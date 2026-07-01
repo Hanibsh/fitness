@@ -11,6 +11,7 @@ import CreatineCalculator from './pages/tools/CreatineCalculator'
 import StrengthStandards from './pages/tools/StrengthStandards'
 import CalorieDeficit from './pages/tools/CalorieDeficit'
 import FFMICalculator from './pages/tools/FFMICalculator'
+import MuscleGainPotential from './pages/tools/MuscleGainPotential'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/tools/strength-standards" element={<StrengthStandards />} />
         <Route path="/tools/calorie-deficit" element={<CalorieDeficit />} />
         <Route path="/tools/ffmi" element={<FFMICalculator />} />
+        <Route path="/tools/muscle-potential" element={<MuscleGainPotential />} />
       </Routes>
     </div>
   )

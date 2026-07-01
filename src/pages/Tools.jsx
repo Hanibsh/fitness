@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Flame, Target, Beef, Pill, Trophy, TrendingDown, Ruler } from 'lucide-react'
+import { Flame, Target, Beef, Pill, Trophy, TrendingDown, Ruler, Dna } from 'lucide-react'
 
 const tools = [
   {
@@ -44,6 +44,12 @@ const tools = [
     icon: Ruler,
     title: 'FFMI calculator',
     desc: 'See how much muscle you\'re carrying relative to your height.',
+  },
+  {
+    to: '/tools/muscle-potential',
+    icon: Dna,
+    title: 'Muscle gain potential',
+    desc: 'Estimate your natural genetic ceiling from your frame size.',
   },
 ]
 
