@@ -15,7 +15,7 @@ export default function Navbar() {
   const location = useLocation()
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-cream/90 backdrop-blur-md border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-cream-dark/90 backdrop-blur-md border-b border-border">
       <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
         <Link to="/" className="font-heading text-lg font-semibold text-text-primary tracking-tight no-underline">
           JEFIT
@@ -51,7 +51,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-cream border-b border-border overflow-hidden"
+            className="md:hidden bg-cream-dark border-b border-border overflow-hidden"
           >
             <div className="px-6 py-4 flex flex-col gap-4">
               {navLinks.map(({ to, label }) => (

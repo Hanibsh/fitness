@@ -2,36 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
-const bodyFatRanges = {
-  male: [
-    { label: '8-10%', value: 9 },
-    { label: '11-12%', value: 11.5 },
-    { label: '13-15%', value: 14 },
-    { label: '16-19%', value: 17.5 },
-    { label: '20-24%', value: 22 },
-    { label: '25-30%', value: 27.5 },
-    { label: '31-40%', value: 35 },
-  ],
-  female: [
-    { label: '12%', value: 12 },
-    { label: '15%', value: 15 },
-    { label: '20%', value: 20 },
-    { label: '25%', value: 25 },
-    { label: '30%', value: 30 },
-    { label: '35%', value: 35 },
-    { label: '40%', value: 40 },
-  ],
-}
-
-const bodyFatBounds = {
-  male: { min: 4, max: 65, default: 20 },
-  female: { min: 4, max: 65, default: 24 },
-}
-
-function nearestBodyFatLabel(sex, value) {
-  return bodyFatRanges[sex].reduce((best, r) => Math.abs(r.value - value) < Math.abs(best.value - value) ? r : best).label
-}
+import { bodyFatBounds, nearestBodyFatLabel } from '../../lib/bodyFat'
 
 const loseSpeeds = [
   { label: 'Slow', percent: 0.25 },
@@ -154,6 +125,12 @@ export default function TDEECalculator() {
     { label: 'Exercise', value: result.exercise, color: 'bg-text-muted', typicalRange: '5-15%' },
     { label: 'TEF (digestion)', value: result.tef, color: 'bg-border-hover', typicalRange: '10-15%' },
   ] : []
+
+  const weightUnitLabel = unit === 'imperial' ? 'lbs' : 'kg'
+  const fatCalConst = unit === 'imperial' ? '3,500' : '7,700'
+  const fatUnitLabel = unit === 'imperial' ? 'pound' : 'kilogram'
+  const lightExample = unit === 'imperial' ? '110 lb' : '50 kg'
+  const heavyExample = unit === 'imperial' ? '265 lb' : '120 kg'
 
   return (
     <div className="pt-28 pb-24 px-6">
@@ -348,11 +325,11 @@ export default function TDEECalculator() {
               </div>
               <div>
                 <p className="text-[13px] font-medium text-text-primary mb-1.5">BMR — Katch-McArdle, blended by sex</p>
-                <p className="text-[13px] text-text-muted leading-relaxed">BMR = 370 + 21.6 × LBM (kg), plus a small sex-specific constant borrowed from the Mifflin-St Jeor formula (+5 for men, −161 for women). Katch-McArdle alone is more accurate than weight-only formulas because it's driven by lean mass, not total weight — but research shows a small residual metabolic difference between sexes even at identical lean mass, likely hormonal. Blending in that constant accounts for it.</p>
+                <p className="text-[13px] text-text-muted leading-relaxed">BMR = 370 + 21.6 × LBM in kg{unit === 'imperial' && <> (we convert your weight from lbs to kg automatically)</>}, plus a small sex-specific constant borrowed from the Mifflin-St Jeor formula (+5 for men, −161 for women). Katch-McArdle alone is more accurate than weight-only formulas because it's driven by lean mass, not total weight — but research shows a small residual metabolic difference between sexes even at identical lean mass, likely hormonal. Blending in that constant accounts for it.</p>
               </div>
               <div>
                 <p className="text-[13px] font-medium text-text-primary mb-1.5">NEAT — from your step count</p>
-                <p className="text-[13px] text-text-muted leading-relaxed">Calories burned per step scale with body weight — roughly 0.0005 × weight (kg) per step. We multiply your daily step count by that per-step cost to estimate the calories from daily walking and movement.</p>
+                <p className="text-[13px] text-text-muted leading-relaxed">Calories burned per step scale with body weight — roughly 0.0005 × weight in kg per step. We multiply your daily step count by that per-step cost (using your weight in {weightUnitLabel}, converted to kg behind the scenes) to estimate the calories from daily walking and movement.</p>
               </div>
               <div>
                 <p className="text-[13px] font-medium text-text-primary mb-1.5">Exercise calories</p>
@@ -368,8 +345,16 @@ export default function TDEECalculator() {
               </div>
               <div>
                 <p className="text-[13px] font-medium text-text-primary mb-1.5">Calorie targets</p>
-                <p className="text-[13px] text-text-muted leading-relaxed">One kilogram of body fat holds roughly 7,700 calories. For cutting, the deficit is scaled to a percentage of your bodyweight per week (0.25 / 0.5 / 1%) instead of a fixed number, since a flat deficit doesn't mean the same thing for a 50kg person and a 120kg person. For bulking, instead of a speed choice, you pick how much fat gain you're willing to accept: a lean bulk (+200 cal/day, minimal fat gain) or a normal bulk (+500 cal/day, moderate fat gain) — deliberately bulking "fast" mostly just adds fat, not muscle. Recomp offers three closer-to-maintenance options: hold at maintenance, a very clean +150 cal/day surplus for muscle-gain focus, or a slow 0.35%-bodyweight/week deficit for fat-loss focus.</p>
+                <p className="text-[13px] text-text-muted leading-relaxed">One {fatUnitLabel} of body fat holds roughly {fatCalConst} calories. For cutting, the deficit is scaled to a percentage of your bodyweight per week (0.25 / 0.5 / 1%) instead of a fixed number, since a flat deficit doesn't mean the same thing for a {lightExample} person and a {heavyExample} person. For bulking, instead of a speed choice, you pick how much fat gain you're willing to accept: a lean bulk (+200 cal/day, minimal fat gain) or a normal bulk (+500 cal/day, moderate fat gain) — deliberately bulking "fast" mostly just adds fat, not muscle. Recomp offers three closer-to-maintenance options: hold at maintenance, a very clean +150 cal/day surplus for muscle-gain focus, or a slow 0.35%-bodyweight/week deficit for fat-loss focus.</p>
               </div>
+            </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mt-10 bg-white border border-border p-9">
+            <h2 className="font-heading text-xl font-medium text-text-primary mb-4">One more thing</h2>
+            <div className="space-y-4">
+              <p className="text-[13px] text-text-muted leading-relaxed">No matter how many formulas and citations go into this, it's still an estimate. Your real metabolism, digestion, hormones, sleep, and stress all move the actual number around in ways no calculator can fully capture. Treat everything above as a good place to start your journey, not a verdict — give it a few weeks, then adjust based on what the scale and the mirror are actually telling you, rather than assuming the number was wrong from day one.</p>
+              <p className="text-[13px] text-text-muted leading-relaxed">One line worth not crossing: don't chase a deficit by dropping below about 1,400–1,500 calories a day. Below that range, it gets genuinely hard to hit your protein, vitamins, and everything else your body needs to function properly — you're not losing fat faster, you're just shortchanging yourself. If you want to lose weight quicker than a moderate deficit gets you there, it's almost always a better trade to add more walking, steps, or cardio than to cut calories that low.</p>
             </div>
           </motion.div>
         </motion.div>
