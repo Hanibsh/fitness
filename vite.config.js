@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// On GitHub Pages the app is served from /fitness-website/. Locally it stays at
+// root so `npm run dev` and the preview server work unchanged.
+const base = process.env.DEPLOY_TARGET === 'gh-pages' ? '/fitness-website/' : '/'
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     tailwindcss(),
@@ -17,8 +22,6 @@ export default defineConfig({
         theme_color: '#FAF9F6',
         background_color: '#FAF9F6',
         display: 'standalone',
-        start_url: '/',
-        scope: '/',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
