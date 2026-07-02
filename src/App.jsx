@@ -10,6 +10,9 @@ import ProteinCalculator from './pages/tools/ProteinCalculator'
 import CreatineCalculator from './pages/tools/CreatineCalculator'
 import StrengthStandards from './pages/tools/StrengthStandards'
 import CalorieDeficit from './pages/tools/CalorieDeficit'
+import FFMICalculator from './pages/tools/FFMICalculator'
+import MuscleGainPotential from './pages/tools/MuscleGainPotential'
+import WorkoutTracker from './pages/WorkoutTracker'
 
 function App() {
   return (
@@ -18,6 +21,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tools" element={<Tools />} />
+        <Route path="/log" element={<WorkoutTracker />} />
         <Route path="/programs" element={<Programs />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/tools/tdee" element={<TDEECalculator />} />
@@ -26,6 +30,8 @@ function App() {
         <Route path="/tools/creatine" element={<CreatineCalculator />} />
         <Route path="/tools/strength-standards" element={<StrengthStandards />} />
         <Route path="/tools/calorie-deficit" element={<CalorieDeficit />} />
+        <Route path="/tools/ffmi" element={<FFMICalculator />} />
+        <Route path="/tools/muscle-potential" element={<MuscleGainPotential />} />
       </Routes>
     </div>
   )
