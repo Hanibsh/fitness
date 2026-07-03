@@ -94,3 +94,18 @@ alter table public.shared_lifts enable row level security;
 create policy "Authenticated users can contribute anonymized lifts"
   on public.shared_lifts for insert
   with check (auth.uid() is not null);
+
+-- ---------------------------------------------------------------------------
+-- 4) SUBMISSION_LOG — rate-limiting for guest contributions (via the
+--    contribute-lifts edge function). No policies: only the service role
+--    (the function) can touch it.
+-- ---------------------------------------------------------------------------
+create table if not exists public.submission_log (
+  id bigint generated always as identity primary key,
+  ip_hash text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.submission_log enable row level security;
+
+create index if not exists submission_log_ip_time_idx on public.submission_log (ip_hash, created_at desc);
