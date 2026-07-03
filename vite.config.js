@@ -28,12 +28,27 @@ export default defineConfig({
           { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      // Let the app run offline once installed.
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Precache static assets for offline use, but NOT index.html — pages
+        // are fetched fresh from the network (see runtimeCaching) so new deploys
+        // show up immediately instead of being served from a stale cache.
+        globPatterns: ['**/*.{js,css,svg,png,ico,woff2}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        // Disable the default precache-based navigation fallback (index.html is
+        // no longer precached); the network-first rule below handles navigations.
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            // HTML navigations: network-first, so updates are instant online;
+            // falls back to the cached page only when offline.
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: { cacheName: 'pages', networkTimeoutSeconds: 3 },
+          },
+        ],
       },
-      // Enable the service worker in dev so we can verify installability in preview.
-      devOptions: { enabled: true },
     }),
   ],
 })
