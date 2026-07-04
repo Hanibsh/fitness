@@ -178,7 +178,7 @@ export default function TDEECalculator() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 items-end">
               {[['Age', age, setAge, '25', inputBounds.age.min, inputBounds.age.max], ['Weight', weight, setWeight, unit === 'metric' ? '80' : '176', inputBounds.weight[unit].min, inputBounds.weight[unit].max], ['Height', height, setHeight, unit === 'metric' ? '180' : '71', inputBounds.height[unit].min, inputBounds.height[unit].max]].map(([label, val, set, ph, min, max]) => (
                 <div key={label}>
                   <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-2">{label}{label !== 'Age' ? ` (${label === 'Weight' ? (unit === 'metric' ? 'kg' : 'lbs') : (unit === 'metric' ? 'cm' : 'in')})` : ''}</label>
@@ -187,7 +187,7 @@ export default function TDEECalculator() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 items-end">
               <div>
                 <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-2">Workout (hrs/week)</label>
                 <input type="number" min={inputBounds.workoutHours.min} max={inputBounds.workoutHours.max} value={workoutHours} onChange={e => setWorkoutHours(e.target.value)} placeholder="4" className="w-full bg-cream border border-border px-4 py-3 text-text-primary text-[13px] outline-none focus:border-text-primary transition-colors" />
@@ -209,11 +209,11 @@ export default function TDEECalculator() {
             <>
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mt-10 bg-white border border-border p-9">
                 <h2 className="font-heading text-xl font-medium text-text-primary mb-6">Your results</h2>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   {[['LBM', result.lbm], ['BMR', result.bmr], ['TDEE', result.tdee]].map(([label, val], i) => (
-                    <div key={label} className={`p-5 text-center ${i === 2 ? 'bg-text-primary' : 'bg-cream border border-border'}`}>
+                    <div key={label} className={`px-2 py-4 sm:p-5 text-center ${i === 2 ? 'bg-text-primary' : 'bg-cream border border-border'}`}>
                       <p className={`text-[11px] uppercase tracking-wider mb-1.5 ${i === 2 ? 'text-cream/70' : 'text-text-muted'}`}>{label}</p>
-                      <p className={`text-3xl font-medium ${i === 2 ? 'text-cream' : 'text-text-primary'}`}>{val}</p>
+                      <p className={`text-2xl sm:text-3xl font-medium ${i === 2 ? 'text-cream' : 'text-text-primary'}`}>{val}</p>
                       <p className={`text-[11px] ${i === 2 ? 'text-cream/50' : 'text-text-light'}`}>{label === 'LBM' ? 'kg' : 'cal/day'}</p>
                     </div>
                   ))}

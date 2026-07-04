@@ -132,7 +132,7 @@ export default function StrengthStandards() {
               <p className="text-[12px] text-text-light mt-2">Selected: <span className="text-text-primary font-medium">{lifts[lift].name}</span></p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 items-end">
               <div>
                 <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-2">Bodyweight ({unit === 'metric' ? 'kg' : 'lbs'})</label>
                 <input type="number" min={inputBounds.bodyweight[unit].min} max={inputBounds.bodyweight[unit].max} value={bodyweight} onChange={e => setBodyweight(e.target.value)} placeholder={unit === 'metric' ? '80' : '176'} className="w-full bg-cream border border-border px-4 py-3 text-text-primary text-[13px] outline-none focus:border-text-primary transition-colors" />
@@ -159,7 +159,7 @@ export default function StrengthStandards() {
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mt-10 bg-white border border-border p-9">
               <h2 className="font-heading text-xl font-medium text-text-primary mb-1.5">{lifts[lift].name}</h2>
               <p className="text-[12px] text-text-light mb-6">Source: {lifts[lift].source}</p>
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <div className="bg-cream border border-border p-5 text-center">
                   <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1.5">Estimated 1RM</p>
                   <p className="text-2xl font-medium text-text-primary">{result.e1RM}</p>

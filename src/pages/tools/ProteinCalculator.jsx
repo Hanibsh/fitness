@@ -166,7 +166,7 @@ export default function ProteinCalculator() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 items-end">
               <div>
                 <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-2">Age</label>
                 <input type="number" min={inputBounds.age.min} max={inputBounds.age.max} value={age} onChange={e => setAge(e.target.value)} placeholder="25" className="w-full bg-cream border border-border px-4 py-3 text-text-primary text-[13px] outline-none focus:border-text-primary transition-colors" />
