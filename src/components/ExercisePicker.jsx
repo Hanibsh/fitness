@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Search } from 'lucide-react'
-import { MOVEMENTS } from '../lib/movements'
+import { MOVEMENTS, searchMovements } from '../lib/movements'
 
 // Searchable exercise picker: filters the movement library as you type, and
 // always offers to add whatever you typed as a custom exercise if it's not a
@@ -19,7 +19,7 @@ export default function ExercisePicker({ onSelect }) {
   }, [])
 
   const q = query.trim().toLowerCase()
-  const matches = (q ? MOVEMENTS.filter((m) => m.name.toLowerCase().includes(q)) : MOVEMENTS).slice(0, 8)
+  const matches = searchMovements(query).slice(0, 8)
   const exact = MOVEMENTS.some((m) => m.name.toLowerCase() === q)
 
   function pick(name) {
