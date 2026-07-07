@@ -39,11 +39,20 @@ function blankSide(prev) {
   return { weight: prev ? prev.weight : '', reps: prev ? prev.reps : '', rir: prev ? prev.rir : '' }
 }
 
-export function createSet(prev, unilateral = false) {
+export function createSet(prev, opts = false) {
+  // `opts` accepts a boolean (legacy: unilateral) or { unilateral, bodyweight, bw }.
+  const { unilateral = false, bodyweight = false, bw = 0 } =
+    typeof opts === 'boolean' ? { unilateral: opts } : opts
   // A new set copies the previous set's numbers, since you usually repeat
   // the same weight/reps (or duration/distance) — one tap and you're logging.
   if (unilateral) {
     return { id: newId(), left: blankSide(prev?.left), right: blankSide(prev?.right) }
+  }
+  if (bodyweight) {
+    // `added` is external/assist weight; `weight` (the field all stats read) is
+    // the effective load = bodyweight + added; `bw` snapshots the bodyweight.
+    const added = prev ? prev.added ?? '' : ''
+    return { id: newId(), added, reps: prev ? prev.reps : '', rir: prev ? prev.rir : '', bw, weight: (Number(bw) || 0) + (Number(added) || 0) }
   }
   return {
     id: newId(),
@@ -77,10 +86,15 @@ export function convertSet(s, unilateral) {
 export function createExercise(name, kind = 'strength', opts = {}) {
   const laterality = kind === 'cardio' ? undefined : opts.laterality || 'both'
   const unilateral = laterality === 'unilateral'
-  const ex = { id: newId(), name, kind, sets: [createSet(undefined, unilateral)] }
+  const bodyweight = kind !== 'cardio' && !!opts.bodyweight
+  const firstSet = createSet(undefined, bodyweight ? { bodyweight: true, bw: opts.bw || 0 } : { unilateral })
+  const ex = { id: newId(), name, kind, sets: [firstSet] }
   if (kind !== 'cardio') {
     ex.laterality = laterality
-    ex.unilateral = unilateral
+    // Bodyweight-loaded moves (pull-ups, dips…) log added weight against your
+    // bodyweight; they aren't offered the unilateral toggle.
+    ex.bodyweight = bodyweight
+    ex.unilateral = bodyweight ? false : unilateral
     // Opt-in: only carry a rep-range target if one was passed (e.g. remembered
     // from a previous session). Otherwise the user adds it per exercise.
     ex.repRange = opts.repRange || null

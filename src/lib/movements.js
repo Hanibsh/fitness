@@ -178,6 +178,24 @@ import exercisesDb from '../data/exercises.json'
 const DB_LATERALITY = new Map(
   (exercisesDb.exercises || []).map((e) => [e.name.trim().toLowerCase(), e.laterality])
 )
+const DB_EQUIPMENT = new Map(
+  (exercisesDb.exercises || []).map((e) => [e.name.trim().toLowerCase(), e.equipment])
+)
+
+// Movements loaded primarily by bodyweight (± added/assist weight): pull-ups,
+// dips, push-ups, etc. For these the log treats bodyweight as the base load.
+const BODYWEIGHT_RE = /\b(pull-?up|chin-?up|push-?up|muscle-?up|dip|inverted row|pistol|sissy squat|nordic|hanging (leg|knee)|toes to bar|dragon flag)\b/i
+
+export function usesBodyweight(name) {
+  const key = (name || '').trim().toLowerCase()
+  if (!key) return false
+  if (DB_EQUIPMENT.get(key) === 'bodyweight') return true
+  // The DB mistags some bodyweight moves as "free weight" (to be fixed in the
+  // ID reconciliation), so trust an explicit machine/cable tag to exclude, then
+  // fall back to the name.
+  if (/\b(machine|lever|cable|smith)\b/.test(key)) return false
+  return BODYWEIGHT_RE.test(key)
+}
 
 // Clearly single-limb movements.
 const UNILATERAL_RE = /\b(single[- ]?arm|one[- ]?arm|1[- ]?arm|single[- ]?leg|one[- ]?leg|bulgarian|split[- ]squat|lunge|step[- ]?up|pistol|concentration|kickback|suitcase|meadows|side plank|pallof|wood ?chop)\b/i

@@ -22,9 +22,10 @@ import {
   saveGuestShare,
   getExerciseTarget,
   saveExerciseTarget,
+  getBodyweightLog,
 } from '../lib/workoutStore'
 import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, insertSharedLifts, submitGuestLifts } from '../lib/workoutRemote'
-import { buildSharedLifts, distanceUnit, repRangeStatus } from '../lib/workoutStats'
+import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight } from '../lib/workoutStats'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
 import { useAuth } from '../lib/auth'
@@ -32,7 +33,7 @@ import Modal from '../components/Modal'
 import ExerciseProgress from '../components/ExerciseProgress'
 import ExercisePicker from '../components/ExercisePicker'
 import SessionNamePicker from '../components/SessionNamePicker'
-import { lateralityFor } from '../lib/movements'
+import { lateralityFor, usesBodyweight } from '../lib/movements'
 import UnitHelp from '../components/UnitHelp'
 
 const SET_GRID = 'grid grid-cols-[18px_1fr_1fr_50px_18px] gap-2 items-center'
@@ -215,13 +216,32 @@ export default function WorkoutTracker() {
   // `kind` is decided by which section's picker added it (resistance/cardio),
   // not a per-exercise toggle. Prefill the rep target from the last time this
   // exercise was trained, if we remember one.
+  // Best guess at the user's current bodyweight in the display unit: their
+  // profile value (logged in) or the latest weigh-in, else blank.
+  function prefillBodyweight() {
+    if (profile?.bodyweight) return Math.round(convertWeight(Number(profile.bodyweight), profile.unit || 'kg', unit) * 10) / 10
+    const log = getBodyweightLog()
+    if (log.length) {
+      const e = [...log].sort((a, b) => b.date - a.date)[0]
+      return Math.round(convertWeight(Number(e.weight), e.unit || 'kg', unit) * 10) / 10
+    }
+    return ''
+  }
+
   function addExercise(name, kind) {
     const trimmed = name.trim().slice(0, 60)
     if (!trimmed) return
     const isStrength = kind !== 'cardio'
     const laterality = isStrength ? lateralityFor(trimmed) : undefined
+    const bodyweight = isStrength ? usesBodyweight(trimmed) : false
     const repRange = isStrength ? getExerciseTarget(trimmed) || undefined : undefined
-    setDraft((d) => ({ ...d, exercises: [...d.exercises, createExercise(trimmed, kind, { laterality, repRange })] }))
+    setDraft((d) => {
+      const bw = bodyweight ? (d.bodyweight != null && d.bodyweight !== '' ? d.bodyweight : prefillBodyweight()) : undefined
+      const ex = createExercise(trimmed, kind, { laterality, repRange, bodyweight, bw: Number(bw) || 0 })
+      const next = { ...d, exercises: [...d.exercises, ex] }
+      if (bodyweight && (d.bodyweight == null || d.bodyweight === '')) next.bodyweight = bw
+      return next
+    })
   }
 
   // Flip an exercise between bilateral and per-limb (left/right) logging,
@@ -317,10 +337,44 @@ export default function WorkoutTracker() {
   function addSet(exId) {
     setDraft((d) => ({
       ...d,
+      exercises: d.exercises.map((e) => {
+        if (e.id !== exId) return e
+        const opts = e.bodyweight ? { bodyweight: true, bw: Number(d.bodyweight) || 0 } : { unilateral: e.unilateral }
+        return { ...e, sets: [...e.sets, createSet(e.sets[e.sets.length - 1], opts)] }
+      }),
+    }))
+  }
+
+  // Session bodyweight (shared by all bodyweight-loaded exercises). Recompute
+  // each affected set's effective load = bodyweight + added.
+  function setSessionBodyweight(value) {
+    if (value !== '' && !Number.isFinite(Number(value))) return
+    const bw = Number(value) || 0
+    setDraft((d) => ({
+      ...d,
+      bodyweight: value,
       exercises: d.exercises.map((e) =>
-        e.id === exId ? { ...e, sets: [...e.sets, createSet(e.sets[e.sets.length - 1], e.unilateral)] } : e
+        e.bodyweight
+          ? { ...e, sets: e.sets.map((s) => ({ ...s, bw, weight: Math.max(0, bw + (Number(s.added) || 0)) })) }
+          : e
       ),
     }))
+  }
+
+  // Added/assist weight for a bodyweight set (may be negative for assisted).
+  function updateAdded(exId, setId, value) {
+    if (value !== '' && value !== '-' && !Number.isFinite(Number(value))) return
+    setDraft((d) => {
+      const bw = Number(d.bodyweight) || 0
+      return {
+        ...d,
+        exercises: d.exercises.map((e) =>
+          e.id === exId
+            ? { ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, added: value, weight: Math.max(0, bw + (Number(value) || 0)) } : s)) }
+            : e
+        ),
+      }
+    })
   }
 
   function updateSet(exId, setId, field, value) {
@@ -601,7 +655,82 @@ export default function WorkoutTracker() {
                 </p>
               )}
 
-              {ex.unilateral ? (
+              {ex.bodyweight ? (
+                <>
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <span className="text-[10px] uppercase tracking-wider text-text-light">Bodyweight</span>
+                    <input
+                      type="number" inputMode="decimal" min="0"
+                      value={draft.bodyweight ?? ''}
+                      onChange={(e) => setSessionBodyweight(e.target.value)}
+                      placeholder="—"
+                      aria-label="Session bodyweight"
+                      className="w-16 bg-white border border-border px-2 py-1 text-center text-text-primary text-[12px] outline-none focus:border-text-primary transition-colors"
+                    />
+                    <span className="text-[11px] text-text-light">{unit} · counted as load</span>
+                  </div>
+                  <div className={`${SET_GRID} mb-2 text-[10px] uppercase tracking-wider text-text-light`}>
+                    <span className="text-center">#</span>
+                    <span>+{unit}</span>
+                    <span>Reps</span>
+                    <span className="flex items-center gap-1">RIR
+                      <button type="button" onClick={() => setShowRirHelp(true)} aria-label="What is RIR?" className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer p-0 leading-none">
+                        <HelpCircle className="w-3 h-3" />
+                      </button>
+                    </span>
+                    <span />
+                  </div>
+                  {ex.sets.map((set, i) => (
+                    <div key={set.id} className={`${SET_GRID} mb-2`}>
+                      <button
+                        type="button"
+                        onClick={() => cycleSetType(ex.id, set.id)}
+                        title="Tap: working → warm-up (W) → back-off (B)"
+                        className={`text-center text-[13px] bg-transparent border-none cursor-pointer p-0 ${typeClass(set)}`}
+                      >
+                        {setLabels[i]}
+                      </button>
+                      <input
+                        type="number" inputMode="decimal"
+                        value={set.added ?? ''}
+                        onChange={(e) => updateAdded(ex.id, set.id, e.target.value)}
+                        placeholder="0"
+                        aria-label={`Set ${i + 1} added weight in ${unit}`}
+                        className="w-full min-w-0 bg-white border border-border px-2 py-2 text-text-primary text-[13px] outline-none focus:border-text-primary transition-colors"
+                      />
+                      <input
+                        type="number" inputMode="numeric" min="0"
+                        value={set.reps}
+                        onChange={(e) => updateSet(ex.id, set.id, 'reps', e.target.value)}
+                        placeholder="—"
+                        aria-label={`Set ${i + 1} reps`}
+                        className="w-full min-w-0 bg-white border border-border px-2 py-2 text-text-primary text-[13px] outline-none focus:border-text-primary transition-colors"
+                      />
+                      <input
+                        type="number" inputMode="numeric" min="0" max="10"
+                        value={set.rir ?? ''}
+                        onChange={(e) => updateSet(ex.id, set.id, 'rir', e.target.value)}
+                        placeholder="—"
+                        aria-label={`Set ${i + 1} reps in reserve`}
+                        className="w-full min-w-0 bg-white border border-border px-2 py-2 text-text-primary text-[13px] outline-none focus:border-text-primary transition-colors"
+                      />
+                      <button
+                        onClick={() => removeSet(ex.id, set.id)} aria-label={`Remove set ${i + 1}`} disabled={ex.sets.length === 1}
+                        className="flex justify-center text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  <p className="text-[11px] text-text-light mt-1 mb-2">Load = bodyweight + added (use a negative number for assisted reps).</p>
+                  <button
+                    onClick={() => addSet(ex.id)}
+                    className="inline-flex items-center gap-1.5 text-[12px] text-text-muted hover:text-text-primary bg-transparent border-none cursor-pointer mt-1 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add set
+                  </button>
+                </>
+              ) : ex.unilateral ? (
                 <>
                   <div className="grid grid-cols-[20px_1fr_1fr_44px] gap-2 mb-1.5 text-[10px] uppercase tracking-wider text-text-light">
                     <span />
