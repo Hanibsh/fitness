@@ -19,3 +19,17 @@ createRoot(document.getElementById('root')).render(
     </AuthProvider>
   </StrictMode>,
 )
+
+// iOS standalone PWAs often don't re-check for a new service worker when you
+// just switch back to an already-open app, so a fresh deploy can look stale.
+// Nudge the check whenever the app returns to the foreground; the plugin's
+// autoUpdate registration (with skipWaiting) handles activating + reloading if
+// there's a new version. No-op in dev, where no SW is registered.
+if ('serviceWorker' in navigator) {
+  const checkForUpdates = () => {
+    if (document.visibilityState !== 'visible') return
+    navigator.serviceWorker.getRegistration().then((reg) => reg && reg.update()).catch(() => {})
+  }
+  document.addEventListener('visibilitychange', checkForUpdates)
+  window.addEventListener('focus', checkForUpdates)
+}
