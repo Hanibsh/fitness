@@ -275,7 +275,6 @@ export default function Dashboard() {
               <Plus className="w-4 h-4" /> Log your first workout
             </Link>
           </motion.div>
-          <BodyweightTracker user={user} unit={unit} />
           <CoachingCTA />
         </div>
         {editingNick && user && (
@@ -440,9 +439,6 @@ export default function Dashboard() {
           )}
         </Card>
 
-        {/* SECTION 6b — BODYWEIGHT */}
-        <BodyweightTracker user={user} unit={unit} />
-
         {/* SECTION 7 + 8 — GOALS & PERSONAL RECORDS */}
         <div className="grid lg:grid-cols-2 gap-6">
           <Card>
@@ -602,7 +598,10 @@ export default function Dashboard() {
           </Card>
         )}
 
-        {/* SECTION 14 — COACHING CTA */}
+        {/* SECTION 14 — BODYWEIGHT (compact; tap to open the full panel) */}
+        <BodyweightTracker user={user} unit={unit} />
+
+        {/* SECTION 15 — COACHING CTA */}
         <CoachingCTA />
       </div>
 
