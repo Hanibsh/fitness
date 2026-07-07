@@ -1,13 +1,17 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { fetchProfile } from './profile'
 
 // Tracks the signed-in user across the app. If Supabase isn't configured
 // (no env vars), it stays "signed out" and everything runs anonymously.
-const AuthContext = createContext({ user: null, loading: true, signOut: async () => {} })
+// Also carries the user's display nickname so any component (navbar, dashboard)
+// can show it; `setNickname` lets editors update it live everywhere.
+const AuthContext = createContext({ user: null, loading: true, nickname: '', setNickname: () => {}, signOut: async () => {} })
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [nickname, setNickname] = useState('')
 
   useEffect(() => {
     if (!supabase) {
@@ -24,12 +28,25 @@ export function AuthProvider({ children }) {
     return () => sub.subscription.unsubscribe()
   }, [])
 
+  // Load the display nickname whenever the signed-in user changes.
+  useEffect(() => {
+    let cancelled = false
+    if (!supabase || !user) {
+      setNickname('')
+      return
+    }
+    fetchProfile(user.id)
+      .then((p) => { if (!cancelled) setNickname(p?.display_name || '') })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user])
+
   async function signOut() {
     if (supabase) await supabase.auth.signOut()
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
+    <AuthContext.Provider value={{ user, loading, nickname, setNickname, signOut }}>
       {children}
     </AuthContext.Provider>
   )

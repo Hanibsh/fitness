@@ -15,11 +15,18 @@ const navLinks = [
   { to: '/contact', label: 'Contact' },
 ]
 
+// The account link's label: the nickname if set, otherwise the name part of
+// the email.
+function accountLabel(user, nickname) {
+  if (nickname && nickname.trim()) return nickname.trim()
+  return user?.email ? user.email.split('@')[0] : 'Account'
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
   const location = useLocation()
-  const { user, signOut } = useAuth()
+  const { user, nickname, signOut } = useAuth()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-cream-dark/90 backdrop-blur-md border-b border-border">
@@ -56,7 +63,7 @@ export default function Navbar() {
                     location.pathname === '/account' ? 'text-text-primary font-medium' : 'text-text-muted hover:text-text-primary'
                   }`}
                 >
-                  {user.email}
+                  {accountLabel(user, nickname)}
                 </Link>
                 <button
                   onClick={signOut}
@@ -119,7 +126,7 @@ export default function Navbar() {
                         title={user.email}
                         className="text-[13px] text-text-muted truncate no-underline hover:text-text-primary"
                       >
-                        {user.email}
+                        {accountLabel(user, nickname)}
                       </Link>
                       <button
                         onClick={() => { signOut(); setIsOpen(false) }}

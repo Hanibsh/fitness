@@ -7,7 +7,7 @@ import { fetchProfile, saveProfile } from '../lib/profile'
 import { validateNickname, NICKNAME_MAX } from '../lib/nickname'
 
 export default function Account() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, setNickname: setAuthNickname } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -61,6 +61,7 @@ export default function Account() {
         share_data: shareData,
       })
       setNickname(nick.value)
+      setAuthNickname(nick.value)
       setSaved(true)
     } catch {
       setError('Could not save. Please try again.')

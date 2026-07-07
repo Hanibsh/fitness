@@ -8,7 +8,7 @@ import {
 import { useAuth } from '../lib/auth'
 import { getHistory, getUnit, getGoals, saveGoals } from '../lib/workoutStore'
 import { fetchRemoteHistory } from '../lib/workoutRemote'
-import { fetchProfile, saveProfile } from '../lib/profile'
+import { saveProfile } from '../lib/profile'
 import { loggedExerciseNames } from '../lib/workoutStats'
 import {
   heroSummary, monthStats, lifetimeStats, weeklyMuscleSets, personalRecords, recentPRs,
@@ -113,14 +113,14 @@ function ProgressGoal({ label, value, target, unit = '' }) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  // Nickname lives in the auth context so the navbar reflects edits instantly.
+  const { user, nickname, setNickname } = useAuth()
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
   const [unit, setUnit] = useState(() => getUnit())
   const [selectedDay, setSelectedDay] = useState(null) // { date, sessions }
   const [goals, setGoals] = useState(() => getGoals())
   const [editingGoals, setEditingGoals] = useState(false)
-  const [nickname, setNickname] = useState('')
   const [editingNick, setEditingNick] = useState(false)
 
   useEffect(() => {
@@ -130,16 +130,13 @@ export default function Dashboard() {
       setUnit(getUnit())
       if (user) {
         try {
-          const [remote, profile] = await Promise.all([fetchRemoteHistory(user.id), fetchProfile(user.id)])
-          if (cancelled) return
-          setSessions(remote)
-          setNickname(profile?.display_name || '')
+          const remote = await fetchRemoteHistory(user.id)
+          if (!cancelled) setSessions(remote)
         } catch {
           if (!cancelled) setSessions(getHistory())
         }
       } else {
         setSessions(getHistory())
-        setNickname('')
       }
       if (!cancelled) setLoading(false)
     }
