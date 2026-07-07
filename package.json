@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:exercises": "node scripts/lint-exercises.mjs && cp data/exercises.candidate.json src/data/exercises.json",
     "lint": "oxlint",
     "preview": "vite preview"
   },
