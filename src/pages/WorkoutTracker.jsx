@@ -243,6 +243,14 @@ export default function WorkoutTracker() {
     }))
   }
 
+  // Add a rep-range target to an exercise (opt-in) or clear it (pass null).
+  function setRepTarget(exId, repRange) {
+    setDraft((d) => ({
+      ...d,
+      exercises: d.exercises.map((e) => (e.id === exId ? { ...e, repRange } : e)),
+    }))
+  }
+
   function changeUnit(u) {
     setUnit(u)
     saveUnit(u)
@@ -482,25 +490,43 @@ export default function WorkoutTracker() {
                 >
                   <ArrowLeftRight className="w-3 h-3" /> {ex.unilateral ? 'Unilateral' : 'Bilateral'}
                 </button>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-text-light">Target</span>
-                  <input
-                    type="number" inputMode="numeric" min="1" max="50"
-                    value={ex.repRange?.low ?? ''}
-                    onChange={(e) => setRepRange(ex.id, 'low', e.target.value)}
-                    aria-label="Target rep range low"
-                    className="w-11 bg-white border border-border px-1.5 py-1 text-center text-text-primary text-[12px] outline-none focus:border-text-primary transition-colors"
-                  />
-                  <span className="text-text-light text-[12px]">–</span>
-                  <input
-                    type="number" inputMode="numeric" min="1" max="50"
-                    value={ex.repRange?.high ?? ''}
-                    onChange={(e) => setRepRange(ex.id, 'high', e.target.value)}
-                    aria-label="Target rep range high"
-                    className="w-11 bg-white border border-border px-1.5 py-1 text-center text-text-primary text-[12px] outline-none focus:border-text-primary transition-colors"
-                  />
-                  <span className="text-[11px] text-text-light">reps</span>
-                </div>
+                {ex.repRange ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] uppercase tracking-wider text-text-light">Target</span>
+                    <input
+                      type="number" inputMode="numeric" min="1" max="50"
+                      value={ex.repRange?.low ?? ''}
+                      onChange={(e) => setRepRange(ex.id, 'low', e.target.value)}
+                      aria-label="Target rep range low"
+                      className="w-11 bg-white border border-border px-1.5 py-1 text-center text-text-primary text-[12px] outline-none focus:border-text-primary transition-colors"
+                    />
+                    <span className="text-text-light text-[12px]">–</span>
+                    <input
+                      type="number" inputMode="numeric" min="1" max="50"
+                      value={ex.repRange?.high ?? ''}
+                      onChange={(e) => setRepRange(ex.id, 'high', e.target.value)}
+                      aria-label="Target rep range high"
+                      className="w-11 bg-white border border-border px-1.5 py-1 text-center text-text-primary text-[12px] outline-none focus:border-text-primary transition-colors"
+                    />
+                    <span className="text-[11px] text-text-light">reps</span>
+                    <button
+                      type="button"
+                      onClick={() => setRepTarget(ex.id, null)}
+                      aria-label="Remove rep target"
+                      className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer p-0.5 ml-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setRepTarget(ex.id, { low: 8, high: 12 })}
+                    className="inline-flex items-center gap-1 text-[11px] text-text-muted hover:text-text-primary bg-white border border-border hover:border-border-hover px-2 py-1 cursor-pointer transition-colors"
+                  >
+                    <Plus className="w-3 h-3" /> Rep target
+                  </button>
+                )}
               </div>
 
               {status && (

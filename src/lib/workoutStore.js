@@ -78,7 +78,9 @@ export function createExercise(name, kind = 'strength', opts = {}) {
   const ex = { id: newId(), name, kind, sets: [createSet(undefined, unilateral)] }
   if (kind !== 'cardio') {
     ex.unilateral = unilateral
-    ex.repRange = opts.repRange || { low: 8, high: 12 }
+    // Opt-in: only carry a rep-range target if one was passed (e.g. remembered
+    // from a previous session). Otherwise the user adds it per exercise.
+    ex.repRange = opts.repRange || null
   }
   return ex
 }
