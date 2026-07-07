@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import UnitHelp from '../../components/UnitHelp'
 import { bodyFatBounds, nearestBodyFatLabel } from '../../lib/bodyFat'
 import { asset } from '../../lib/assets'
 
@@ -133,9 +134,10 @@ export default function FFMICalculator() {
           <p className="text-text-muted text-[15px] mb-10">How much muscle you're carrying, relative to your height.</p>
 
           <div className="bg-white border border-border p-9 space-y-7">
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-center">
               {toggle(unit === 'metric', () => setUnit('metric'), 'Metric (kg/cm)')}
               {toggle(unit === 'imperial', () => setUnit('imperial'), 'Imperial (lbs/in)')}
+              <UnitHelp />
             </div>
             <div className="flex gap-3">
               {toggle(sex === 'male', () => { setSex('male'); setBodyFat(bodyFatBounds.male.default) }, 'Male')}

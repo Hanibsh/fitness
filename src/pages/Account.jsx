@@ -5,6 +5,7 @@ import { ArrowLeft, LogOut, Check } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { fetchProfile, saveProfile } from '../lib/profile'
 import { validateNickname, NICKNAME_MAX } from '../lib/nickname'
+import UnitHelp from '../components/UnitHelp'
 
 export default function Account() {
   const { user, signOut, setNickname: setAuthNickname } = useAuth()
@@ -129,7 +130,7 @@ export default function Account() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-3">Preferred unit</label>
+                  <label className="text-[11px] text-text-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">Preferred unit <UnitHelp /></label>
                   <div className="flex gap-3">
                     {toggle(unit === 'kg', () => setUnit('kg'), 'Metric (kg)')}
                     {toggle(unit === 'lbs', () => setUnit('lbs'), 'Imperial (lbs)')}

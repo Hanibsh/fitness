@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import UnitHelp from '../../components/UnitHelp'
 import { bodyFatBounds, nearestBodyFatLabel } from '../../lib/bodyFat'
 import { asset } from '../../lib/assets'
 
@@ -98,9 +99,10 @@ export default function MuscleGainPotential() {
           <p className="text-text-muted text-[15px] mb-10">Estimate your natural genetic ceiling from your frame size.</p>
 
           <div className="bg-white border border-border p-9 space-y-7">
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-center">
               {toggle(unit === 'metric', () => setUnit('metric'), 'Metric (cm)')}
               {toggle(unit === 'imperial', () => setUnit('imperial'), 'Imperial (in)')}
+              <UnitHelp />
             </div>
             <div className="flex gap-3">
               {toggle(sex === 'male', () => { setSex('male'); setTargetBf(targetBfDefault.male) }, 'Male')}

@@ -33,6 +33,7 @@ import ExerciseProgress from '../components/ExerciseProgress'
 import ExercisePicker from '../components/ExercisePicker'
 import SessionNamePicker from '../components/SessionNamePicker'
 import { lateralityFor } from '../lib/movements'
+import UnitHelp from '../components/UnitHelp'
 
 const SET_GRID = 'grid grid-cols-[18px_1fr_1fr_50px_18px] gap-2 items-center'
 const CARDIO_SET_GRID = 'grid grid-cols-[18px_1fr_1fr_18px] gap-2 items-center'
@@ -718,18 +719,21 @@ export default function WorkoutTracker() {
                     <p className="font-heading text-lg font-medium text-text-primary">{liveStats.sets}</p>
                   </div>
                 )}
-                <div className="flex border border-border">
-                  {['kg', 'lbs'].map((u) => (
-                    <button
-                      key={u}
-                      onClick={() => changeUnit(u)}
-                      className={`px-3 py-1.5 text-[12px] font-medium cursor-pointer transition-colors ${
-                        unit === u ? 'bg-text-primary text-cream' : 'bg-white text-text-muted hover:text-text-primary'
-                      }`}
-                    >
-                      {u}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-1.5">
+                  <div className="flex border border-border">
+                    {[['kg', 'Metric'], ['lbs', 'Imperial']].map(([u, label]) => (
+                      <button
+                        key={u}
+                        onClick={() => changeUnit(u)}
+                        className={`px-3 py-1.5 text-[12px] font-medium cursor-pointer transition-colors ${
+                          unit === u ? 'bg-text-primary text-cream' : 'bg-white text-text-muted hover:text-text-primary'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <UnitHelp align="right" />
                 </div>
               </div>
             </div>

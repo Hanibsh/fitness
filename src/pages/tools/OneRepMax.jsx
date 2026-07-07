@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import UnitHelp from '../../components/UnitHelp'
 
 const inputBounds = {
   weight: { metric: { min: 1, max: 500 }, imperial: { min: 2, max: 1100 } },
@@ -72,9 +73,10 @@ export default function OneRepMax() {
           <p className="text-text-muted text-[15px] mb-10">Estimate your true max without actually testing it.</p>
 
           <div className="bg-white border border-border p-9 space-y-7">
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-center">
               {toggle(unit === 'metric', () => setUnit('metric'), 'Metric (kg)')}
               {toggle(unit === 'imperial', () => setUnit('imperial'), 'Imperial (lbs)')}
+              <UnitHelp />
             </div>
             <div className="grid grid-cols-2 gap-4 items-end">
               <div>
