@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../lib/auth'
 import { getHistory, getUnit, getGoals, saveGoals } from '../lib/workoutStore'
 import { fetchRemoteHistory } from '../lib/workoutRemote'
+import { fetchProfile, saveProfile } from '../lib/profile'
 import { loggedExerciseNames } from '../lib/workoutStats'
 import {
   heroSummary, monthStats, lifetimeStats, weeklyMuscleSets, personalRecords, recentPRs,
@@ -17,6 +18,7 @@ import {
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import ExerciseProgress from '../components/ExerciseProgress'
 import GoalsModal from '../components/GoalsModal'
+import NicknameModal from '../components/NicknameModal'
 
 function greeting(d = new Date()) {
   const h = d.getHours()
@@ -118,6 +120,8 @@ export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState(null) // { date, sessions }
   const [goals, setGoals] = useState(() => getGoals())
   const [editingGoals, setEditingGoals] = useState(false)
+  const [nickname, setNickname] = useState('')
+  const [editingNick, setEditingNick] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -126,19 +130,28 @@ export default function Dashboard() {
       setUnit(getUnit())
       if (user) {
         try {
-          const remote = await fetchRemoteHistory(user.id)
-          if (!cancelled) setSessions(remote)
+          const [remote, profile] = await Promise.all([fetchRemoteHistory(user.id), fetchProfile(user.id)])
+          if (cancelled) return
+          setSessions(remote)
+          setNickname(profile?.display_name || '')
         } catch {
           if (!cancelled) setSessions(getHistory())
         }
       } else {
         setSessions(getHistory())
+        setNickname('')
       }
       if (!cancelled) setLoading(false)
     }
     load()
     return () => { cancelled = true }
   }, [user])
+
+  async function saveNickname(value) {
+    await saveProfile(user.id, { display_name: value || null })
+    setNickname(value)
+    setEditingNick(false)
+  }
 
   const now = new Date()
   const stats = useMemo(() => {
@@ -178,7 +191,10 @@ export default function Dashboard() {
     if (exerciseNames.length && !exerciseNames.includes(selectedExercise)) setSelectedExercise(exerciseNames[0])
   }, [exerciseNames, selectedExercise])
 
-  const displayName = (user?.email ? user.email.split('@')[0] : 'there').replace(/[.\-_]/g, ' ')
+  const emailName = (user?.email ? user.email.split('@')[0] : 'there').replace(/[.\-_]/g, ' ')
+  const displayName = nickname.trim() || emailName
+  // Auto-capitalise the email fallback, but leave a chosen nickname's casing.
+  const nameClass = nickname.trim() ? '' : 'capitalize'
 
   if (loading) {
     return (
@@ -195,7 +211,18 @@ export default function Dashboard() {
         <div className="max-w-2xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
             <p className="text-[13px] text-text-light uppercase tracking-wider mb-2">{greeting()}</p>
-            <h1 className="font-heading text-4xl font-medium text-text-primary mb-3 capitalize">{displayName}</h1>
+            <div className="flex items-center gap-2 mb-3">
+              <h1 className={`font-heading text-4xl font-medium text-text-primary ${nameClass}`}>{displayName}</h1>
+              {user && (
+                <button
+                  onClick={() => setEditingNick(true)}
+                  aria-label="Edit nickname"
+                  className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer p-1"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
+            </div>
             <p className="text-text-muted text-[15px] mb-8">
               Your dashboard comes to life once you start logging. Track your first session and you'll see your streak,
               volume, records, and trends here.
@@ -208,6 +235,9 @@ export default function Dashboard() {
             </Link>
           </motion.div>
         </div>
+        {editingNick && user && (
+          <NicknameModal current={nickname} onSave={saveNickname} onClose={() => setEditingNick(false)} />
+        )}
       </div>
     )
   }
@@ -226,7 +256,18 @@ export default function Dashboard() {
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
           <div className="bg-text-primary text-cream p-6 sm:p-8">
             <p className="text-[12px] text-cream/60 uppercase tracking-wider">{greeting()}</p>
-            <h1 className="font-heading text-2xl sm:text-3xl font-medium capitalize mb-1">{displayName}</h1>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className={`font-heading text-2xl sm:text-3xl font-medium ${nameClass}`}>{displayName}</h1>
+              {user && (
+                <button
+                  onClick={() => setEditingNick(true)}
+                  aria-label="Edit nickname"
+                  className="text-cream/50 hover:text-cream bg-transparent border-none cursor-pointer p-1"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
+            </div>
             <p className="text-[12px] text-cream/50 mb-6">{fullDate(now)}</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
@@ -521,6 +562,10 @@ export default function Dashboard() {
           onSave={(g) => { saveGoals(g); setGoals(g); setEditingGoals(false) }}
           onClose={() => setEditingGoals(false)}
         />
+      )}
+
+      {editingNick && user && (
+        <NicknameModal current={nickname} onSave={saveNickname} onClose={() => setEditingNick(false)} />
       )}
     </div>
   )

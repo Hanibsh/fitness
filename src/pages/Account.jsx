@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, LogOut, Check } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { fetchProfile, saveProfile } from '../lib/profile'
+import { validateNickname, NICKNAME_MAX } from '../lib/nickname'
 
 export default function Account() {
   const { user, signOut } = useAuth()
@@ -12,6 +13,7 @@ export default function Account() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
+  const [nickname, setNickname] = useState('')
   const [sex, setSex] = useState('')
   const [bodyweight, setBodyweight] = useState('')
   const [unit, setUnit] = useState('kg')
@@ -25,6 +27,7 @@ export default function Account() {
       try {
         const p = await fetchProfile(user.id)
         if (!cancelled && p) {
+          setNickname(p.display_name || '')
           setSex(p.sex || '')
           setBodyweight(p.bodyweight != null ? String(p.bodyweight) : '')
           setUnit(p.unit || 'kg')
@@ -43,14 +46,21 @@ export default function Account() {
   async function save() {
     setError('')
     setSaved(false)
+    const nick = validateNickname(nickname)
+    if (!nick.ok) {
+      setError(nick.error)
+      return
+    }
     setSaving(true)
     try {
       await saveProfile(user.id, {
+        display_name: nick.value || null,
         sex: sex || null,
         bodyweight: bodyweight === '' ? null : Number(bodyweight),
         unit,
         share_data: shareData,
       })
+      setNickname(nick.value)
       setSaved(true)
     } catch {
       setError('Could not save. Please try again.')
@@ -96,6 +106,19 @@ export default function Account() {
               </div>
 
               <div className="bg-white border border-border p-9 space-y-7">
+                <div>
+                  <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-2">Nickname (optional)</label>
+                  <input
+                    type="text"
+                    value={nickname}
+                    maxLength={NICKNAME_MAX}
+                    onChange={(e) => setNickname(e.target.value)}
+                    placeholder="What should we call you?"
+                    className="w-full bg-cream border border-border px-4 py-3 text-text-primary text-[13px] outline-none focus:border-text-primary transition-colors"
+                  />
+                  <p className="text-[11px] text-text-light mt-1.5">Shown on your dashboard instead of your email. Leave blank to use your email name.</p>
+                </div>
+
                 <div>
                   <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-3">Sex</label>
                   <div className="flex gap-3">
