@@ -70,6 +70,13 @@ function isSameDay(a, b) {
   return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate()
 }
 
+// A calendar day strictly after today — can't log a workout there.
+function isFutureDay(ts) {
+  const d = new Date(ts); d.setHours(0, 0, 0, 0)
+  const t = new Date(); t.setHours(0, 0, 0, 0)
+  return d.getTime() > t.getTime()
+}
+
 function sideSummary(s, unit) {
   const base = s.weight ? `${s.weight}${unit} × ${s.reps}` : `${s.reps}`
   const hasRir = s.rir !== '' && s.rir != null
@@ -239,6 +246,13 @@ export default function WorkoutTracker() {
   }, [draft, history, unit])
 
   const sortedHistory = useMemo(() => [...history].sort((a, b) => b.date - a.date), [history])
+
+  // Workouts on the calendar-selected day (kept fresh as history changes), for
+  // the day-detail panel under the calendar.
+  const daySessions = useMemo(
+    () => (selectedCalDay ? sortedHistory.filter((s) => isSameDay(s.date, selectedCalDay)) : []),
+    [selectedCalDay, sortedHistory]
+  )
 
   // Exercises the user has logged before, most-recent first and split by kind,
   // so each section's picker surfaces what they actually train there.
@@ -638,17 +652,30 @@ export default function WorkoutTracker() {
     }
   }
 
-  // Tap a day in the history calendar: highlight it and, if a workout was
-  // logged that day, open the first session and scroll it into view.
-  function selectCalendarDay(date, daySessions) {
-    setSelectedCalDay(date)
-    if (daySessions.length) {
-      const first = daySessions[0]
-      setOpenSession(first.id)
-      setTimeout(() => {
-        document.getElementById(`session-${first.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }, 60)
+  // Tap a day in the calendar: select it so the day-detail panel (below the
+  // calendar) shows that day's workouts with edit / delete / add actions.
+  function selectCalendarDay(date) {
+    setSelectedCalDay((prev) => (prev && isSameDay(prev, date) ? null : date))
+  }
+
+  // Start (or backdate the in-progress) session onto a chosen day, then jump to
+  // the editor — the quick way to log a workout you forgot, from the calendar.
+  function startWorkoutOnDay(date) {
+    const noon = new Date(date)
+    noon.setHours(12, 0, 0, 0)
+    const day = Math.min(noon.getTime(), Date.now())
+    if (draft.editingId) {
+      // Leave edit mode, restoring any stashed in-progress draft, then backdate.
+      const stash = getStashedDraft()
+      clearStashedDraft()
+      clearDraft()
+      setDraft({ ...(stash || emptyDraft()), date: day })
+    } else {
+      setDraft((d) => ({ ...d, date: day }))
     }
+    setEditingDate(false)
+    setSelectedCalDay(null)
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 40)
   }
 
   // Move a saved session to another day (e.g. the date was misclicked). Clamp
@@ -1320,7 +1347,7 @@ export default function WorkoutTracker() {
                 <p className="text-[13px] text-red-600 mb-4">{saveError}</p>
               )}
 
-              {/* Browse past days — tap a day to jump to that session. */}
+              {/* Browse past days — tap a day to see and edit that day's workouts. */}
               <div className="bg-white border border-border p-5 sm:p-6 mb-6">
                 <div className="flex items-center gap-2 mb-4">
                   <CalendarDays className="w-4 h-4 text-text-primary" />
@@ -1331,6 +1358,70 @@ export default function WorkoutTracker() {
                   selectedDate={selectedCalDay}
                   onSelectDay={selectCalendarDay}
                 />
+
+                {selectedCalDay && (
+                  <div className="mt-5 pt-5 border-t border-border">
+                    <p className="text-[13px] font-medium text-text-primary mb-3">{formatDate(selectedCalDay)}</p>
+                    {daySessions.length === 0 ? (
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <p className="text-[12px] text-text-muted">No workout logged this day.</p>
+                        {!isFutureDay(selectedCalDay) && (
+                          <button
+                            onClick={() => startWorkoutOnDay(selectedCalDay)}
+                            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-cream bg-text-primary px-3 py-1.5 border-none cursor-pointer hover:bg-accent-hover transition-colors"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Log a workout on this day
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {daySessions.map((s) => {
+                          const st = sessionStats(s)
+                          return (
+                            <div key={s.id} className="bg-cream border border-border p-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-[13px] font-medium text-text-primary break-words">{s.name || 'Workout'}</p>
+                                  <p className="text-[11px] text-text-muted mt-0.5">
+                                    {st.exercises} exercise{st.exercises !== 1 ? 's' : ''} · {st.sets} set{st.sets !== 1 ? 's' : ''}
+                                    {st.volume > 0 && ` · ${st.volume.toLocaleString()} ${s.unit || 'kg'}`}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <button
+                                    onClick={() => editSession(s)}
+                                    disabled={draft.editingId === s.id}
+                                    className="inline-flex items-center gap-1 text-[12px] font-medium text-cream bg-text-primary px-2.5 py-1 border-none cursor-pointer hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-default"
+                                  >
+                                    <Pencil className="w-3 h-3" /> {draft.editingId === s.id ? 'Editing…' : 'Edit'}
+                                  </button>
+                                  <button
+                                    onClick={() => removeSession(s.id)}
+                                    aria-label={`Delete ${s.name || 'workout'}`}
+                                    title="Delete workout"
+                                    className="text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer p-1"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                              {s.exercises.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                  {s.exercises.map((ex) => (
+                                    <span key={ex.id} className="text-[11px] text-text-muted bg-white border border-border px-2 py-0.5">
+                                      {ex.name}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">
