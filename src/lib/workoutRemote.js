@@ -76,6 +76,16 @@ export async function deleteRemoteSession(id) {
   if (error) throw error
 }
 
+// Move a saved session to another day. Only the date changes; RLS keeps this
+// scoped to the user's own rows.
+export async function updateRemoteSessionDate(id, date) {
+  const { error } = await supabase
+    .from('sessions')
+    .update({ date: new Date(date).toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}
+
 // ---- Bodyweight log --------------------------------------------------------
 // Mirrors the localStorage bodyweight functions but talks to the
 // `bodyweight_log` table. RLS keeps each user to their own rows.

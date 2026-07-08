@@ -27,9 +27,30 @@ function read(key, fallback) {
 function write(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value))
+    return true
   } catch {
     // Storage full or unavailable — fail silently so the UI never crashes.
+    return false
   }
+}
+
+// We aim to keep at least a year of workout history on the device. If storage
+// is full we don't just drop the newest save — we trim the oldest sessions
+// (first anything past the retention window, then oldest-first) and retry, so a
+// packed log degrades gracefully instead of failing to save.
+const HISTORY_RETENTION_MS = 366 * 24 * 60 * 60 * 1000
+
+function writeHistory(history) {
+  if (write(HISTORY_KEY, history)) return history
+  const cutoff = Date.now() - HISTORY_RETENTION_MS
+  let trimmed = history.filter((s) => s.date >= cutoff).sort((a, b) => b.date - a.date)
+  if (write(HISTORY_KEY, trimmed)) return trimmed
+  // Still too large even within a year — drop oldest until it fits.
+  while (trimmed.length > 1) {
+    trimmed = trimmed.slice(0, -1)
+    if (write(HISTORY_KEY, trimmed)) break
+  }
+  return trimmed
 }
 
 // ---- Factories -------------------------------------------------------------
@@ -215,8 +236,14 @@ function plausibleDuration(startedAt) {
 // so a backdated session lands in the right chronological spot.
 export function addLocalSession(session) {
   const history = [session, ...getHistory()].sort((a, b) => b.date - a.date)
-  write(HISTORY_KEY, history)
-  return history
+  return writeHistory(history)
+}
+
+// Replace a session in local history (e.g. after moving it to another day) and
+// re-sort so it lands in the right chronological spot.
+export function updateLocalSession(session) {
+  const history = [session, ...getHistory().filter((s) => s.id !== session.id)].sort((a, b) => b.date - a.date)
+  return writeHistory(history)
 }
 
 export function clearLocalHistory() {

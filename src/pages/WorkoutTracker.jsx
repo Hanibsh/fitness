@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronDown, HelpCircle, LineChart, Calendar, ArrowLeftRight } from 'lucide-react'
+import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight } from 'lucide-react'
 import {
   getDraft,
   saveDraft,
@@ -13,6 +13,7 @@ import {
   getHistory,
   makeSession,
   addLocalSession,
+  updateLocalSession,
   clearLocalHistory,
   deleteSession,
   sessionStats,
@@ -24,7 +25,7 @@ import {
   saveExerciseTarget,
   getBodyweightLog,
 } from '../lib/workoutStore'
-import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, insertSharedLifts, submitGuestLifts } from '../lib/workoutRemote'
+import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, insertSharedLifts, submitGuestLifts } from '../lib/workoutRemote'
 import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight } from '../lib/workoutStats'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
@@ -32,6 +33,7 @@ import { useAuth } from '../lib/auth'
 import Modal from '../components/Modal'
 import ExerciseProgress from '../components/ExerciseProgress'
 import ExercisePicker from '../components/ExercisePicker'
+import WorkoutCalendar from '../components/WorkoutCalendar'
 import SessionNamePicker from '../components/SessionNamePicker'
 import { lateralityFor, usesBodyweight } from '../lib/movements'
 import UnitHelp from '../components/UnitHelp'
@@ -118,6 +120,8 @@ export default function WorkoutTracker() {
   const [profile, setProfile] = useState(null)
   const [unit, setUnit] = useState(() => getUnit())
   const [openSession, setOpenSession] = useState(null)
+  const [selectedCalDay, setSelectedCalDay] = useState(null)
+  const [editingSessionDate, setEditingSessionDate] = useState(null)
   const [showRirHelp, setShowRirHelp] = useState(false)
   const [progressExercise, setProgressExercise] = useState(null)
   const [editingDate, setEditingDate] = useState(false)
@@ -486,6 +490,41 @@ export default function WorkoutTracker() {
     } else {
       setHistory(deleteSession(id))
     }
+  }
+
+  // Tap a day in the history calendar: highlight it and, if a workout was
+  // logged that day, open the first session and scroll it into view.
+  function selectCalendarDay(date, daySessions) {
+    setSelectedCalDay(date)
+    if (daySessions.length) {
+      const first = daySessions[0]
+      setOpenSession(first.id)
+      setTimeout(() => {
+        document.getElementById(`session-${first.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 60)
+    }
+  }
+
+  // Move a saved session to another day (e.g. the date was misclicked). Clamp
+  // to today — a workout can't be logged in the future.
+  async function changeSessionDate(session, value) {
+    if (!value) return setEditingSessionDate(null)
+    const ts = Math.min(fromInputDate(value), Date.now())
+    if (Number.isNaN(ts) || isSameDay(ts, session.date)) return setEditingSessionDate(null)
+    const updated = { ...session, date: ts }
+    if (user) {
+      try {
+        await updateRemoteSessionDate(session.id, ts)
+      } catch {
+        setSaveError('Could not move that workout. Check your connection and try again.')
+        return
+      }
+      setHistory((prev) => [updated, ...prev.filter((s) => s.id !== session.id)].sort((a, b) => b.date - a.date))
+    } else {
+      setHistory(updateLocalSession(updated))
+    }
+    setEditingSessionDate(null)
+    setSaveError('')
   }
 
   async function importLocal() {
@@ -1052,12 +1091,30 @@ export default function WorkoutTracker() {
           {history.length > 0 && (
             <div className="mt-14">
               <h2 className="font-heading text-xl font-medium text-text-primary mb-6">History</h2>
+
+              {saveError && draft.exercises.length === 0 && (
+                <p className="text-[13px] text-red-600 mb-4">{saveError}</p>
+              )}
+
+              {/* Browse past days — tap a day to jump to that session. */}
+              <div className="bg-white border border-border p-5 sm:p-6 mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <CalendarDays className="w-4 h-4 text-text-primary" />
+                  <h3 className="text-[12px] font-medium uppercase tracking-wider text-text-secondary">Calendar</h3>
+                </div>
+                <WorkoutCalendar
+                  sessions={sortedHistory}
+                  selectedDate={selectedCalDay}
+                  onSelectDay={selectCalendarDay}
+                />
+              </div>
+
               <div className="space-y-3">
                 {sortedHistory.map((session) => {
                   const stats = sessionStats(session)
                   const isOpen = openSession === session.id
                   return (
-                    <div key={session.id} className="bg-white border border-border">
+                    <div key={session.id} id={`session-${session.id}`} className="bg-white border border-border scroll-mt-28">
                       <button
                         onClick={() => setOpenSession(isOpen ? null : session.id)}
                         className="w-full flex items-center justify-between px-6 py-4 bg-transparent border-none cursor-pointer text-left"
@@ -1113,12 +1170,32 @@ export default function WorkoutTracker() {
                                   </div>
                                 )
                               })}
-                              <button
-                                onClick={() => removeSession(session.id)}
-                                className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer mt-3 transition-colors"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" /> Delete session
-                              </button>
+                              <div className="flex flex-wrap items-center gap-4 mt-3">
+                                {editingSessionDate === session.id ? (
+                                  <input
+                                    type="date"
+                                    autoFocus
+                                    defaultValue={toInputDate(session.date)}
+                                    max={toInputDate(Date.now())}
+                                    onChange={(e) => changeSessionDate(session, e.target.value)}
+                                    onBlur={() => setEditingSessionDate(null)}
+                                    className="bg-cream border border-border px-2 py-1 text-text-primary text-[12px] outline-none focus:border-text-primary transition-colors"
+                                  />
+                                ) : (
+                                  <button
+                                    onClick={() => setEditingSessionDate(session.id)}
+                                    className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer transition-colors"
+                                  >
+                                    <Calendar className="w-3.5 h-3.5" /> Move to another day
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => removeSession(session.id)}
+                                  className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" /> Delete session
+                                </button>
+                              </div>
                             </div>
                           </motion.div>
                         )}
