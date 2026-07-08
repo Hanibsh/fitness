@@ -11,6 +11,7 @@
 import exercisesDb from '../data/exercises.json'
 import { rirEffectiveness, ATOM_TO_GROUP, ENGINE_MUSCLES, landmarksFor } from './engineConfig'
 import { muscleForExercise } from './dashboard'
+import { exerciseIdForName } from './exerciseLibrary'
 
 const DAY = 86400000
 const DB_BY_ID = new Map((exercisesDb.exercises || []).map((e) => [e.id, e]))
@@ -55,7 +56,11 @@ export function effectiveWeeklyVolume(sessions, { days = 7, now = Date.now() } =
     if (startOfDay(s.date) < cutoff) continue
     for (const ex of s.exercises) {
       if (ex.kind === 'cardio') continue
-      const db = ex.exerciseId ? DB_BY_ID.get(ex.exerciseId) : null
+      // Prefer the stored id; fall back to matching by name for sessions logged
+      // before ids existed (or typed rather than picked from the search box) —
+      // otherwise these silently lost their muscle-atom detail (or all credit).
+      const dbId = ex.exerciseId || exerciseIdForName(ex.name)
+      const db = dbId ? DB_BY_ID.get(dbId) : null
       for (const set of ex.sets) {
         if (!isWorking(set, ex.kind)) continue
         const eff = rirEffectiveness(setRir(set))
