@@ -86,6 +86,18 @@ export async function updateRemoteSessionDate(id, date) {
   if (error) throw error
 }
 
+// Overwrite a saved session in place (editing a past workout). Updates the
+// existing row rather than inserting; RLS scopes it to the user's own rows.
+export async function updateRemoteSession(userId, session) {
+  const row = toRow(userId, session)
+  let { error } = await supabase.from('sessions').update(row).eq('id', session.id)
+  if (missingDurationColumn(error)) {
+    ;({ error } = await supabase.from('sessions').update(stripDuration(row)).eq('id', session.id))
+  }
+  if (error) throw error
+  return session
+}
+
 // ---- Bodyweight log --------------------------------------------------------
 // Mirrors the localStorage bodyweight functions but talks to the
 // `bodyweight_log` table. RLS keeps each user to their own rows.

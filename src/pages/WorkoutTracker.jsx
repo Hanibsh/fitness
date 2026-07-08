@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Unlink2 } from 'lucide-react'
+import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Unlink2, Pencil } from 'lucide-react'
 import {
   getDraft,
   saveDraft,
@@ -16,6 +16,9 @@ import {
   updateLocalSession,
   clearLocalHistory,
   deleteSession,
+  stashDraft,
+  getStashedDraft,
+  clearStashedDraft,
   sessionStats,
   getUnit,
   saveUnit,
@@ -25,7 +28,7 @@ import {
   saveExerciseTarget,
   getBodyweightLog,
 } from '../lib/workoutStore'
-import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, insertSharedLifts, submitGuestLifts } from '../lib/workoutRemote'
+import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts } from '../lib/workoutRemote'
 import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels } from '../lib/workoutStats'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
@@ -147,6 +150,7 @@ export default function WorkoutTracker() {
 
   const draftDate = draft.date || Date.now()
   const isToday = isSameDay(draftDate, Date.now())
+  const isEditing = !!draft.editingId
 
   // Auto-save the draft on every change (skip the very first render).
   useEffect(() => {
@@ -196,7 +200,10 @@ export default function WorkoutTracker() {
     const provisional = draft.exercises.length
       ? [{ id: '__draft__', date: draft.date || Date.now(), provisional: true, unit, exercises: draft.exercises }]
       : []
-    return [...provisional, ...history]
+    // While editing a past session, the live draft stands in for it — drop the
+    // saved copy from history so the graph doesn't count it twice.
+    const base = draft.editingId ? history.filter((s) => s.id !== draft.editingId) : history
+    return [...provisional, ...base]
   }, [draft, history, unit])
 
   const sortedHistory = useMemo(() => [...history].sort((a, b) => b.date - a.date), [history])
@@ -432,11 +439,83 @@ export default function WorkoutTracker() {
     }))
   }
 
+  // Load a past session back into the editor. Any unfinished (non-edit) draft
+  // is stashed so it can be restored when the edit is done or cancelled.
+  function editSession(session) {
+    setDraft((cur) => {
+      if (cur.exercises.length > 0 && !cur.editingId) stashDraft(cur)
+      // Restore the session's bodyweight (used by bodyweight-loaded sets) from
+      // whatever was baked into its sets.
+      let bodyweight = ''
+      for (const ex of session.exercises) {
+        if (ex.bodyweight) {
+          const s = ex.sets.find((st) => st.bw != null)
+          if (s) { bodyweight = s.bw; break }
+        }
+      }
+      return {
+        startedAt: Date.now(),
+        date: session.date,
+        name: session.name || '',
+        exercises: session.exercises.map(migrateExercise),
+        bodyweight,
+        editingId: session.id,
+        durationMs: session.durationMs ?? null,
+      }
+    })
+    setOpenSession(null)
+    setEditingDate(false)
+    setSaveError('')
+    lastFinishedRef.current = null
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 40)
+  }
+
+  // Leave edit mode, restoring any stashed in-progress draft (else start fresh).
+  function exitEditMode() {
+    const stash = getStashedDraft()
+    clearStashedDraft()
+    clearDraft()
+    setDraft(stash || emptyDraft())
+    setEditingDate(false)
+  }
+
   async function finish() {
     if (saving || lastFinishedRef.current === draft.startedAt) return
     lastFinishedRef.current = draft.startedAt
     setSaveError('')
     setSaving(true)
+
+    // Editing an existing session: overwrite it in place (keep its id and
+    // original duration) instead of creating a new one.
+    if (draft.editingId) {
+      const updated = {
+        id: draft.editingId,
+        date: draft.date || Date.now(),
+        name: draft.name || '',
+        unit,
+        durationMs: draft.durationMs ?? null,
+        exercises: draft.exercises,
+      }
+      try {
+        if (user) {
+          await updateRemoteSession(user.id, updated)
+          setHistory((prev) => [updated, ...prev.filter((s) => s.id !== updated.id)].sort((a, b) => b.date - a.date))
+        } else {
+          setHistory(updateLocalSession(updated))
+        }
+        for (const ex of updated.exercises) {
+          if (ex.kind !== 'cardio' && ex.repRange) saveExerciseTarget(ex.name, ex.repRange)
+        }
+        exitEditMode()
+      } catch {
+        lastFinishedRef.current = null
+        setSaveError('Could not save your changes. Check your connection and try again.')
+      } finally {
+        setSaving(false)
+      }
+      return
+    }
+
     const session = makeSession(draft, unit)
     try {
       if (user) {
@@ -485,6 +564,7 @@ export default function WorkoutTracker() {
   }
 
   function discard() {
+    if (draft.editingId) return exitEditMode()
     clearDraft()
     setDraft(emptyDraft())
     setEditingDate(false)
@@ -992,7 +1072,7 @@ export default function WorkoutTracker() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-[11px] uppercase tracking-wider text-text-light mb-1">
-                  {isToday ? "Today's session" : 'Past session'}
+                  {isEditing ? 'Editing session' : isToday ? "Today's session" : 'Past session'}
                 </p>
                 {editingDate ? (
                   <input
@@ -1090,13 +1170,13 @@ export default function WorkoutTracker() {
                     disabled={!hasLoggedSets || saving}
                     className="flex-1 inline-flex items-center justify-center gap-2 bg-text-primary text-cream font-medium py-3.5 border-none cursor-pointer text-[14px] hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    <Check className="w-4 h-4" /> {saving ? 'Saving…' : 'Finish session'}
+                    <Check className="w-4 h-4" /> {saving ? 'Saving…' : isEditing ? 'Save changes' : 'Finish session'}
                   </button>
                   <button
                     onClick={discard}
                     className="px-5 text-text-muted hover:text-text-primary bg-white border border-border hover:border-border-hover cursor-pointer text-[13px] transition-colors"
                   >
-                    Discard
+                    {isEditing ? 'Cancel' : 'Discard'}
                   </button>
                 </div>
               </div>
@@ -1226,7 +1306,14 @@ export default function WorkoutTracker() {
                                 )
                               })}
                               <div className="flex flex-wrap items-center gap-4 mt-3">
-                                {editingSessionDate === session.id ? (
+                                <button
+                                  onClick={() => editSession(session)}
+                                  disabled={draft.editingId === session.id}
+                                  className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-default"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" /> {draft.editingId === session.id ? 'Editing…' : 'Edit'}
+                                </button>
+                                {draft.editingId !== session.id && (editingSessionDate === session.id ? (
                                   <input
                                     type="date"
                                     autoFocus
@@ -1243,13 +1330,15 @@ export default function WorkoutTracker() {
                                   >
                                     <Calendar className="w-3.5 h-3.5" /> Move to another day
                                   </button>
+                                ))}
+                                {draft.editingId !== session.id && (
+                                  <button
+                                    onClick={() => removeSession(session.id)}
+                                    className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer transition-colors"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" /> Delete session
+                                  </button>
                                 )}
-                                <button
-                                  onClick={() => removeSession(session.id)}
-                                  className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer transition-colors"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" /> Delete session
-                                </button>
                               </div>
                             </div>
                           </motion.div>

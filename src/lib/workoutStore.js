@@ -204,6 +204,27 @@ export function clearDraft() {
   }
 }
 
+// A backup slot for the in-progress draft. When you jump into editing a past
+// workout, any unfinished session is stashed here and the editor is reused;
+// finishing or cancelling the edit restores it so nothing in progress is lost.
+const DRAFT_STASH_KEY = 'leon_workout_draft_stash'
+
+export function getStashedDraft() {
+  return read(DRAFT_STASH_KEY, null)
+}
+
+export function stashDraft(draft) {
+  write(DRAFT_STASH_KEY, draft)
+}
+
+export function clearStashedDraft() {
+  try {
+    localStorage.removeItem(DRAFT_STASH_KEY)
+  } catch {
+    // ignore
+  }
+}
+
 // ---- History (completed sessions) -----------------------------------------
 
 export function getHistory() {
