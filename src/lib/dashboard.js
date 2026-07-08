@@ -5,6 +5,7 @@
 
 import { convertWeight, estimatedOneRepMax } from './workoutStats'
 import { MOVEMENTS } from './movements'
+import exercisesDb from '../data/exercises.json'
 
 const DAY = 86400000
 
@@ -50,9 +51,47 @@ const NAME_PATTERNS = [
 
 const MOVEMENT_BY_NAME = new Map(MOVEMENTS.map((m) => [m.name.toLowerCase(), m]))
 
+// The ID'd exercise DB carries per-muscle contributions. Map its anatomical
+// muscle names onto the dashboard's broader groups and take each exercise's
+// dominant (highest-contribution) muscle, so a DB movement resolves from real
+// data rather than name guessing. (Muscles with no dashboard group — e.g.
+// abductors, forearms — are skipped; those exercises fall through below.)
+const DB_MUSCLE_TO_GROUP = {
+  Triceps: 'Triceps',
+  Biceps: 'Biceps', Brachialis: 'Biceps', Brachioradialis: 'Biceps',
+  Quadriceps: 'Quads',
+  Hamstrings: 'Hamstrings',
+  'Glute Max': 'Glutes',
+  Gastrocnemius: 'Calves', Soleus: 'Calves',
+  'Front Delts': 'Shoulders', 'Side Delts': 'Shoulders', 'Rear Delts': 'Shoulders', 'Rotator Cuff': 'Shoulders',
+  'Upper Chest': 'Chest', 'Middle Chest': 'Chest', 'Lower Chest': 'Chest',
+  Lats: 'Back', 'Mid Back': 'Back', Rhomboids: 'Back', 'Upper Traps': 'Back', 'Lower Traps': 'Back', 'Spinal Erectors': 'Back',
+  'Rectus Abdominis': 'Abs', 'Transverse Abdominis': 'Abs', Obliques: 'Abs', 'Hip Flexors': 'Abs',
+}
+
+function dominantGroup(muscles) {
+  let best = null
+  let bestWeight = -1
+  for (const [muscle, weight] of Object.entries(muscles || {})) {
+    const group = DB_MUSCLE_TO_GROUP[muscle]
+    if (group && weight > bestWeight) {
+      best = group
+      bestWeight = weight
+    }
+  }
+  return best
+}
+
+const DB_MUSCLE_BY_NAME = new Map(
+  (exercisesDb.exercises || []).map((e) => [e.name.trim().toLowerCase(), dominantGroup(e.muscles)])
+)
+
 export function muscleForExercise(name) {
   const raw = (name || '').trim().toLowerCase()
   if (!raw) return null
+  // Prefer the DB's real muscle data when we recognise the exercise by name.
+  const fromDb = DB_MUSCLE_BY_NAME.get(raw)
+  if (fromDb) return fromDb
   const m = MOVEMENT_BY_NAME.get(raw)
   if (m) {
     if (m.category === 'Cardio' || m.category === 'Full Body' || m.category === 'Olympic') return null

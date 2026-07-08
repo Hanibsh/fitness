@@ -39,6 +39,7 @@ import ExercisePicker from '../components/ExercisePicker'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import SessionNamePicker from '../components/SessionNamePicker'
 import { lateralityFor, usesBodyweight } from '../lib/movements'
+import { getExercise, exerciseIdForName } from '../lib/exerciseLibrary'
 import UnitHelp from '../components/UnitHelp'
 
 const SET_GRID = 'grid grid-cols-[18px_1fr_1fr_50px_18px] gap-2 items-center'
@@ -104,10 +105,20 @@ function isWorkingSet(set, kind) {
 // a unilateral toggle on Bench Press). Backfill it from the DB on load and
 // snap the sets to the resolved shape.
 function migrateExercise(ex) {
-  if (!ex || ex.kind === 'cardio' || ex.laterality) return ex
-  const laterality = lateralityFor(ex.name)
-  const unilateral = laterality === 'unilateral' ? true : laterality === 'bilateral' ? false : !!ex.unilateral
-  return { ...ex, laterality, unilateral, sets: (ex.sets || []).map((s) => convertSet(s, unilateral)) }
+  if (!ex || ex.kind === 'cardio') return ex
+  let next = ex
+  // Backfill laterality (+ snap set shapes) on exercises saved before it existed.
+  if (!ex.laterality) {
+    const laterality = lateralityFor(ex.name)
+    const unilateral = laterality === 'unilateral' ? true : laterality === 'bilateral' ? false : !!ex.unilateral
+    next = { ...ex, laterality, unilateral, sets: (ex.sets || []).map((s) => convertSet(s, unilateral)) }
+  }
+  // Backfill the exercise-DB id from the name where it matches, so exercises
+  // logged before IDs existed still link to the library.
+  if (next.exerciseId === undefined) {
+    next = { ...next, exerciseId: exerciseIdForName(next.name) }
+  }
+  return next
 }
 function migrateDraft(draft) {
   if (!draft || !Array.isArray(draft.exercises)) return draft
@@ -239,16 +250,19 @@ export default function WorkoutTracker() {
     return ''
   }
 
-  function addExercise(name, kind) {
+  function addExercise(name, kind, exerciseId) {
     const trimmed = name.trim().slice(0, 60)
     if (!trimmed) return
     const isStrength = kind !== 'cardio'
-    const laterality = isStrength ? lateralityFor(trimmed) : undefined
-    const bodyweight = isStrength ? usesBodyweight(trimmed) : false
+    // When picked from the library, take laterality/bodyweight straight from the
+    // DB entry (authoritative). For custom/typed exercises, infer from the name.
+    const lib = isStrength ? getExercise(exerciseId) : null
+    const laterality = isStrength ? (lib ? lib.laterality : lateralityFor(trimmed)) : undefined
+    const bodyweight = isStrength ? (lib ? lib.bodyweight : usesBodyweight(trimmed)) : false
     const repRange = isStrength ? getExerciseTarget(trimmed) || undefined : undefined
     setDraft((d) => {
       const bw = bodyweight ? (d.bodyweight != null && d.bodyweight !== '' ? d.bodyweight : prefillBodyweight()) : undefined
-      const ex = createExercise(trimmed, kind, { laterality, repRange, bodyweight, bw: Number(bw) || 0 })
+      const ex = createExercise(trimmed, kind, { laterality, repRange, bodyweight, bw: Number(bw) || 0, exerciseId: exerciseId || null })
       const next = { ...d, exercises: [...d.exercises, ex] }
       if (bodyweight && (d.bodyweight == null || d.bodyweight === '')) next.bodyweight = bw
       return next
@@ -1137,7 +1151,7 @@ export default function WorkoutTracker() {
                 {resistanceExercises.map(renderExercise)}
               </AnimatePresence>
               <ExercisePicker
-                onSelect={(name) => addExercise(name, 'strength')}
+                onSelect={(name, _cat, id) => addExercise(name, 'strength', id)}
                 recentNames={recentByKind.resistance}
                 excludeCategory="Cardio"
                 placeholder="Search or add a resistance exercise…"
@@ -1154,7 +1168,7 @@ export default function WorkoutTracker() {
                 {cardioExercises.map(renderExercise)}
               </AnimatePresence>
               <ExercisePicker
-                onSelect={(name) => addExercise(name, 'cardio')}
+                onSelect={(name, _cat, id) => addExercise(name, 'cardio', id)}
                 recentNames={recentByKind.cardio}
                 onlyCategory="Cardio"
                 placeholder="Search or add a cardio exercise…"

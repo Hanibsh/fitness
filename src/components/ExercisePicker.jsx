@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Search } from 'lucide-react'
-import { searchExercises } from '../lib/movements'
+import { searchExercises } from '../lib/exerciseLibrary'
 
 // Searchable exercise picker: filters the movement library (plus the user's
 // own previously-logged exercises, surfaced first) as you type, and always
@@ -28,14 +28,14 @@ export default function ExercisePicker({ onSelect, recentNames = [], onlyCategor
   const matches = results.slice(0, 8)
   const exact = results.some((m) => m.name.toLowerCase() === q)
 
-  function pick(name, category) {
+  function pick(name, category, id) {
     // 60-char cap matches the shared-lifts validation server-side; anything
     // longer would also wreck the set-row layout. `category` (when picked from
-    // the list) lets the tracker decide strength vs cardio; custom entries pass
-    // undefined and default to strength.
+    // the list) lets the tracker decide strength vs cardio; `id` links the pick
+    // to the exercise DB. Custom entries pass neither and default to strength.
     const trimmed = name.trim().slice(0, 60)
     if (!trimmed) return
-    onSelect(trimmed, category)
+    onSelect(trimmed, category, id)
     setQuery('')
     setOpen(false)
   }
@@ -62,7 +62,7 @@ export default function ExercisePicker({ onSelect, recentNames = [], onlyCategor
               key={m.name}
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => pick(m.name, m.category)}
+              onClick={() => pick(m.name, m.category, m.id)}
               className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left bg-transparent border-none border-b border-border cursor-pointer hover:bg-cream transition-colors"
             >
               <span className="text-[13px] text-text-primary">{m.name}</span>

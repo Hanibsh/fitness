@@ -110,6 +110,10 @@ export function createExercise(name, kind = 'strength', opts = {}) {
   const bodyweight = kind !== 'cardio' && !!opts.bodyweight
   const firstSet = createSet(undefined, bodyweight ? { bodyweight: true, bw: opts.bw || 0 } : { unilateral })
   const ex = { id: newId(), name, kind, sets: [firstSet] }
+  // Stable pointer into the exercise DB (`src/data/exercises.json`) when the
+  // movement was picked from the library — null for custom/typed entries.
+  // Downstream analytics look movements up by this instead of guessing by name.
+  ex.exerciseId = opts.exerciseId || null
   if (kind !== 'cardio') {
     ex.laterality = laterality
     // Bodyweight-loaded moves (pull-ups, dips…) log added weight against your

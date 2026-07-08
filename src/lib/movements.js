@@ -1,12 +1,12 @@
-// The movement library that powers the workout-log exercise picker.
-// These are names only — no standards data — so the list can be broad and
-// safe. Anything not here can still be typed in as a custom exercise.
-// Ordered so the most common compound lifts surface first as suggestions.
-//
-// `keywords` are extra search terms (abbreviations, alternate names, the
-// muscles worked) so the picker finds a movement even when you don't type its
-// exact name — e.g. "ohp" or "shoulder" both surface the Overhead Press.
-// Search also matches the category, so typing "shoulders" lists them all.
+// The legacy movement list (names + keywords, no standards data). The picker
+// now sources resistance movements from the ID'd exercise DB
+// (`exerciseLibrary.js` → `src/data/exercises.json`); this list lives on for
+// two things: (1) the dashboard's muscle inference (`dashboard.js`), and
+// (2) supplementing the picker with cardio / Olympic / full-body movements the
+// resistance DB doesn't cover. `keywords` are extra search terms used for those
+// supplements. Anything not here can still be typed as a custom exercise.
+// This file also provides the name-based laterality / bodyweight inference used
+// as a fallback for custom (non-DB) exercises.
 
 export const MOVEMENTS = [
   // Big compounds first (default suggestions)
@@ -211,68 +211,4 @@ export function lateralityFor(name) {
   if (/\b(dumbbell|db|cable)\b/.test(key)) return 'both'
   if (BILATERAL_RE.test(key)) return 'bilateral'
   return 'both'
-}
-
-// Whole-word abbreviations expanded before searching, so "db shoulder" finds
-// the dumbbell shoulder presses, "ohp" finds the overhead press, etc.
-const ABBREVIATIONS = {
-  db: 'dumbbell',
-  bb: 'barbell',
-  ohp: 'overhead press',
-  rdl: 'romanian deadlift',
-  sldl: 'stiff-leg deadlift',
-  bss: 'bulgarian split squat',
-  cgbp: 'close-grip bench press',
-}
-
-function haystack(m) {
-  return [m.name, m.category, ...(m.keywords || [])].join(' ').toLowerCase()
-}
-
-function tokenize(q) {
-  return q
-    .split(/\s+/)
-    .map((t) => ABBREVIATIONS[t] || t)
-    .join(' ')
-    .split(/\s+/)
-    .filter(Boolean)
-}
-
-// The searchable set of exercises for a given user: their previously-logged
-// movements first (most-recent first, so the picker surfaces what they
-// actually use), then the full library — deduped by name. A recent movement
-// that isn't in the library shows up as a plain custom entry so it can be
-// re-logged with an identical name (keeps progress charts continuous).
-export function exercisePool(recentNames = []) {
-  const seen = new Set()
-  const pool = []
-  const push = (item) => {
-    const key = item.name.trim().toLowerCase()
-    if (!key || seen.has(key)) return
-    seen.add(key)
-    pool.push(item)
-  }
-  for (const name of recentNames) {
-    const known = MOVEMENTS.find((m) => m.name.toLowerCase() === name.trim().toLowerCase())
-    push(known || { name: name.trim(), category: 'Recent', keywords: [] })
-  }
-  for (const m of MOVEMENTS) push(m)
-  return pool
-}
-
-// Token-based search over the pool: every word in the query must appear in the
-// movement's name, category, or keywords (any order). Empty query returns the
-// whole pool (recents first). Name-prefix matches float to the top ("run"
-// leads with Running, not Crunch); stable sort preserves pool order otherwise.
-export function searchExercises(query, recentNames = []) {
-  const pool = exercisePool(recentNames)
-  const q = (query || '').trim().toLowerCase()
-  if (!q) return pool
-  const tokens = tokenize(q)
-  return pool
-    .filter((m) => {
-      const text = haystack(m)
-      return tokens.every((t) => text.includes(t))
-    })
-    .sort((a, b) => Number(b.name.toLowerCase().startsWith(q)) - Number(a.name.toLowerCase().startsWith(q)))
 }
