@@ -72,6 +72,53 @@ export function supersetLabels(exercises = []) {
   return map
 }
 
+// ---- Rest tracking ---------------------------------------------------------
+// Sets are timestamped (`completedAt`) as they're logged; rest between two sets
+// is the gap between stamps. Only plausible gaps count — logging everything at
+// the end, backfilled sessions, or long interruptions resolve to "not measured".
+const REST_MIN_SEC = 5
+const REST_MAX_SEC = 20 * 60
+
+// A set counts toward rest only if it was actually logged (stamped + real work,
+// warm-ups excluded).
+function isLoggedSet(set, kind) {
+  if (!set.completedAt || set.type === 'warmup') return false
+  if (kind === 'cardio') return Number(set.duration) > 0
+  if (set.left) return Number(set.left?.reps) > 0 || Number(set.right?.reps) > 0
+  return Number(set.reps) > 0
+}
+
+// Rests (seconds) between consecutive logged working sets of one exercise.
+export function restBetweenSets(ex) {
+  const logged = ex.sets.filter((s) => isLoggedSet(s, ex.kind)).sort((a, b) => a.completedAt - b.completedAt)
+  const rests = []
+  for (let i = 1; i < logged.length; i++) {
+    const gap = (logged[i].completedAt - logged[i - 1].completedAt) / 1000
+    if (gap >= REST_MIN_SEC && gap <= REST_MAX_SEC) rests.push(gap)
+  }
+  return rests
+}
+
+export function avgRestForExercise(ex) {
+  const r = restBetweenSets(ex)
+  return r.length ? Math.round(r.reduce((a, b) => a + b, 0) / r.length) : null
+}
+
+// Session-wide average rest across all exercises (seconds), or null.
+export function sessionAvgRest(session) {
+  const all = []
+  for (const ex of session.exercises) all.push(...restBetweenSets(ex))
+  return all.length ? Math.round(all.reduce((a, b) => a + b, 0) / all.length) : null
+}
+
+// mm:ss for a rest duration in seconds (null-safe).
+export function formatRest(sec) {
+  if (sec == null) return null
+  const m = Math.floor(sec / 60)
+  const s = Math.round(sec % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 // Brzycki 1RM estimate — the same formula the site's 1RM calculator uses,
 // so the graph agrees with that tool. Accurate at low reps, rough past ~12.
 export function estimatedOneRepMax(weight, reps) {

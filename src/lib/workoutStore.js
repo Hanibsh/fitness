@@ -88,13 +88,16 @@ export function createSet(prev, opts = false) {
 // Convert a set between the flat (bilateral) and left/right (unilateral)
 // shapes, preserving whatever was already typed.
 export function convertSet(s, unilateral) {
+  // Carry the set's type (warm-up/back-off) and rest timestamp across a shape
+  // change so nothing is lost when toggling laterality.
+  const keep = { ...(s.type ? { type: s.type } : {}), ...(s.completedAt ? { completedAt: s.completedAt } : {}) }
   if (unilateral) {
     if (s.left) return s
     const side = { weight: s.weight ?? '', reps: s.reps ?? '', rir: s.rir ?? '' }
-    return { id: s.id, left: side, right: { ...side } }
+    return { id: s.id, left: side, right: { ...side }, ...keep }
   }
   if (!s.left) return s
-  return { id: s.id, weight: s.left.weight ?? '', reps: s.left.reps ?? '', rir: s.left.rir ?? '', duration: '', distance: '' }
+  return { id: s.id, weight: s.left.weight ?? '', reps: s.left.reps ?? '', rir: s.left.rir ?? '', duration: '', distance: '', ...keep }
 }
 
 // `kind` is 'strength' (weight/reps/RIR) or 'cardio' (duration/distance) — it

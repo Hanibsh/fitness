@@ -110,6 +110,16 @@ function isWorkingSet(set, kind) {
   return Number(set.reps) > 0
 }
 
+// Passively timestamp a set the moment it's first logged (positive reps or, for
+// cardio, duration), so rest between sets can be derived automatically. Only
+// stamps once; the explicit "done" tap refreshes it. Returns a patch to merge,
+// or null when nothing changes.
+function restStamp(set, field, value) {
+  if (field !== 'reps' && field !== 'duration') return null
+  if (value !== '' && Number(value) > 0 && !set.completedAt) return { completedAt: Date.now() }
+  return null
+}
+
 // Drafts saved before laterality existed have no `laterality` on their
 // exercises, so they'd fall back to "both" and wrongly show the toggle (e.g.
 // a unilateral toggle on Bench Press). Backfill it from the DB on load and
@@ -371,7 +381,7 @@ export default function WorkoutTracker() {
       ...d,
       exercises: d.exercises.map((e) =>
         e.id === exId
-          ? { ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, [side]: { ...s[side], [field]: value } } : s)) }
+          ? { ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, [side]: { ...s[side], [field]: value }, ...restStamp(s, field, value) } : s)) }
           : e
       ),
     }))
@@ -504,7 +514,7 @@ export default function WorkoutTracker() {
       ...d,
       exercises: d.exercises.map((e) =>
         e.id === exId
-          ? { ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, [field]: value } : s)) }
+          ? { ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, [field]: value, ...restStamp(s, field, value) } : s)) }
           : e
       ),
     }))
