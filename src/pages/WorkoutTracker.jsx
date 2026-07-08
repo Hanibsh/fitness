@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Pencil } from 'lucide-react'
+import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Pencil, Timer } from 'lucide-react'
 import {
   getDraft,
   saveDraft,
@@ -32,7 +32,7 @@ import {
 } from '../lib/workoutStore'
 import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts, fetchRemoteProgram, upsertRemoteProgram } from '../lib/workoutRemote'
 import { todaysDay, advanceProgram, draftFromDay } from '../lib/program'
-import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels } from '../lib/workoutStats'
+import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels, sessionAvgRest, formatRest } from '../lib/workoutStats'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
 import { useAuth } from '../lib/auth'
@@ -184,6 +184,8 @@ export default function WorkoutTracker() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [guestShare, setGuestShare] = useState(() => getGuestShare())
+  const [restAnchor, setRestAnchor] = useState(null) // manual "rest starts now" tap
+  const [nowTick, setNowTick] = useState(() => Date.now()) // drives the live rest timer
   const [hp, setHp] = useState('') // honeypot — real users leave this empty
   const [loadError, setLoadError] = useState('')
   const firstRender = useRef(true)
@@ -208,6 +210,31 @@ export default function WorkoutTracker() {
   // already editing or mid-way through a started program session.
   const todayDay = program ? todaysDay(program) : null
   const showTodayCard = !!todayDay && !isEditing && !draft.programId
+
+  // Live rest timer: time since the most recent logged set (or a manual "rest
+  // starts now" tap), whichever is later. Only while logging a live session.
+  const lastSetStamp = useMemo(() => {
+    let m = 0
+    for (const ex of draft.exercises) for (const s of ex.sets) if (s.completedAt > m) m = s.completedAt
+    return m || null
+  }, [draft])
+  const restAnchorTs = Math.max(restAnchor || 0, lastSetStamp || 0) || null
+  const restElapsedSec = restAnchorTs ? Math.floor((nowTick - restAnchorTs) / 1000) : null
+  const showRest = !isEditing && isToday && restElapsedSec != null && restElapsedSec >= 0 && restElapsedSec <= 30 * 60
+
+  // Tick the rest timer once a second whenever a live session has an anchor
+  // (keeps `nowTick` fresh so `restElapsedSec`/`showRest` are correct). Stops
+  // after 30 min, when rest is no longer meaningful.
+  useEffect(() => {
+    if (!restAnchorTs || isEditing || !isToday) return
+    setNowTick(Date.now())
+    const id = setInterval(() => {
+      const t = Date.now()
+      setNowTick(t)
+      if ((t - restAnchorTs) / 1000 > 30 * 60) clearInterval(id)
+    }, 1000)
+    return () => clearInterval(id)
+  }, [restAnchorTs, isEditing, isToday])
 
   // Auto-save the draft on every change (skip the very first render).
   useEffect(() => {
@@ -460,12 +487,19 @@ export default function WorkoutTracker() {
   }
 
   function addSet(exId) {
+    const now = Date.now()
     setDraft((d) => ({
       ...d,
       exercises: d.exercises.map((e) => {
         if (e.id !== exId) return e
         const opts = e.bodyweight ? { bodyweight: true, bw: Number(d.bodyweight) || 0 } : { unilateral: e.unilateral }
-        return { ...e, sets: [...e.sets, createSet(e.sets[e.sets.length - 1], opts)] }
+        // Moving on to a new set means the current last set is done — stamp it
+        // (if logged but not yet stamped) so rest is captured even when you keep
+        // the same reps and never touch the inputs.
+        const sets = e.sets.map((s, i) =>
+          i === e.sets.length - 1 && !s.completedAt && isWorkingSet(s, e.kind) ? { ...s, completedAt: now } : s
+        )
+        return { ...e, sets: [...sets, createSet(sets[sets.length - 1], opts)] }
       }),
     }))
   }
@@ -1368,6 +1402,19 @@ export default function WorkoutTracker() {
               </div>
             </div>
 
+            {showRest && (
+              <button
+                type="button"
+                onClick={() => setRestAnchor(Date.now())}
+                title="Tap to restart the rest timer"
+                className="w-full flex items-center justify-center gap-2 bg-cream border border-border text-text-secondary py-2 mb-6 cursor-pointer hover:border-border-hover transition-colors"
+              >
+                <Timer className="w-3.5 h-3.5 text-text-light" />
+                <span className="text-[11px] uppercase tracking-wider text-text-light">Rest</span>
+                <span className="font-heading text-[15px] font-medium text-text-primary tabular-nums">{formatRest(restElapsedSec)}</span>
+              </button>
+            )}
+
             <div className="mb-6">
               <SessionNamePicker
                 value={draft.name || ''}
@@ -1552,6 +1599,7 @@ export default function WorkoutTracker() {
                 {sortedHistory.map((session) => {
                   const stats = sessionStats(session)
                   const isOpen = openSession === session.id
+                  const avgRest = formatRest(sessionAvgRest(session))
                   const sessionGroups = supersetLabels(session.exercises.filter((e) => e.kind !== 'cardio'))
                   return (
                     <div key={session.id} id={`session-${session.id}`} className="bg-white border border-border scroll-mt-28">
@@ -1571,6 +1619,7 @@ export default function WorkoutTracker() {
                           <p className="text-[12px] text-text-muted mt-0.5">
                             {stats.exercises} exercise{stats.exercises !== 1 ? 's' : ''} · {stats.sets} set{stats.sets !== 1 ? 's' : ''}
                             {stats.volume > 0 && ` · ${stats.volume.toLocaleString()} ${session.unit || 'kg'} volume`}
+                            {avgRest && ` · ${avgRest} avg rest`}
                           </p>
                         </div>
                         <ChevronDown className={`w-4 h-4 text-text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
