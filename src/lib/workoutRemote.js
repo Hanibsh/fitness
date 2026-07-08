@@ -98,6 +98,36 @@ export async function updateRemoteSession(userId, session) {
   return session
 }
 
+// ---- Training program ------------------------------------------------------
+// One active program per user, stored as a jsonb blob in the `programs` table
+// (one row per user, keyed by user_id). Upsert like profiles. If the table
+// doesn't exist yet (migration not run), reads return null and saves no-op so
+// the app degrades gracefully.
+function missingProgramsTable(error) {
+  if (!error) return false
+  return error.code === '42P01' || (typeof error.message === 'string' && /relation .*programs.* does not exist/i.test(error.message))
+}
+
+export async function fetchRemoteProgram(userId) {
+  const { data, error } = await supabase.from('programs').select('data').eq('user_id', userId).maybeSingle()
+  if (error) {
+    if (error.code === 'PGRST116' || missingProgramsTable(error)) return null // no row / no table yet
+    throw error
+  }
+  return data?.data || null
+}
+
+export async function upsertRemoteProgram(userId, program) {
+  const { error } = await supabase.from('programs').upsert({ user_id: userId, data: program, updated_at: new Date().toISOString() })
+  if (error && !missingProgramsTable(error)) throw error
+  return program
+}
+
+export async function deleteRemoteProgram(userId) {
+  const { error } = await supabase.from('programs').delete().eq('user_id', userId)
+  if (error && !missingProgramsTable(error)) throw error
+}
+
 // ---- Bodyweight log --------------------------------------------------------
 // Mirrors the localStorage bodyweight functions but talks to the
 // `bodyweight_log` table. RLS keeps each user to their own rows.

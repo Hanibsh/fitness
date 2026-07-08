@@ -180,6 +180,28 @@ export function newGoalId() {
   return newId()
 }
 
+// ---- Training program (the active routine) --------------------------------
+// One active program per device/account, stored as a single JSON blob (same
+// pattern as goals). The rotating-schedule logic lives in program.js.
+const PROGRAM_KEY = 'leon_program'
+
+export function getProgram() {
+  return read(PROGRAM_KEY, null)
+}
+
+export function saveProgram(program) {
+  write(PROGRAM_KEY, program)
+  return program
+}
+
+export function clearProgram() {
+  try {
+    localStorage.removeItem(PROGRAM_KEY)
+  } catch {
+    // ignore
+  }
+}
+
 // ---- Unit preference (kg / lbs) -------------------------------------------
 
 export function getUnit() {
