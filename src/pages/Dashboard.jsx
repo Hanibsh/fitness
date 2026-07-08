@@ -14,10 +14,11 @@ import BlockModal from '../components/BlockModal'
 import { saveProfile } from '../lib/profile'
 import { loggedExerciseNames } from '../lib/workoutStats'
 import {
-  heroSummary, monthStats, lifetimeStats, weeklyMuscleSets, personalRecords, recentPRs,
+  heroSummary, monthStats, lifetimeStats, personalRecords, recentPRs,
   splitDistribution, muscleDistribution, recentActivity, thisDayInHistory, formatDuration,
   exerciseBests, blockSummary,
 } from '../lib/dashboard'
+import { effectiveWeeklyVolume } from '../lib/engine'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import ExerciseProgress from '../components/ExerciseProgress'
 import BodyweightTracker from '../components/BodyweightTracker'
@@ -170,6 +171,7 @@ export default function Dashboard() {
   const [goals, setGoals] = useState(() => getGoals())
   const [editingGoals, setEditingGoals] = useState(false)
   const [blockModal, setBlockModal] = useState(null) // { block } | null; block null = new
+  const [expandedMuscle, setExpandedMuscle] = useState(null) // weekly-volume drill-down
   const [editingNick, setEditingNick] = useState(false)
 
   useEffect(() => {
@@ -224,7 +226,7 @@ export default function Dashboard() {
       hero: heroSummary(sessions, unit),
       month: monthStats(sessions, now.getFullYear(), now.getMonth(), unit),
       lifetime: lifetimeStats(sessions, unit),
-      muscle: weeklyMuscleSets(sessions),
+      volume: effectiveWeeklyVolume(sessions),
       records: personalRecords(sessions, unit),
       prs: recentPRs(sessions, unit, 6),
       split: splitDistribution(sessions),
@@ -309,7 +311,7 @@ export default function Dashboard() {
     )
   }
 
-  const { hero, month, lifetime, muscle, records, prs, split, muscleDist, activity, throwback } = stats
+  const { hero, month, lifetime, volume, records, prs, split, muscleDist, activity, throwback } = stats
   // "Up next" comes from the active program when there is one (the real next day
   // in the rotation), falling back to the name-based heuristic otherwise.
   const nextDay = todaysDay(program)
@@ -323,7 +325,6 @@ export default function Dashboard() {
   const block = blockSummary(sessions, active, unit)
   const pastBlocks = sortedBlocks(blocks).filter((b) => b.id !== active?.id)
   const maxBlockMuscle = block ? Math.max(1, ...block.perMuscle.map((p) => p.sets)) : 1
-  const maxMuscle = Math.max(1, ...muscle.map((m) => m.sets))
   const maxSplit = Math.max(1, ...split.map((s) => s.value))
   const maxMuscleDist = Math.max(1, ...muscleDist.map((m) => m.value))
   const trainingTime = formatDuration(month.durationMs)
@@ -443,17 +444,58 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* SECTION 5 — WEEKLY MUSCLE VOLUME */}
+        {/* SECTION 5 — WEEKLY MUSCLE VOLUME (effective sets) */}
         <Card>
           <SectionHeading icon={Activity}>Weekly muscle volume</SectionHeading>
-          <p className="text-[12px] text-text-muted mb-4 -mt-2">Hard sets per muscle group over the last 7 days.</p>
-          {muscle.every((m) => m.sets === 0) ? (
+          <p className="text-[12px] text-text-muted mb-4 -mt-2">
+            Effective sets per muscle over the last 7 days — weighted by how directly each set trains the muscle and how close to failure. Tap a muscle for the breakdown.
+          </p>
+          {volume.every((v) => v.sets === 0) ? (
             <p className="text-[13px] text-text-muted">No sets logged in the last 7 days.</p>
           ) : (
-            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
-              {muscle.map((m) => (
-                <Bar key={m.muscle} label={m.muscle} value={m.sets} max={maxMuscle} suffix=" sets" />
-              ))}
+            <div className="space-y-2">
+              {volume.map((v) => {
+                const barColor = v.status === 'over' ? 'bg-red-500' : v.status === 'in' ? 'bg-green-500' : 'bg-amber-400'
+                const pct = Math.min(100, Math.round((v.sets / v.landmarks.high) * 100))
+                const expandable = v.atoms.length > 0
+                const open = expandedMuscle === v.muscle
+                return (
+                  <div key={v.muscle}>
+                    <button
+                      onClick={() => expandable && setExpandedMuscle(open ? null : v.muscle)}
+                      className={`w-full text-left bg-transparent border-none p-0 ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
+                    >
+                      <div className="flex justify-between items-center text-[12px] mb-1">
+                        <span className="text-text-secondary flex items-center gap-1">
+                          {v.muscle}
+                          {expandable && <ChevronRight className={`w-3 h-3 text-text-light transition-transform ${open ? 'rotate-90' : ''}`} />}
+                        </span>
+                        <span className="text-text-muted tabular-nums">
+                          {v.sets}<span className="text-text-light"> / {v.landmarks.low}–{v.landmarks.high}</span>
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-cream border border-border overflow-hidden">
+                        <div className={`h-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </button>
+                    {open && (
+                      <div className="mt-1.5 ml-3 pl-3 border-l border-border space-y-1.5">
+                        {v.atoms.map((a) => (
+                          <div key={a.atom} className="flex justify-between items-center text-[11px]">
+                            <span className="text-text-muted">{a.atom}</span>
+                            <span className="text-text-light tabular-nums">{a.sets} sets</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+              <p className="text-[11px] text-text-light pt-2">
+                <span className="inline-block w-2 h-2 bg-amber-400 align-middle mr-1" /> below range ·
+                <span className="inline-block w-2 h-2 bg-green-500 align-middle mx-1" /> productive ·
+                <span className="inline-block w-2 h-2 bg-red-500 align-middle mx-1" /> over
+              </p>
             </div>
           )}
         </Card>
