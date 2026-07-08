@@ -284,12 +284,15 @@ export function lifetimeStats(sessions, unit = 'kg') {
   }
 }
 
-// ---- Weekly muscle volume (hard sets per muscle, last 7 days) --------------
-export function weeklyMuscleSets(sessions, days = 7) {
-  const cutoff = startOfDay(Date.now()) - (days - 1) * DAY
+// ---- Weekly muscle volume (hard sets per muscle) ---------------------------
+// Count working sets per muscle group over an inclusive day window.
+function muscleSetsInRange(sessions, fromTs, toTs) {
+  const from = startOfDay(fromTs)
+  const to = startOfDay(toTs)
   const counts = Object.fromEntries(MUSCLE_GROUPS.map((m) => [m, 0]))
   for (const s of sessions) {
-    if (startOfDay(s.date) < cutoff) continue
+    const d = startOfDay(s.date)
+    if (d < from || d > to) continue
     for (const ex of s.exercises) {
       if (isCardio(ex)) continue
       const muscle = muscleForExercise(ex.name)
@@ -297,7 +300,39 @@ export function weeklyMuscleSets(sessions, days = 7) {
       counts[muscle] += workingSets(ex).length
     }
   }
+  return counts
+}
+
+export function weeklyMuscleSets(sessions, days = 7) {
+  const counts = muscleSetsInRange(sessions, Date.now() - (days - 1) * DAY, Date.now())
   return MUSCLE_GROUPS.map((m) => ({ muscle: m, sets: counts[m] }))
+}
+
+// ---- Specialization-block summary ------------------------------------------
+// Per-muscle volume over a block's window, with the focus muscles flagged, plus
+// how much of the total volume landed on them. Powers the dashboard's block card.
+export function blockSummary(sessions, block, unit = 'kg') {
+  if (!block) return null
+  const to = block.endDate != null ? Math.min(block.endDate, Date.now()) : Date.now()
+  const inBlock = sessions.filter((s) => {
+    const d = startOfDay(s.date)
+    return d >= startOfDay(block.startDate) && d <= startOfDay(to)
+  })
+  const counts = muscleSetsInRange(sessions, block.startDate, to)
+  const weeks = Math.max(1, (startOfDay(to) - startOfDay(block.startDate)) / (7 * DAY) + 1 / 7)
+  const focus = new Set(block.focusMuscles || [])
+  const perMuscle = MUSCLE_GROUPS
+    .map((m) => ({ muscle: m, sets: counts[m], weeklyAvg: Math.round((counts[m] / weeks) * 10) / 10, focus: focus.has(m) }))
+    .sort((a, b) => Number(b.focus) - Number(a.focus) || b.sets - a.sets)
+  const focusSets = perMuscle.filter((p) => p.focus).reduce((a, p) => a + p.sets, 0)
+  const totalSets = perMuscle.reduce((a, p) => a + p.sets, 0)
+  return {
+    sessions: inBlock.length,
+    volume: aggregate(inBlock, unit).volume,
+    focusSets,
+    totalSets,
+    perMuscle,
+  }
 }
 
 // ---- Personal records ------------------------------------------------------

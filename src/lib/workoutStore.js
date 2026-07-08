@@ -202,6 +202,21 @@ export function clearProgram() {
   }
 }
 
+// ---- Specialization blocks -------------------------------------------------
+// A list of muscle-group specialization phases, stored as one JSON array (the
+// block logic lives in blocks.js; the per-muscle summary in dashboard.js).
+const BLOCKS_KEY = 'leon_blocks'
+
+export function getBlocks() {
+  const b = read(BLOCKS_KEY, [])
+  return Array.isArray(b) ? b : []
+}
+
+export function saveBlocks(blocks) {
+  write(BLOCKS_KEY, blocks)
+  return blocks
+}
+
 // ---- Unit preference (kg / lbs) -------------------------------------------
 
 export function getUnit() {

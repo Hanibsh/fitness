@@ -128,6 +128,27 @@ create policy "Users can delete their own program"
   on public.programs for delete using (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------------------
+-- 2d) BLOCKS — each user's specialization blocks (muscle-group focus phases).
+--     One row per user; the whole list is a single JSON array. Upsert by user_id.
+-- ---------------------------------------------------------------------------
+create table if not exists public.blocks (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '[]'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.blocks enable row level security;
+
+create policy "Users can view their own blocks"
+  on public.blocks for select using (auth.uid() = user_id);
+create policy "Users can insert their own blocks"
+  on public.blocks for insert with check (auth.uid() = user_id);
+create policy "Users can update their own blocks"
+  on public.blocks for update using (auth.uid() = user_id);
+create policy "Users can delete their own blocks"
+  on public.blocks for delete using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
 -- 3) SHARED_LIFTS — anonymized data for analysis. NO user identity is stored.
 --    Signed-in users may contribute (insert), but the app can't read it back
 --    (no select policy) — only the Supabase dashboard can, for your analysis.

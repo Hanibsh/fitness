@@ -128,6 +128,29 @@ export async function deleteRemoteProgram(userId) {
   if (error && !missingProgramsTable(error)) throw error
 }
 
+// ---- Specialization blocks -------------------------------------------------
+// One row per user, the whole list as a jsonb array. Degrades gracefully if the
+// `blocks` table migration hasn't been run (reads null, saves no-op).
+function missingBlocksTable(error) {
+  if (!error) return false
+  return error.code === '42P01' || (typeof error.message === 'string' && /relation .*blocks.* does not exist/i.test(error.message))
+}
+
+export async function fetchRemoteBlocks(userId) {
+  const { data, error } = await supabase.from('blocks').select('data').eq('user_id', userId).maybeSingle()
+  if (error) {
+    if (error.code === 'PGRST116' || missingBlocksTable(error)) return null
+    throw error
+  }
+  return Array.isArray(data?.data) ? data.data : null
+}
+
+export async function upsertRemoteBlocks(userId, blocks) {
+  const { error } = await supabase.from('blocks').upsert({ user_id: userId, data: blocks, updated_at: new Date().toISOString() })
+  if (error && !missingBlocksTable(error)) throw error
+  return blocks
+}
+
 // ---- Bodyweight log --------------------------------------------------------
 // Mirrors the localStorage bodyweight functions but talks to the
 // `bodyweight_log` table. RLS keeps each user to their own rows.
