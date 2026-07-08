@@ -27,8 +27,11 @@ import {
   getExerciseTarget,
   saveExerciseTarget,
   getBodyweightLog,
+  getProgram,
+  saveProgram,
 } from '../lib/workoutStore'
-import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts } from '../lib/workoutRemote'
+import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts, fetchRemoteProgram, upsertRemoteProgram } from '../lib/workoutRemote'
+import { todaysDay, advanceProgram, draftFromDay } from '../lib/program'
 import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels } from '../lib/workoutStats'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
@@ -156,6 +159,7 @@ export default function WorkoutTracker() {
   const { user } = useAuth()
   const [draft, setDraft] = useState(() => migrateDraft(getDraft()) || emptyDraft())
   const [history, setHistory] = useState([])
+  const [program, setProgram] = useState(null)
   const [loadingHistory, setLoadingHistory] = useState(true)
   const [importable, setImportable] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -190,6 +194,10 @@ export default function WorkoutTracker() {
   const draftDate = draft.date || Date.now()
   const isToday = isSameDay(draftDate, Date.now())
   const isEditing = !!draft.editingId
+  // The program's next day up — shown as a "Today's session" card unless we're
+  // already editing or mid-way through a started program session.
+  const todayDay = program ? todaysDay(program) : null
+  const showTodayCard = !!todayDay && !isEditing && !draft.programId
 
   // Auto-save the draft on every change (skip the very first render).
   useEffect(() => {
@@ -210,20 +218,23 @@ export default function WorkoutTracker() {
       setLoadError('')
       if (user) {
         try {
-          const [remote, prof] = await Promise.all([fetchRemoteHistory(user.id), fetchProfile(user.id)])
+          const [remote, prof, prog] = await Promise.all([fetchRemoteHistory(user.id), fetchProfile(user.id), fetchRemoteProgram(user.id)])
           if (cancelled) return
           setHistory(remote)
           setProfile(prof)
+          setProgram(prog || getProgram())
           const local = getHistory()
           setImportable(local.length > 0 ? local : null)
         } catch {
           if (!cancelled) {
             setHistory([])
+            setProgram(getProgram())
             setLoadError("Couldn't load your workouts — check your connection and refresh.")
           }
         }
       } else {
         setHistory(getHistory())
+        setProgram(getProgram())
         setImportable(null)
         setProfile(null)
       }
@@ -539,13 +550,51 @@ export default function WorkoutTracker() {
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 40)
   }
 
-  // Leave edit mode, restoring any stashed in-progress draft (else start fresh).
+  // Leave edit / program-session mode, restoring any stashed in-progress draft
+  // (else start fresh).
   function exitEditMode() {
     const stash = getStashedDraft()
     clearStashedDraft()
     clearDraft()
     setDraft(stash || emptyDraft())
     setEditingDate(false)
+  }
+
+  // Persist the program: locally always, remotely (best-effort) when logged in.
+  function persistProgram(p) {
+    saveProgram(p)
+    if (user) upsertRemoteProgram(user.id, p).catch(() => {})
+  }
+
+  // Start today's planned session: fill the draft from the program day (name +
+  // exercises + targets) and tag it so finishing advances the rotation. Any
+  // in-progress non-program draft is stashed (like edit mode) and restored later.
+  function startTodaysSession(day) {
+    setDraft((cur) => {
+      if (cur.exercises.length > 0 && !cur.editingId && !cur.programId) stashDraft(cur)
+      const bodyweight = prefillBodyweight()
+      return {
+        startedAt: Date.now(),
+        date: Date.now(),
+        name: day.name || '',
+        exercises: draftFromDay(day, { bodyweight }),
+        bodyweight,
+        programId: program.id,
+        programDayId: day.id,
+      }
+    })
+    setEditingDate(false)
+    setSaveError('')
+    lastFinishedRef.current = null
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 40)
+  }
+
+  // Rest day: advance past it without logging anything.
+  function markRestDone(day) {
+    if (!program) return
+    const advanced = advanceProgram(program, day.id)
+    setProgram(advanced)
+    persistProgram(advanced)
   }
 
   async function finish() {
@@ -620,8 +669,18 @@ export default function WorkoutTracker() {
       for (const ex of session.exercises) {
         if (ex.kind !== 'cardio' && ex.repRange) saveExerciseTarget(ex.name, ex.repRange)
       }
+      // If this session was started from the program, advance the rotation.
+      if (draft.programId && program && draft.programId === program.id && draft.programDayId) {
+        const advanced = advanceProgram(program, draft.programDayId)
+        setProgram(advanced)
+        persistProgram(advanced)
+      }
+      // Restore any stashed in-progress draft (set aside when a planned session
+      // was started over it), else start fresh. Harmless for plain saves.
+      const stash = getStashedDraft()
+      clearStashedDraft()
       clearDraft()
-      setDraft(emptyDraft())
+      setDraft(stash || emptyDraft())
       setEditingDate(false)
     } catch {
       // Allow retrying this same draft after a failed save.
@@ -633,7 +692,8 @@ export default function WorkoutTracker() {
   }
 
   function discard() {
-    if (draft.editingId) return exitEditMode()
+    // Editing or a started program session: restore any stashed draft.
+    if (draft.editingId || draft.programId) return exitEditMode()
     clearDraft()
     setDraft(emptyDraft())
     setEditingDate(false)
@@ -1191,12 +1251,66 @@ export default function WorkoutTracker() {
               : 'Track what you trained, set by set. Everything saves automatically in your browser — no account needed.'}
           </p>
 
+          {/* Today's planned session (from the active program) */}
+          {showTodayCard && (
+            <div className="bg-text-primary text-cream p-6 md:p-7 mb-6">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <CalendarDays className="w-4 h-4 text-cream/70 shrink-0" />
+                  <p className="text-[11px] uppercase tracking-wider text-cream/60">Today’s session</p>
+                </div>
+                <Link to="/routine" className="text-[11px] text-cream/70 underline hover:text-cream no-underline shrink-0">Edit program</Link>
+              </div>
+
+              {todayDay.kind === 'rest' ? (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <p className="font-heading text-xl font-medium">Rest day</p>
+                    <p className="text-[12px] text-cream/60 mt-0.5">Recovery in your rotation — log freely below, or mark it done to move on.</p>
+                  </div>
+                  <button
+                    onClick={() => markRestDone(todayDay)}
+                    className="shrink-0 inline-flex items-center justify-center gap-2 bg-cream text-text-primary font-medium px-5 py-2.5 border-none cursor-pointer text-[13px] hover:bg-white transition-colors"
+                  >
+                    Mark rest done
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="font-heading text-2xl font-medium mb-1 break-words">{todayDay.name}</p>
+                  {todayDay.exercises.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 mt-3 mb-5">
+                      {todayDay.exercises.map((ex) => (
+                        <span key={ex.id} className="text-[12px] text-cream/90 bg-cream/10 border border-cream/20 px-2.5 py-1">
+                          {ex.name} <span className="text-cream/50">· {ex.sets}×</span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[12px] text-cream/60 mt-1 mb-5">No exercises planned yet — add some in the routine builder.</p>
+                  )}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <button
+                      onClick={() => startTodaysSession(todayDay)}
+                      className="inline-flex items-center justify-center gap-2 bg-cream text-text-primary font-medium px-5 py-2.5 border-none cursor-pointer text-[14px] hover:bg-white transition-colors"
+                    >
+                      <Check className="w-4 h-4" /> Start session
+                    </button>
+                    {draft.exercises.length > 0 && (
+                      <span className="text-[11px] text-cream/60">Your current entries will be set aside and restored after.</span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Current session */}
           <div className="bg-white border border-border p-7 md:p-9">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-[11px] uppercase tracking-wider text-text-light mb-1">
-                  {isEditing ? 'Editing session' : isToday ? "Today's session" : 'Past session'}
+                  {isEditing ? 'Editing session' : draft.programId ? 'Today’s session' : isToday ? "Today's session" : 'Past session'}
                 </p>
                 {editingDate ? (
                   <input
