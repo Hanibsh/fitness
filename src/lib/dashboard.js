@@ -13,13 +13,14 @@ const DAY = 86400000
 // Infer the primary muscle of an exercise from the movement library's keywords
 // (falling back to its category). Custom exercises we don't recognise return
 // null and are simply left out of muscle breakdowns.
-export const MUSCLE_GROUPS = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Abs']
+export const MUSCLE_GROUPS = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Forearms', 'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Abs']
 
 // Order matters: specific muscles are checked before broad ones so e.g. a
 // Romanian deadlift (hamstrings, glutes) resolves to Hamstrings, and a squat
 // (quads, glutes) to Quads.
 const MUSCLE_MATCHERS = [
   ['Triceps', ['triceps', 'tricep']],
+  ['Forearms', ['forearm', 'brachioradialis', 'wrist flexor', 'wrist extensor', 'grip']],
   ['Biceps', ['biceps', 'bicep', 'brachialis']],
   ['Hamstrings', ['hamstrings', 'hamstring']],
   ['Calves', ['calves', 'calf', 'soleus']],
@@ -31,7 +32,7 @@ const MUSCLE_MATCHERS = [
   ['Back', ['lats', 'lat', 'traps', 'trap', 'back']],
 ]
 
-const CATEGORY_MUSCLE = { Chest: 'Chest', Back: 'Back', Shoulders: 'Shoulders', Arms: 'Biceps', Legs: 'Quads', Core: 'Abs' }
+const CATEGORY_MUSCLE = { Chest: 'Chest', Back: 'Back', Shoulders: 'Shoulders', Arms: 'Biceps', Forearms: 'Forearms', Legs: 'Quads', Core: 'Abs' }
 
 // For custom exercises we don't have in the library, guess the muscle from
 // common exercise-name patterns. Ordered so more specific movements win — e.g.
@@ -42,6 +43,7 @@ const NAME_PATTERNS = [
   ['Calves', ['calf raise', 'calf', 'soleus']],
   ['Quads', ['squat', 'lunge', 'leg extension', 'leg press', 'step up', 'step-up', 'hack']],
   ['Triceps', ['pushdown', 'pressdown', 'tricep', 'skull', 'overhead extension', 'kickback', 'close-grip', 'close grip']],
+  ['Forearms', ['wrist curl', 'forearm curl', 'forearm', 'reverse curl', 'grip', 'farmer']],
   ['Biceps', ['curl']],
   ['Back', ['row', 'pulldown', 'pull-up', 'pullup', 'pull up', 'chin', 'deadlift', 'shrug', 'pullover', 'lat ']],
   ['Chest', ['bench', 'chest', 'fly', 'flye', 'push-up', 'pushup', 'press up', 'pec', 'dip']],
@@ -55,17 +57,18 @@ const MOVEMENT_BY_NAME = new Map(MOVEMENTS.map((m) => [m.name.toLowerCase(), m])
 // muscle names onto the dashboard's broader groups and take each exercise's
 // dominant (highest-contribution) muscle, so a DB movement resolves from real
 // data rather than name guessing. (Muscles with no dashboard group — e.g.
-// abductors, forearms — are skipped; those exercises fall through below.)
+// abductors — are skipped; those exercises fall through below.)
 const DB_MUSCLE_TO_GROUP = {
   Triceps: 'Triceps',
-  Biceps: 'Biceps', Brachialis: 'Biceps', Brachioradialis: 'Biceps',
+  Biceps: 'Biceps', Brachialis: 'Biceps',
+  Brachioradialis: 'Forearms', 'Wrist Flexors': 'Forearms', 'Wrist Extensors': 'Forearms',
   Quadriceps: 'Quads',
   Hamstrings: 'Hamstrings',
   'Glute Max': 'Glutes',
   Gastrocnemius: 'Calves', Soleus: 'Calves',
   'Front Delts': 'Shoulders', 'Side Delts': 'Shoulders', 'Rear Delts': 'Shoulders', 'Rotator Cuff': 'Shoulders',
   'Upper Chest': 'Chest', 'Middle Chest': 'Chest', 'Lower Chest': 'Chest',
-  Lats: 'Back', 'Mid Back': 'Back', Rhomboids: 'Back', 'Upper Traps': 'Back', 'Lower Traps': 'Back', 'Spinal Erectors': 'Back',
+  Lats: 'Back', 'Mid Back': 'Back', Rhomboids: 'Back', 'Upper Traps': 'Back', 'Mid Traps': 'Back', 'Lower Traps': 'Back', 'Spinal Erectors': 'Back',
   'Rectus Abdominis': 'Abs', 'Transverse Abdominis': 'Abs', Obliques: 'Abs', 'Hip Flexors': 'Abs',
 }
 

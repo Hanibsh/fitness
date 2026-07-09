@@ -52,13 +52,26 @@ don't want to touch the raw CSV for, use `data/exercise-overrides.mjs` (keyed by
 | Column | Meaning / accepted values |
 |---|---|
 | Exercise Name | Free text. Becomes the `id` (slugified). |
-| Home Category | `Shoulders`, `Back`, `Chest`, `Arms`, `Core`, `Legs`, `Traps` |
+| Home Category | `Shoulders`, `Back`, `Chest`, `Arms`, `Forearms`, `Core`, `Legs`, `Traps` — free text, but these are the ones the app recognizes for search/browse and specialization blocks |
 | Exercise Type | `Compound`, `Isolation`, `Hybrid` |
 | Laterality | `Bilateral`, `Unilateral`, `Can be both` |
 | Primary Muscles (1.00) | Muscle name(s), comma-separated. Weight ×1.0 |
 | Secondary Muscles (0.50) | …weight ×0.5 |
 | Tertiary Muscles (0.25) | …weight ×0.25 |
 | **Quaternary Muscles (0.125)** | …weight ×0.125 *(optional, leave blank if unused)* |
+| Fatigue Score | Integer `1`–`5` |
+| Estimated Recovery Window | e.g. `48-72 hours` |
+| Progressive Overload Potential | `Low`, `Moderate`, `High`, `Very High` |
+| Stability | `Highly unstable`, `Unstable`, `Moderate`, `Stable`, `Very stable` |
+| Hypertrophy Potential | `Low`, `Moderate`, `High`, `Excellent` |
+| Stimulus-to-Fatigue Ratio (SFR) | `Poor`, `Average`, `Good`, `Excellent` |
+| Stretch-Mediated Hypertrophy | `No`, `Partial`, `Yes` |
+| Resistance Profile | `Balanced`, `Shortened bias`, `Lengthened bias` |
+| Stability Requirement | Actually **equipment**: `Free weight`, `Machine`, `Cable`, `Bodyweight` |
+| Axial Loading | `No`, `Yes` |
+| Skill Requirement | `Low`, `Moderate`, `High`, `Very High` |
+| Recommended Rest Time | e.g. `3.5-5 minutes` (stored as seconds) |
+| Notes | Free text (optional) |
 
 ### Need a weight other than 1 / 0.5 / 0.25 / 0.125?
 
@@ -74,19 +87,6 @@ Here `Front Delts` still gets the column's normal weight, but `Side Delts` gets
 exactly `0.75` instead. Works in any of the 4 muscle columns, for any number
 in the cell (0 < weight ≤ 1). Leave the colon off (as you always have) and
 nothing changes.
-| Fatigue Score | Integer `1`–`5` |
-| Estimated Recovery Window | e.g. `48-72 hours` |
-| Progressive Overload Potential | `Low`, `Moderate`, `High`, `Very High` |
-| Stability | `Highly unstable`, `Unstable`, `Moderate`, `Stable`, `Very stable` |
-| Hypertrophy Potential | `Low`, `Moderate`, `High`, `Excellent` |
-| Stimulus-to-Fatigue Ratio (SFR) | `Poor`, `Average`, `Good`, `Excellent` |
-| Stretch-Mediated Hypertrophy | `No`, `Partial`, `Yes` |
-| Resistance Profile | `Balanced`, `Shortened bias`, `Lengthened bias` |
-| Stability Requirement | Actually **equipment**: `Free weight`, `Machine`, `Cable`, `Bodyweight` |
-| Axial Loading | `No`, `Yes` |
-| Skill Requirement | `Low`, `Moderate`, `High`, `Very High` |
-| Recommended Rest Time | e.g. `3.5-5 minutes` (stored as seconds) |
-| Notes | Free text (optional) |
 
 ## Muscle names (must match exactly)
 
@@ -95,8 +95,9 @@ Muscle cells must use these canonical names (the taxonomy lives in
 
 - **Shoulders:** Front Delts · Side Delts · Rear Delts · Rotator Cuff
 - **Chest:** Upper Chest · Middle Chest · Lower Chest
-- **Back:** Lats · Mid Back · Rhomboids · Upper Traps · Lower Traps · Spinal Erectors
-- **Arms:** Biceps · Brachialis · Brachioradialis · Triceps · Wrist Flexors · Wrist Extensors
+- **Back:** Lats · Mid Back · Rhomboids · Upper Traps · Mid Traps · Lower Traps · Spinal Erectors
+- **Arms:** Biceps · Brachialis · Triceps
+- **Forearms:** Brachioradialis · Wrist Flexors · Wrist Extensors
 - **Core:** Rectus Abdominis · Obliques · Transverse Abdominis · Hip Flexors
 - **Legs:** Quadriceps · Glute Max · Hamstrings · Adductors · Abductors · Gastrocnemius · Soleus
 

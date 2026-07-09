@@ -214,6 +214,7 @@ const PRIORITY = new Set([
 const CATEGORY_WORDS = {
   chest: 'Chest', back: 'Back', legs: 'Legs', leg: 'Legs', arms: 'Arms', arm: 'Arms',
   shoulders: 'Shoulders', shoulder: 'Shoulders', core: 'Core', abs: 'Core', traps: 'Traps', trap: 'Traps',
+  forearms: 'Forearms', forearm: 'Forearms', grip: 'Forearms',
 }
 
 // How well an item answers the query. The key idea: matches in the exercise's
