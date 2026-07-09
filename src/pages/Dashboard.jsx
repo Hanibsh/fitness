@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Flame, Dumbbell, TrendingUp, Clock, Trophy, Target, Activity, History,
-  ChevronRight, Award, CalendarDays, Plus, Pencil, MessageCircle, ArrowRight, Crosshair,
+  ChevronRight, Award, CalendarDays, Plus, Pencil, MessageCircle, ArrowRight, Crosshair, Trash2,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
-import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks } from '../lib/workoutStore'
-import { fetchRemoteHistory, fetchRemoteProgram, fetchRemoteBlocks, upsertRemoteBlocks } from '../lib/workoutRemote'
+import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks, deleteSession } from '../lib/workoutStore'
+import { fetchRemoteHistory, fetchRemoteProgram, fetchRemoteBlocks, upsertRemoteBlocks, deleteRemoteSession } from '../lib/workoutRemote'
 import { todaysDay } from '../lib/program'
 import { activeBlock, sortedBlocks, blockWeek } from '../lib/blocks'
 import BlockModal from '../components/BlockModal'
@@ -173,6 +173,7 @@ function CoachingCTA() {
 export default function Dashboard() {
   // Nickname lives in the auth context so the navbar reflects edits instantly.
   const { user, nickname, setNickname } = useAuth()
+  const navigate = useNavigate()
   const [sessions, setSessions] = useState([])
   const [program, setProgram] = useState(null)
   const [blocks, setBlocks] = useState([])
@@ -229,6 +230,28 @@ export default function Dashboard() {
   function deleteBlock(id) {
     persistBlocks(blocks.filter((b) => b.id !== id))
     setBlockModal(null)
+  }
+
+  // Calendar day panel: jump to the logger with this session pre-loaded into
+  // the editor (WorkoutTracker reads editSessionId from navigation state).
+  function editDaySession(session) {
+    navigate('/log', { state: { editSessionId: session.id } })
+  }
+
+  // Delete a session straight from the calendar day panel — no need to
+  // navigate away first.
+  async function deleteDaySession(session) {
+    if (user) {
+      try {
+        await deleteRemoteSession(session.id)
+      } catch {
+        return
+      }
+      setSessions((prev) => prev.filter((s) => s.id !== session.id))
+    } else {
+      setSessions(deleteSession(session.id))
+    }
+    setSelectedDay((prev) => (prev ? { ...prev, sessions: prev.sessions.filter((s) => s.id !== session.id) } : prev))
   }
 
   const now = new Date()
@@ -428,11 +451,44 @@ export default function Dashboard() {
                 {selectedDay.sessions.length === 0 ? (
                   <p className="text-[12px] text-text-muted">No workout logged this day.</p>
                 ) : (
-                  <div className="space-y-1.5">
+                  <div className="space-y-2.5">
                     {selectedDay.sessions.map((s) => (
-                      <div key={s.id} className="flex items-center justify-between text-[12px]">
-                        <span className="text-text-secondary">{s.name || 'Workout'}</span>
-                        <span className="text-text-muted">{s.exercises.length} exercise{s.exercises.length !== 1 ? 's' : ''}</span>
+                      <div key={s.id} className="bg-cream border border-border p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[12px] font-medium text-text-primary break-words">{s.name || 'Workout'}</p>
+                            <p className="text-[11px] text-text-muted mt-0.5">
+                              {s.exercises.length} exercise{s.exercises.length !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => editDaySession(s)}
+                              aria-label={`Edit ${s.name || 'workout'}`}
+                              title="Edit this workout"
+                              className="inline-flex items-center gap-1 text-[11px] font-medium text-cream bg-text-primary px-2.5 py-1 border-none cursor-pointer hover:bg-accent-hover transition-colors"
+                            >
+                              <Pencil className="w-3 h-3" /> Edit
+                            </button>
+                            <button
+                              onClick={() => deleteDaySession(s)}
+                              aria-label={`Delete ${s.name || 'workout'}`}
+                              title="Delete this workout"
+                              className="text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer p-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        {s.exercises.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {s.exercises.map((ex) => (
+                              <span key={ex.id} className="text-[11px] text-text-muted bg-white border border-border px-2 py-0.5">
+                                {ex.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

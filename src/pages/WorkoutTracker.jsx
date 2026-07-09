@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Pencil, Timer } from 'lucide-react'
 import {
   getDraft,
@@ -167,6 +167,8 @@ function migrateDraft(draft) {
 
 export default function WorkoutTracker() {
   const { user } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [draft, setDraft] = useState(() => migrateDraft(getDraft()) || emptyDraft())
   const [history, setHistory] = useState([])
   const [program, setProgram] = useState(null)
@@ -280,6 +282,18 @@ export default function WorkoutTracker() {
     load()
     return () => { cancelled = true }
   }, [user])
+
+  // Arriving here via the dashboard calendar's "Edit" action: once history has
+  // loaded, load that session into the editor, then clear the navigation state
+  // so a refresh or navigating back doesn't re-trigger it.
+  useEffect(() => {
+    const editId = location.state?.editSessionId
+    if (!editId || loadingHistory) return
+    const session = history.find((s) => s.id === editId)
+    if (session) editSession(session)
+    navigate(location.pathname, { replace: true, state: {} })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state, loadingHistory, history])
 
   // History plus the in-progress session as a provisional "today" point, so
   // graphs stay live while you're logging.
