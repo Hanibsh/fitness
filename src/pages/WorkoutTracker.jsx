@@ -1439,7 +1439,7 @@ export default function WorkoutTracker() {
                 onSelect={(name, _cat, id) => addExercise(name, 'strength', id)}
                 recentNames={recentByKind.resistance}
                 excludeCategory="Cardio"
-                placeholder="Search or add a resistance exercise…"
+                placeholder="Search for a resistance exercise…"
               />
             </div>
 
@@ -1456,7 +1456,7 @@ export default function WorkoutTracker() {
                 onSelect={(name, _cat, id) => addExercise(name, 'cardio', id)}
                 recentNames={recentByKind.cardio}
                 onlyCategory="Cardio"
-                placeholder="Search or add a cardio exercise…"
+                placeholder="Search for a cardio exercise…"
               />
             </div>
 

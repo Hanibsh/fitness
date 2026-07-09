@@ -173,8 +173,12 @@ function tokenize(q) {
 }
 
 // The searchable set for a user: their previously-logged movements first
-// (most-recent first, reconciled to a DB entry when the name matches so they
-// keep their id/category), then the full pool — deduped by name.
+// (most-recent first, reconciled to a library entry so they keep their
+// id/category), then the full pool — deduped by name. Only picking from this
+// list is allowed (no free-text custom exercises — the effective-volume engine
+// can't score anything outside the library), so a recent name that doesn't
+// resolve to a real entry (an old custom exercise from before this rule, or a
+// stale name) is silently dropped rather than resurfacing as pickable.
 export function exercisePool(recentNames = []) {
   const seen = new Set()
   const pool = []
@@ -186,7 +190,7 @@ export function exercisePool(recentNames = []) {
   }
   for (const name of recentNames) {
     const known = BY_NAME.get(name.trim().toLowerCase())
-    push(known || { id: null, name: name.trim(), category: 'Recent', _hay: buildHaystack([name, 'Recent']) })
+    if (known) push(known)
   }
   for (const m of POOL) push(m)
   return pool

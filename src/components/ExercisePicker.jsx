@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Search, SearchX } from 'lucide-react'
 import { searchExercises } from '../lib/exerciseLibrary'
 
-// Searchable exercise picker: filters the movement library (plus the user's
-// own previously-logged exercises, surfaced first) as you type, and always
-// offers to add whatever you typed as a custom exercise if it's not listed.
-export default function ExercisePicker({ onSelect, recentNames = [], onlyCategory, excludeCategory, placeholder = 'Search or add an exercise…' }) {
+// Searchable exercise picker: filters the exercise library (plus the user's
+// own previously-logged exercises, surfaced first) as you type. Picking is
+// restricted to the library — no free-text custom exercises — so every logged
+// exercise has real muscle data behind it and counts toward effective volume.
+export default function ExercisePicker({ onSelect, recentNames = [], onlyCategory, excludeCategory, placeholder = 'Search for an exercise…' }) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const boxRef = useRef(null)
@@ -18,24 +19,15 @@ export default function ExercisePicker({ onSelect, recentNames = [], onlyCategor
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
-  const q = query.trim().toLowerCase()
   // Scope the library to this section: a resistance picker hides cardio moves,
-  // a cardio picker shows only cardio. The user's own recents (category
-  // "Recent") always pass through.
+  // a cardio picker shows only cardio.
   let results = searchExercises(query, recentNames)
-  if (onlyCategory) results = results.filter((m) => m.category === onlyCategory || m.category === 'Recent')
+  if (onlyCategory) results = results.filter((m) => m.category === onlyCategory)
   if (excludeCategory) results = results.filter((m) => m.category !== excludeCategory)
   const matches = results.slice(0, 8)
-  const exact = results.some((m) => m.name.toLowerCase() === q)
 
-  function pick(name, category, id) {
-    // 60-char cap matches the shared-lifts validation server-side; anything
-    // longer would also wreck the set-row layout. `category` (when picked from
-    // the list) lets the tracker decide strength vs cardio; `id` links the pick
-    // to the exercise DB. Custom entries pass neither and default to strength.
-    const trimmed = name.trim().slice(0, 60)
-    if (!trimmed) return
-    onSelect(trimmed, category, id)
+  function pick(m) {
+    onSelect(m.name, m.category, m.id)
     setQuery('')
     setOpen(false)
   }
@@ -48,7 +40,7 @@ export default function ExercisePicker({ onSelect, recentNames = [], onlyCategor
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && query.trim()) { e.preventDefault(); pick(query) } }}
+          onKeyDown={(e) => { if (e.key === 'Enter' && matches[0]) { e.preventDefault(); pick(matches[0]) } }}
           maxLength={60}
           placeholder={placeholder}
           className="flex-1 min-w-0 bg-transparent py-3 text-text-primary text-[13px] outline-none"
@@ -62,7 +54,7 @@ export default function ExercisePicker({ onSelect, recentNames = [], onlyCategor
               key={m.name}
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => pick(m.name, m.category, m.id)}
+              onClick={() => pick(m)}
               className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left bg-transparent border-none border-b border-border cursor-pointer hover:bg-cream transition-colors"
             >
               <span className="text-[13px] text-text-primary">{m.name}</span>
@@ -70,19 +62,16 @@ export default function ExercisePicker({ onSelect, recentNames = [], onlyCategor
             </button>
           ))}
 
-          {q && !exact && (
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => pick(query)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-left bg-cream border-none cursor-pointer hover:bg-cream-dark transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5 text-text-primary shrink-0" />
-              <span className="text-[13px] text-text-primary">Add “{query.trim()}” as a custom exercise</span>
-            </button>
+          {matches.length === 0 && query.trim() && (
+            <div className="flex items-start gap-2 px-4 py-3">
+              <SearchX className="w-3.5 h-3.5 text-text-light shrink-0 mt-0.5" />
+              <p className="text-[12px] text-text-light leading-relaxed">
+                No exercise found for “{query.trim()}”. Try a different search — only exercises in the library can be logged.
+              </p>
+            </div>
           )}
 
-          {matches.length === 0 && !q && (
+          {matches.length === 0 && !query.trim() && (
             <p className="px-4 py-3 text-[12px] text-text-light">Start typing to search…</p>
           )}
         </div>
