@@ -15,7 +15,7 @@ import { saveProfile } from '../lib/profile'
 import { loggedExerciseNames } from '../lib/workoutStats'
 import {
   heroSummary, monthStats, lifetimeStats, personalRecords, recentPRs,
-  splitDistribution, muscleDistribution, recentActivity, thisDayInHistory, formatDuration,
+  splitDistribution, recentActivity, thisDayInHistory, formatDuration,
   exerciseBests, blockSummary,
 } from '../lib/dashboard'
 import { effectiveWeeklyVolume } from '../lib/engine'
@@ -230,7 +230,6 @@ export default function Dashboard() {
       records: personalRecords(sessions, unit),
       prs: recentPRs(sessions, unit, 6),
       split: splitDistribution(sessions),
-      muscleDist: muscleDistribution(sessions),
       activity: recentActivity(sessions, 8),
       throwback: thisDayInHistory(sessions, unit),
     }
@@ -311,7 +310,7 @@ export default function Dashboard() {
     )
   }
 
-  const { hero, month, lifetime, volume, records, prs, split, muscleDist, activity, throwback } = stats
+  const { hero, month, lifetime, volume, records, prs, split, activity, throwback } = stats
   // "Up next" comes from the active program when there is one (the real next day
   // in the rotation), falling back to the name-based heuristic otherwise.
   const nextDay = todaysDay(program)
@@ -326,7 +325,6 @@ export default function Dashboard() {
   const pastBlocks = sortedBlocks(blocks).filter((b) => b.id !== active?.id)
   const maxBlockMuscle = block ? Math.max(1, ...block.perMuscle.map((p) => p.sets)) : 1
   const maxSplit = Math.max(1, ...split.map((s) => s.value))
-  const maxMuscleDist = Math.max(1, ...muscleDist.map((m) => m.value))
   const trainingTime = formatDuration(month.durationMs)
   const nextMilestone = records.bestE1rm.value ? Math.ceil((records.bestE1rm.value + 1) / 5) * 5 : 0
 
@@ -665,33 +663,19 @@ export default function Dashboard() {
           </Card>
         )}
 
-        {/* SECTION 10 — TRAINING DISTRIBUTION */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <Card>
-            <SectionHeading icon={Activity}>Split distribution</SectionHeading>
-            {split.length === 0 ? (
-              <p className="text-[13px] text-text-muted">Name your sessions (Push, Pull, Legs…) to see this.</p>
-            ) : (
-              <div className="space-y-3">
-                {split.map((s) => (
-                  <Bar key={s.label} label={s.label} value={s.value} max={maxSplit} suffix="" />
-                ))}
-              </div>
-            )}
-          </Card>
-          <Card>
-            <SectionHeading icon={Activity}>Muscle group focus</SectionHeading>
-            {muscleDist.length === 0 ? (
-              <p className="text-[13px] text-text-muted">No mapped exercises logged yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {muscleDist.map((m) => (
-                  <Bar key={m.label} label={m.label} value={m.value} max={maxMuscleDist} suffix=" sets" />
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
+        {/* SECTION 10 — SPLIT DISTRIBUTION */}
+        <Card>
+          <SectionHeading icon={Activity}>Split distribution</SectionHeading>
+          {split.length === 0 ? (
+            <p className="text-[13px] text-text-muted">Name your sessions (Push, Pull, Legs…) to see this.</p>
+          ) : (
+            <div className="space-y-3">
+              {split.map((s) => (
+                <Bar key={s.label} label={s.label} value={s.value} max={maxSplit} suffix="" />
+              ))}
+            </div>
+          )}
+        </Card>
 
         {/* SECTION 11 — LIFETIME STATISTICS */}
         <Card>

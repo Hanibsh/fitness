@@ -435,18 +435,6 @@ export function splitDistribution(sessions) {
     .map(([label, value]) => ({ label, value }))
 }
 
-export function muscleDistribution(sessions) {
-  const counts = Object.fromEntries(MUSCLE_GROUPS.map((m) => [m, 0]))
-  for (const s of sessions) {
-    for (const ex of s.exercises) {
-      if (isCardio(ex)) continue
-      const muscle = muscleForExercise(ex.name)
-      if (!muscle) continue
-      counts[muscle] += workingSets(ex).length
-    }
-  }
-  return MUSCLE_GROUPS.map((m) => ({ label: m, value: counts[m] })).filter((x) => x.value > 0)
-}
 
 // ---- Recent activity + this-day-in-history ---------------------------------
 export function recentActivity(sessions, limit = 8) {
