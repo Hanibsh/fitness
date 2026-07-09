@@ -11,7 +11,8 @@
 // Columns are matched by HEADER NAME (see resolveColumns), so the CSV can be
 // safely re-ordered or extended. Muscle contributions are read from the
 // Primary/Secondary/Tertiary/Quaternary columns at weights 1 / .5 / .25 / .125
-// (Quaternary is optional). See data/README.md for the editing guide.
+// (Quaternary is optional) — a term can override its column's default weight
+// with "Muscle:0.75" syntax (see parseTermWeight). See data/README.md.
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -71,6 +72,17 @@ function parseRange(raw, unit) {
 }
 function slugify(name) {
   return name.toLowerCase().replace(/[()]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+// A muscle term in any tier column normally just uses that column's default
+// weight (Primary 1.0, Secondary 0.5, ...). Optionally, write "Muscle:0.75" to
+// give THAT muscle a custom weight instead — any value in (0, 1] — without
+// touching the column's default for every other muscle in the cell.
+function parseTermWeight(rawTerm, defaultWeight) {
+  const trimmed = rawTerm.trim()
+  const m = trimmed.match(/^(.+?):\s*([\d.]+)\s*$/)
+  if (!m) return { term: trimmed, weight: defaultWeight, overridden: false }
+  return { term: m[1].trim(), weight: parseFloat(m[2]), overridden: true, raw: m[2] }
 }
 
 // ---- report accumulator ----------------------------------------------------
@@ -145,11 +157,17 @@ function main() {
     if (COL.quaternary !== -1) tiers.push([r[COL.quaternary], 0.125])
     for (const [cell, tw] of tiers) {
       if (!cell) continue
-      for (const term of cell.split(',')) {
-        if (!term.trim()) continue
-        const res = resolveMuscleTerm(term, tw)
+      for (const rawTerm of cell.split(',')) {
+        if (!rawTerm.trim()) continue
+        const { term, weight, overridden, raw } = parseTermWeight(rawTerm, tw)
+        if (overridden && !(weight > 0 && weight <= 1)) {
+          if (!ov?.muscles) add('BLOCKER', name, `Invalid custom weight "${raw}" for "${term}" — must be greater than 0 and at most 1.`)
+          continue
+        }
+        const res = resolveMuscleTerm(term, weight)
         if (res.kind === 'unknown') { if (!ov?.muscles) add('BLOCKER', name, `Unknown muscle "${res.term}".`); continue }
-        if (res.kind === 'expanded' && !ov?.muscles) add('DECISION', name, `"${term.trim()}" expanded → ${res.pairs.map(([m, w]) => `${m}:${w}`).join(', ')}.`)
+        if (res.kind === 'expanded' && !ov?.muscles) add('DECISION', name, `"${term}" expanded → ${res.pairs.map(([m, w]) => `${m}:${w}`).join(', ')}.`)
+        if (overridden && !ov?.muscles) add('DECISION', name, `"${term}" given custom weight ${weight} (column default ${tw}).`)
         for (const [m, w] of res.pairs) {
           if (muscles[m] != null && res.from && res.to && res.from !== res.to) collapsed = true
           muscles[m] = Math.max(muscles[m] || 0, w)

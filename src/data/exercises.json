@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-08",
+  "generatedAt": "2026-07-09",
   "count": 147,
   "exercises": [
     {
@@ -3486,7 +3486,7 @@
       "name": "Leg Press",
       "category": "Legs",
       "type": "compound",
-      "laterality": "bilateral",
+      "laterality": "both",
       "muscles": {
         "Quadriceps": 1,
         "Glute Max": 0.5,
@@ -3517,7 +3517,7 @@
       "name": "Lying Leg Curl",
       "category": "Legs",
       "type": "isolation",
-      "laterality": "bilateral",
+      "laterality": "both",
       "muscles": {
         "Hamstrings": 1,
         "Glute Max": 0.5,
@@ -3548,7 +3548,7 @@
       "name": "Seated Leg Curl",
       "category": "Legs",
       "type": "isolation",
-      "laterality": "bilateral",
+      "laterality": "both",
       "muscles": {
         "Hamstrings": 1,
         "Glute Max": 0.5,
@@ -3579,7 +3579,7 @@
       "name": "Leg Extension",
       "category": "Legs",
       "type": "isolation",
-      "laterality": "bilateral",
+      "laterality": "both",
       "muscles": {
         "Quadriceps": 1
       },

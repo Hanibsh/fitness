@@ -58,7 +58,22 @@ don't want to touch the raw CSV for, use `data/exercise-overrides.mjs` (keyed by
 | Primary Muscles (1.00) | Muscle name(s), comma-separated. Weight ×1.0 |
 | Secondary Muscles (0.50) | …weight ×0.5 |
 | Tertiary Muscles (0.25) | …weight ×0.25 |
-| **Quaternary Muscles (0.125)** | …weight ×0.125 *(new — optional, leave blank if unused)* |
+| **Quaternary Muscles (0.125)** | …weight ×0.125 *(optional, leave blank if unused)* |
+
+### Need a weight other than 1 / 0.5 / 0.25 / 0.125?
+
+Every muscle normally uses its column's default weight. If one specific muscle
+in a cell needs a different weight (say 0.75), write it right after the name
+with a colon — no new column needed:
+
+```
+Front Delts, Side Delts:0.75
+```
+
+Here `Front Delts` still gets the column's normal weight, but `Side Delts` gets
+exactly `0.75` instead. Works in any of the 4 muscle columns, for any number
+in the cell (0 < weight ≤ 1). Leave the colon off (as you always have) and
+nothing changes.
 | Fatigue Score | Integer `1`–`5` |
 | Estimated Recovery Window | e.g. `48-72 hours` |
 | Progressive Overload Potential | `Low`, `Moderate`, `High`, `Very High` |
