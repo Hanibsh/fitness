@@ -65,6 +65,10 @@ export const READY_THRESHOLD = 90 // %
 // Sessions older than this contribute nothing measurable — skip them.
 export const RECOVERY_LOOKBACK_DAYS = 14
 
+// Only atoms at/above this contribution make an exercise "target" a muscle
+// for readiness hints (primaries + secondaries; tertiaries ride along).
+export const TARGET_CONTRIBUTION_MIN = 0.5
+
 // ---- Systemic fatigue (whole-body pool) -------------------------------------
 // Second compartment: every working set also taxes one shared pool, weighted
 // up for axially-loading and free-weight work (more whole-body demand).

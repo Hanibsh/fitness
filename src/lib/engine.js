@@ -14,6 +14,7 @@ import {
   rirFatigue, FATIGUE_SCORE_COEF, DEFAULT_FATIGUE_SCORE, DEFAULT_RECOVERY_WINDOW,
   RECOVERY_DECAY_FACTOR, capacityFor, READY_THRESHOLD, RECOVERY_LOOKBACK_DAYS,
   AXIAL_MULT, FREE_WEIGHT_MULT, SYSTEMIC_TAU, SYSTEMIC_CAPACITY, systemicLevel,
+  TARGET_CONTRIBUTION_MIN,
 } from './engineConfig'
 import { muscleForExercise } from './dashboard'
 import { exerciseIdForName } from './exerciseLibrary'
@@ -199,6 +200,27 @@ export function muscleRecovery(sessions, { now = Date.now() } = {}) {
 
   const strain = Math.round(100 * Math.min(1, decayedSum(systemicDeposits, now, SYSTEMIC_TAU) / SYSTEMIC_CAPACITY))
   return { muscles, systemic: { pct: strain, level: systemicLevel(strain) } }
+}
+
+// The engine muscles an exercise list meaningfully targets (atoms at/above
+// TARGET_CONTRIBUTION_MIN — primaries and secondaries). Accepts anything with
+// {exerciseId, name}, e.g. a program day's planned exercises; used to flag
+// when today's planned session hits muscles that are still recovering.
+export function musclesForExercises(list) {
+  const out = new Set()
+  for (const e of list || []) {
+    const dbId = e.exerciseId || exerciseIdForName(e.name)
+    const db = dbId ? DB_BY_ID.get(dbId) : null
+    if (db && db.muscles && Object.keys(db.muscles).length) {
+      for (const [atom, w] of Object.entries(db.muscles)) {
+        if (w >= TARGET_CONTRIBUTION_MIN && ATOM_TO_GROUP[atom]) out.add(ATOM_TO_GROUP[atom])
+      }
+    } else {
+      const g = muscleForExercise(e.name)
+      if (g) out.add(g)
+    }
+  }
+  return out
 }
 
 // "~6h" / "~1d 8h" until `readyAt`, or null once it's in the past.

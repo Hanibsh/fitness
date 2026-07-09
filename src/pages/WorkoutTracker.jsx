@@ -43,6 +43,7 @@ import WorkoutCalendar from '../components/WorkoutCalendar'
 import SessionNamePicker from '../components/SessionNamePicker'
 import { lateralityFor, usesBodyweight } from '../lib/movements'
 import { getExercise, exerciseIdForName } from '../lib/exerciseLibrary'
+import { muscleRecovery, musclesForExercises } from '../lib/engine'
 import UnitHelp from '../components/UnitHelp'
 
 const SET_GRID = 'grid grid-cols-[18px_1fr_1fr_50px_18px] gap-2 items-center'
@@ -212,6 +213,15 @@ export default function WorkoutTracker() {
   // already editing or mid-way through a started program session.
   const todayDay = program ? todaysDay(program) : null
   const showTodayCard = !!todayDay && !isEditing && !draft.programId
+
+  // Engine v2 nudge: which of today's target muscles are still recovering.
+  // Informational only — never a gate on training.
+  const recoveringToday = useMemo(() => {
+    const day = program ? todaysDay(program) : null
+    if (!day || day.kind === 'rest' || !day.exercises.length || !history.length) return []
+    const hit = musclesForExercises(day.exercises)
+    return muscleRecovery(history).muscles.filter((m) => hit.has(m.muscle) && m.status === 'recovering')
+  }, [program, history])
 
   // Live rest timer: time since the most recent logged set (or a manual "rest
   // starts now" tap), whichever is later. Only while logging a live session.
@@ -1350,6 +1360,13 @@ export default function WorkoutTracker() {
                     </div>
                   ) : (
                     <p className="text-[12px] text-cream/60 mt-1 mb-5">No exercises planned yet — add some in the routine builder.</p>
+                  )}
+                  {recoveringToday.length > 0 && (
+                    /* This card inverts with the theme (near-black in light,
+                       near-white in dark), so the amber flips too. */
+                    <p className="text-[12px] text-amber-300 dark:text-amber-700 -mt-3 mb-5">
+                      Still recovering: {recoveringToday.map((m) => `${m.muscle} ${m.recoveryPct}%`).join(' · ')}
+                    </p>
                   )}
                   <div className="flex items-center gap-3 flex-wrap">
                     <button
