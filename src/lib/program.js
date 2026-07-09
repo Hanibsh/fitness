@@ -64,6 +64,17 @@ export function advanceProgram(program, dayId) {
   return { ...program, pointer: (from + 1) % program.days.length, updatedAt: Date.now() }
 }
 
+// Manual correction: point AT `dayId` directly (unlike advanceProgram, which
+// moves past a day). Lets a user fix the rotation if it drifted from reality
+// — a forgotten "mark rest done," a workout logged out of order, etc. No-op if
+// the day isn't found.
+export function setPointerToDay(program, dayId) {
+  if (!program || !program.days.length) return program
+  const idx = program.days.findIndex((d) => d.id === dayId)
+  if (idx === -1) return program
+  return { ...program, pointer: idx, updatedAt: Date.now() }
+}
+
 // ---- Prefill the logger from a planned day ---------------------------------
 
 // Build a draft's `exercises` array from a training day, reusing the same

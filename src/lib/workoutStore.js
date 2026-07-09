@@ -183,26 +183,66 @@ export function newGoalId() {
   return newId()
 }
 
-// ---- Training program (the active routine) --------------------------------
-// One active program per device/account, stored as a single JSON blob (same
-// pattern as goals). The rotating-schedule logic lives in program.js.
-const PROGRAM_KEY = 'leon_program'
+// ---- Training programs (routines) ------------------------------------------
+// A list of saved routines + which one is active. The rotating-schedule logic
+// lives in program.js. `getProgram()`/`saveProgram()` resolve/persist against
+// the ACTIVE routine specifically (same signatures as the old single-program
+// version), so any consumer that only cares about "today's program"
+// (Dashboard, WorkoutTracker) needed zero changes when this became a list —
+// only the Routine builder deals with the full list.
+const PROGRAMS_KEY = 'leon_programs'
+const LEGACY_PROGRAM_KEY = 'leon_program' // pre-multi-routine single-program blob
 
-export function getProgram() {
-  return read(PROGRAM_KEY, null)
+// One-time migration: a user who already built a routine before multi-routine
+// support has it under the old single-blob key. Wrap it into the new shape so
+// it survives as their first (active) routine. The old key is left in place
+// untouched — harmless, and a safety net.
+function migrateLegacyProgram() {
+  const legacy = read(LEGACY_PROGRAM_KEY, null)
+  if (!legacy) return { programs: [], activeId: null }
+  return { programs: [legacy], activeId: legacy.id }
 }
 
+export function getProgramsState() {
+  const state = read(PROGRAMS_KEY, null)
+  if (state && Array.isArray(state.programs)) return state
+  return migrateLegacyProgram()
+}
+
+export function saveProgramsState(state) {
+  write(PROGRAMS_KEY, state)
+  return state
+}
+
+// The active routine, or null if none exists yet.
+export function getProgram() {
+  const { programs, activeId } = getProgramsState()
+  return programs.find((p) => p.id === activeId) || null
+}
+
+// Upsert a routine into the list IN PLACE (stable order — updating a routine,
+// e.g. advancing its pointer, shouldn't reshuffle the list). Preserves
+// whichever routine is currently active unless there isn't one yet (the
+// first-ever routine auto-activates, matching the original behavior).
 export function saveProgram(program) {
-  write(PROGRAM_KEY, program)
+  const state = getProgramsState()
+  const idx = state.programs.findIndex((p) => p.id === program.id)
+  const programs = idx === -1 ? [...state.programs, program] : state.programs.map((p, i) => (i === idx ? program : p))
+  const activeId = state.activeId || program.id
+  saveProgramsState({ programs, activeId })
   return program
 }
 
-export function clearProgram() {
-  try {
-    localStorage.removeItem(PROGRAM_KEY)
-  } catch {
-    // ignore
-  }
+export function setActiveProgram(id) {
+  const state = getProgramsState()
+  return saveProgramsState({ ...state, activeId: id })
+}
+
+export function deleteProgramById(id) {
+  const state = getProgramsState()
+  const programs = state.programs.filter((p) => p.id !== id)
+  const activeId = state.activeId === id ? (programs[0]?.id || null) : state.activeId
+  return saveProgramsState({ programs, activeId })
 }
 
 // ---- Specialization blocks -------------------------------------------------

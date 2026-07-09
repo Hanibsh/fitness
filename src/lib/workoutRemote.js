@@ -98,34 +98,69 @@ export async function updateRemoteSession(userId, session) {
   return session
 }
 
-// ---- Training program ------------------------------------------------------
-// One active program per user, stored as a jsonb blob in the `programs` table
-// (one row per user, keyed by user_id). Upsert like profiles. If the table
-// doesn't exist yet (migration not run), reads return null and saves no-op so
-// the app degrades gracefully.
+// ---- Training programs (routines) ------------------------------------------
+// A list of routines + which one is active, stored as one jsonb blob in the
+// `programs` table (one row per user, keyed by user_id — same table/column as
+// before multi-routine support, just a richer shape inside it, so no schema
+// migration was needed). If the table doesn't exist yet, reads return an
+// empty state and saves no-op so the app degrades gracefully.
 function missingProgramsTable(error) {
   if (!error) return false
   return error.code === '42P01' || (typeof error.message === 'string' && /relation .*programs.* does not exist/i.test(error.message))
 }
 
-export async function fetchRemoteProgram(userId) {
+// A row saved before multi-routine support holds a single program directly
+// (has `.days`) rather than `{programs, activeId}`. Wrap it so it survives as
+// that user's first (active) routine.
+function migrateLegacyProgramShape(data) {
+  if (!data) return { programs: [], activeId: null }
+  if (Array.isArray(data.programs)) return data
+  if (data.days) return { programs: [data], activeId: data.id }
+  return { programs: [], activeId: null }
+}
+
+export async function fetchRemoteProgramsState(userId) {
   const { data, error } = await supabase.from('programs').select('data').eq('user_id', userId).maybeSingle()
   if (error) {
-    if (error.code === 'PGRST116' || missingProgramsTable(error)) return null // no row / no table yet
+    if (error.code === 'PGRST116' || missingProgramsTable(error)) return { programs: [], activeId: null } // no row / no table yet
     throw error
   }
-  return data?.data || null
+  return migrateLegacyProgramShape(data?.data)
 }
 
+export async function upsertRemoteProgramsState(userId, state) {
+  const { error } = await supabase.from('programs').upsert({ user_id: userId, data: state, updated_at: new Date().toISOString() })
+  if (error && !missingProgramsTable(error)) throw error
+  return state
+}
+
+// The active routine, or null if none exists yet (same shape callers expect
+// from before multi-routine support).
+export async function fetchRemoteProgram(userId) {
+  const state = await fetchRemoteProgramsState(userId)
+  return state.programs.find((p) => p.id === state.activeId) || null
+}
+
+// Upsert one routine into the remote list (read-modify-write over the single
+// row). Preserves the current active id unless there isn't one yet.
 export async function upsertRemoteProgram(userId, program) {
-  const { error } = await supabase.from('programs').upsert({ user_id: userId, data: program, updated_at: new Date().toISOString() })
-  if (error && !missingProgramsTable(error)) throw error
-  return program
+  const state = await fetchRemoteProgramsState(userId)
+  const idx = state.programs.findIndex((p) => p.id === program.id)
+  const programs = idx === -1 ? [...state.programs, program] : state.programs.map((p, i) => (i === idx ? program : p))
+  const activeId = state.activeId || program.id
+  return upsertRemoteProgramsState(userId, { programs, activeId })
 }
 
-export async function deleteRemoteProgram(userId) {
-  const { error } = await supabase.from('programs').delete().eq('user_id', userId)
-  if (error && !missingProgramsTable(error)) throw error
+export async function setActiveRemoteProgram(userId, id) {
+  const state = await fetchRemoteProgramsState(userId)
+  return upsertRemoteProgramsState(userId, { ...state, activeId: id })
+}
+
+export async function deleteRemoteProgramById(userId, id) {
+  const state = await fetchRemoteProgramsState(userId)
+  const programs = state.programs.filter((p) => p.id !== id)
+  const activeId = state.activeId === id ? (programs[0]?.id || null) : state.activeId
+  return upsertRemoteProgramsState(userId, { programs, activeId })
 }
 
 // ---- Specialization blocks -------------------------------------------------
