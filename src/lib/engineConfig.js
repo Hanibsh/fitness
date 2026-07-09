@@ -38,7 +38,7 @@ export const ATOM_TO_GROUP = {
   'Front Delts': 'Shoulders', 'Side Delts': 'Shoulders', 'Rear Delts': 'Shoulders', 'Rotator Cuff': 'Shoulders',
   Biceps: 'Biceps', Brachialis: 'Biceps',
   Triceps: 'Triceps',
-  Brachioradialis: 'Forearms', 'Wrist Flexors': 'Forearms', 'Wrist Extensors': 'Forearms',
+  Brachioradialis: 'Forearms', 'Wrist Flexors': 'Forearms', 'Wrist Extensors': 'Forearms', 'Deep Finger Flexors': 'Forearms',
   Quadriceps: 'Quads', Adductors: 'Quads',
   Hamstrings: 'Hamstrings',
   'Glute Max': 'Glutes', Abductors: 'Glutes',

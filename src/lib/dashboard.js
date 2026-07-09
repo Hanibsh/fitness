@@ -61,7 +61,7 @@ const MOVEMENT_BY_NAME = new Map(MOVEMENTS.map((m) => [m.name.toLowerCase(), m])
 const DB_MUSCLE_TO_GROUP = {
   Triceps: 'Triceps',
   Biceps: 'Biceps', Brachialis: 'Biceps',
-  Brachioradialis: 'Forearms', 'Wrist Flexors': 'Forearms', 'Wrist Extensors': 'Forearms',
+  Brachioradialis: 'Forearms', 'Wrist Flexors': 'Forearms', 'Wrist Extensors': 'Forearms', 'Deep Finger Flexors': 'Forearms',
   Quadriceps: 'Quads',
   Hamstrings: 'Hamstrings',
   'Glute Max': 'Glutes',

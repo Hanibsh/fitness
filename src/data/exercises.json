@@ -2826,7 +2826,8 @@
       "type": "isolation",
       "laterality": "unilateral",
       "muscles": {
-        "Wrist Flexors": 1
+        "Wrist Flexors": 1,
+        "Deep Finger Flexors": 0.6
       },
       "fatigueScore": 1,
       "recoveryWindowHours": [
