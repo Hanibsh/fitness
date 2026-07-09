@@ -21,6 +21,64 @@ export function rirEffectiveness(rir) {
   return Number.isFinite(r) ? RIR_EFFECTIVENESS[r] : RIR_EFFECTIVENESS_DEFAULT
 }
 
+// ---- Fatigue model (engine v2) ----------------------------------------------
+// Fatigue mirrors stimulus with opposite curvature: pushing closer to failure
+// adds disproportionate fatigue (stimulus saturates, fatigue accelerates).
+
+// How hard a set hits the muscles it loads, by the exercise DB's 1–5 fatigue
+// score. 3 = the reference movement.
+export const FATIGUE_SCORE_COEF = { 1: 0.7, 2: 0.85, 3: 1.0, 4: 1.25, 5: 1.5 }
+
+// RIR → fatigue multiplier. Accelerates near failure, floors around half a
+// set's worth when you stop far from it.
+export const RIR_FATIGUE = {
+  0: 1.25, 1: 1.1, 2: 1.0, 3: 0.9, 4: 0.8, 5: 0.7,
+  6: 0.62, 7: 0.56, 8: 0.52, 9: 0.5, 10: 0.5,
+}
+export const RIR_FATIGUE_DEFAULT = 1.0
+
+export function rirFatigue(rir) {
+  if (rir == null || rir === '') return RIR_FATIGUE_DEFAULT
+  const r = Math.max(0, Math.min(10, Math.round(Number(rir))))
+  return Number.isFinite(r) ? RIR_FATIGUE[r] : RIR_FATIGUE_DEFAULT
+}
+
+// Custom / unmatched exercises have no DB entry — assume a middling movement.
+export const DEFAULT_FATIGUE_SCORE = 2
+export const DEFAULT_RECOVERY_WINDOW = [24, 48] // hours
+
+// Each set's fatigue decays exponentially with τ = (recovery-window midpoint) /
+// this factor: one set is ~95% dissipated by the end of its own window, while a
+// full session's stack takes roughly the whole window to clear.
+export const RECOVERY_DECAY_FACTOR = 3
+
+// Fatigue units that drive a muscle to 0% recovered — roughly one hard direct
+// session's worth. Per-muscle overrides use the same shape as the landmarks.
+export const RECOVERY_CAPACITY = { default: 8 }
+export function capacityFor(muscle) {
+  return RECOVERY_CAPACITY[muscle] ?? RECOVERY_CAPACITY.default
+}
+
+// Recovered enough to hit the muscle hard again.
+export const READY_THRESHOLD = 90 // %
+
+// Sessions older than this contribute nothing measurable — skip them.
+export const RECOVERY_LOOKBACK_DAYS = 14
+
+// ---- Systemic fatigue (whole-body pool) -------------------------------------
+// Second compartment: every working set also taxes one shared pool, weighted
+// up for axially-loading and free-weight work (more whole-body demand).
+export const AXIAL_MULT = 1.3
+export const FREE_WEIGHT_MULT = 1.15
+export const SYSTEMIC_TAU = 20 // hours — the pool mostly clears in ~2 days
+export const SYSTEMIC_CAPACITY = 30 // units ≈ one brutal heavy free-weight day
+
+// Strain % bands (100 = completely wrecked).
+export const SYSTEMIC_LEVELS = { fresh: 33, moderate: 66 } // above moderate = high
+export function systemicLevel(pct) {
+  return pct < SYSTEMIC_LEVELS.fresh ? 'fresh' : pct < SYSTEMIC_LEVELS.moderate ? 'moderate' : 'high'
+}
+
 // ---- Muscle model ----------------------------------------------------------
 // The muscle groups the engine reports volume for (finer than the taxonomy's 6
 // so arms/legs are actionable). Sub-muscle atoms from the exercise DB roll up

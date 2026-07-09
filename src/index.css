@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Let `dark:` utilities key off the same data-theme attribute the token
+   overrides below use — for the few spots (status chips) that need raw palette
+   colors rather than a semantic token. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 @theme {
   --color-cream: #FAF9F6;
   --color-cream-dark: #F3F1EC;

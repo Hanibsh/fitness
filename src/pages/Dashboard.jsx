@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   Flame, Dumbbell, TrendingUp, Clock, Trophy, Target, Activity, History,
   ChevronRight, Award, CalendarDays, Plus, Pencil, MessageCircle, ArrowRight, Crosshair, Trash2,
+  BatteryCharging,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks, deleteSession } from '../lib/workoutStore'
@@ -18,7 +19,7 @@ import {
   splitDistribution, recentActivity, thisDayInHistory, formatDuration,
   exerciseBests, blockSummary,
 } from '../lib/dashboard'
-import { effectiveWeeklyVolume } from '../lib/engine'
+import { effectiveWeeklyVolume, muscleRecovery, formatReadyIn } from '../lib/engine'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import ExerciseProgress from '../components/ExerciseProgress'
 import BodyweightTracker from '../components/BodyweightTracker'
@@ -86,6 +87,18 @@ function StatTile({ icon: Icon, label, value, sub }) {
       {sub && <p className="text-[11px] text-text-muted mt-1.5">{sub}</p>}
     </div>
   )
+}
+
+// Status chip for the recovery card — tones tuned per theme (raw palette
+// colors don't flip with the semantic tokens, hence the dark: variants).
+const CHIP_TONES = {
+  green: 'text-green-700 bg-green-50 border-green-300 dark:text-green-400 dark:bg-green-500/10 dark:border-green-500/30',
+  amber: 'text-amber-700 bg-amber-50 border-amber-300 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/30',
+  red: 'text-red-600 bg-red-50 border-red-300 dark:text-red-400 dark:bg-red-500/10 dark:border-red-500/30',
+}
+
+function StatusChip({ tone, children }) {
+  return <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 border ${CHIP_TONES[tone]}`}>{children}</span>
 }
 
 function MiniStat({ label, value }) {
@@ -273,6 +286,9 @@ export default function Dashboard() {
   // Kept separate from `stats` so switching the weekly-volume range doesn't
   // recompute everything else on the page.
   const volume = useMemo(() => effectiveWeeklyVolume(sessions, { days: volumeRangeDays }), [sessions, volumeRangeDays])
+  // Engine v2: per-muscle fatigue/recovery snapshot (recomputed per visit; a
+  // few minutes of staleness while the page sits open doesn't matter).
+  const recovery = useMemo(() => muscleRecovery(sessions), [sessions])
 
   const exerciseNames = useMemo(() => loggedExerciseNames(sessions), [sessions])
   // Best working-set weight per exercise (display unit) — the "current" value
@@ -586,6 +602,58 @@ export default function Dashboard() {
               </p>
             </div>
           )}
+        </Card>
+
+        {/* SECTION 5c — RECOVERY (engine v2: per-muscle fatigue model) */}
+        <Card>
+          <SectionHeading icon={BatteryCharging}>Recovery</SectionHeading>
+          <p className="text-[12px] text-text-muted mb-4 -mt-2">
+            How recovered each muscle is right now — from how hard, how directly and how recently you trained it.
+            Estimates to guide the next session, not gospel.
+          </p>
+          {(() => {
+            const trained = recovery.muscles.filter((m) => m.lastTrained).sort((a, b) => a.recoveryPct - b.recoveryPct)
+            const untouched = recovery.muscles.filter((m) => !m.lastTrained)
+            if (!trained.length) return <p className="text-[13px] text-text-muted">Nothing logged in the last two weeks — everything's fully recovered.</p>
+            const strainTone = recovery.systemic.level === 'high' ? 'red' : recovery.systemic.level === 'moderate' ? 'amber' : 'green'
+            return (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center gap-2 flex-wrap text-[12px] border-b border-border pb-3 mb-3">
+                  <span className="text-text-secondary">Systemic strain <span className="text-text-light">· whole-body</span></span>
+                  <StatusChip tone={strainTone}>{recovery.systemic.level} · {recovery.systemic.pct}%</StatusChip>
+                </div>
+                {trained.map((m) => (
+                  <div key={m.muscle} title={m.lastTrained ? `Last trained: ${relativeDay(m.lastTrained)}` : undefined}>
+                    <div className="flex justify-between items-center gap-2 flex-wrap text-[12px] mb-1">
+                      <span className="text-text-secondary flex items-center gap-2">
+                        {m.muscle}
+                        <StatusChip tone={m.status === 'ready' ? 'green' : 'amber'}>
+                          {m.status === 'ready' ? 'Ready' : 'Recovering'}
+                        </StatusChip>
+                      </span>
+                      <span className="text-text-muted tabular-nums">
+                        {m.recoveryPct}%
+                        {m.status === 'recovering' && m.readyAt && (
+                          <span className="text-text-light"> · ready {formatReadyIn(m.readyAt)}</span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-cream border border-border overflow-hidden">
+                      <div
+                        className={`h-full transition-all ${m.status === 'ready' ? 'bg-green-500' : 'bg-amber-400'}`}
+                        style={{ width: `${m.recoveryPct}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                {untouched.length > 0 && (
+                  <p className="text-[11px] text-text-light pt-2">
+                    Fully recovered: {untouched.map((m) => m.muscle).join(' · ')}
+                  </p>
+                )}
+              </div>
+            )
+          })()}
         </Card>
 
         {/* SECTION 5b — SPECIALIZATION BLOCK */}
