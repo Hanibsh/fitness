@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   Flame, Dumbbell, TrendingUp, Clock, Trophy, Target, Activity, History,
   ChevronRight, Award, CalendarDays, Plus, Pencil, MessageCircle, ArrowRight, Crosshair, Trash2,
-  BatteryCharging,
+  BatteryCharging, Lightbulb,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks, deleteSession } from '../lib/workoutStore'
@@ -20,6 +20,7 @@ import {
   exerciseBests, blockSummary,
 } from '../lib/dashboard'
 import { effectiveWeeklyVolume, muscleRecovery, formatReadyIn } from '../lib/engine'
+import { adviseTraining } from '../lib/advisor'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import ExerciseProgress from '../components/ExerciseProgress'
 import BodyweightTracker from '../components/BodyweightTracker'
@@ -289,6 +290,8 @@ export default function Dashboard() {
   // Engine v2: per-muscle fatigue/recovery snapshot (recomputed per visit; a
   // few minutes of staleness while the page sits open doesn't matter).
   const recovery = useMemo(() => muscleRecovery(sessions), [sessions])
+  // Engine v3: the advisor's targeted volume-trimming recommendations.
+  const advice = useMemo(() => adviseTraining(sessions, { blocks }), [sessions, blocks])
 
   const exerciseNames = useMemo(() => loggedExerciseNames(sessions), [sessions])
   // Best working-set weight per exercise (display unit) — the "current" value
@@ -662,6 +665,33 @@ export default function Dashboard() {
               </div>
             )
           })()}
+        </Card>
+
+        {/* SECTION 5d — ADVISOR (engine v3: targeted volume trimming) */}
+        <Card>
+          <SectionHeading icon={Lightbulb}>Advisor</SectionHeading>
+          <p className="text-[12px] text-text-muted mb-4 -mt-2">
+            What the engine would change this week — targeted set-trimming only, never a deload.
+          </p>
+          {advice.length === 0 ? (
+            <p className="text-[13px] text-text-muted">Keep logging — advice appears once there's enough history.</p>
+          ) : (
+            <div className="space-y-4">
+              {advice.map((a) => (
+                <div key={a.id} className="flex items-start gap-3">
+                  <div className="shrink-0 mt-0.5">
+                    <StatusChip tone={a.severity === 'red' ? 'red' : a.severity === 'amber' ? 'amber' : 'green'}>
+                      {a.severity === 'red' ? 'Act' : a.severity === 'amber' ? 'Watch' : 'Good'}
+                    </StatusChip>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-medium text-text-primary">{a.title}</p>
+                    <p className="text-[12px] text-text-muted mt-0.5 leading-relaxed">{a.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* SECTION 5b — SPECIALIZATION BLOCK */}

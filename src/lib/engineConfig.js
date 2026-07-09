@@ -159,3 +159,16 @@ export const VOLUME_LANDMARKS = {
 export function landmarksFor(muscle) {
   return VOLUME_LANDMARKS[muscle] || VOLUME_LANDMARKS.default
 }
+
+// ---- Advisor (engine v3) ------------------------------------------------------
+// Rule thresholds for the fatigue-management advisor. House philosophy: NEVER
+// a deload — high fatigue gets managed by trimming volume from the specific
+// exercises/muscles driving it, while everything else trains on.
+export const SFR_RANK = { excellent: 4, good: 3, average: 2, poor: 1 } // higher = more worth keeping
+export const ADVISOR_MIN_SESSIONS = 4 // history needed before any advice
+export const ADVISOR_BLOCK_SLACK = 1.25 // specialization-focus muscles may exceed the ceiling by this
+export const ADVISOR_UNDERRECOVERED_MIN = 3 // trained under-recovered in ≥ this…
+export const ADVISOR_UNDERRECOVERED_WINDOW = 4 // …of the last this-many workings
+export const ADVISOR_REGRESSION_STREAK = 3 // consecutive below-trend sessions
+export const ADVISOR_REGRESSION_EPS = -0.005 // "below trend" = residual under this
+export const ADVISOR_MAX_RECS = 3

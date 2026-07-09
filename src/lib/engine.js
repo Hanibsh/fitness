@@ -205,6 +205,12 @@ function setFatigueDeposits(set, ex, db, extraMult = 1) {
 
 // The engine muscles an exercise primarily trains (atoms ≥ TARGET_CONTRIBUTION_MIN,
 // or the coarse name-based group) — where its performance evidence points.
+// Exported flavor (resolves the DB entry itself) is used by the advisor.
+export function primaryMusclesFor(ex) {
+  const dbId = ex.exerciseId || exerciseIdForName(ex.name)
+  return primaryMuscles(ex, dbId ? DB_BY_ID.get(dbId) : null)
+}
+
 function primaryMuscles(ex, db) {
   const out = new Set()
   if (db && db.muscles && Object.keys(db.muscles).length) {
