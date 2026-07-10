@@ -11,8 +11,11 @@ import {
   createPlannedExercise,
   programFromTemplate,
   setPointerToDay,
+  scheduleMode,
   STARTER_PROGRAMS,
 } from '../lib/program'
+
+const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 import ExercisePicker from '../components/ExercisePicker'
 
 // Move an item within an array by delta, returning a new array.
@@ -182,7 +185,13 @@ export default function Routine() {
 
   const editingProgram = programsState.programs.find((p) => p.id === editingId) || null
   const isEditingActive = !!editingProgram && editingProgram.id === programsState.activeId
+  // Weekly (exactly 7 days): the date decides the day, so the pointer and its
+  // affordances (Up next badge, Set as today) disappear — instead the card for
+  // today's weekday is highlighted.
+  const isWeekly = !!editingProgram && scheduleMode(editingProgram) === 'weekly'
+  const todayWeekdayIndex = (new Date().getDay() + 6) % 7 // Mon=0 … Sun=6
   const pointerIndex = editingProgram && editingProgram.days.length ? editingProgram.pointer % editingProgram.days.length : -1
+  const highlightIndex = isWeekly ? todayWeekdayIndex : pointerIndex
 
   // The template/blank picker — shown for the very first routine, or again
   // whenever "+ New routine" is tapped.
@@ -317,8 +326,16 @@ export default function Routine() {
                       className="w-full bg-cream border border-border px-3 py-2.5 text-text-primary text-[15px] font-heading font-medium outline-none focus:border-text-primary transition-colors"
                     />
                     <p className="text-[12px] text-text-muted mt-3">
-                      {editingProgram.days.filter((d) => d.kind === 'train').length} training day{editingProgram.days.filter((d) => d.kind === 'train').length !== 1 ? 's' : ''} · rotates in order, advancing as you log.
+                      {editingProgram.days.filter((d) => d.kind === 'train').length} training day{editingProgram.days.filter((d) => d.kind === 'train').length !== 1 ? 's' : ''}
+                      {isWeekly
+                        ? ' · fixed weekly schedule — day 1 is Monday, day 7 is Sunday. Missing a day never shifts it.'
+                        : ' · rotates in order, advancing as you log.'}
                     </p>
+                    {!isWeekly && editingProgram.days.length > 0 && (
+                      <p className="text-[11px] text-text-light mt-1.5">
+                        Tip: make it exactly 7 days (rest days included) and it becomes a fixed weekly schedule instead.
+                      </p>
+                    )}
                   </div>
 
                   {/* Days */}
@@ -329,17 +346,26 @@ export default function Routine() {
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, height: 0 }}
-                        className={`mb-4 border bg-white ${dayIndex === pointerIndex ? 'border-text-primary' : 'border-border'}`}
+                        className={`mb-4 border bg-white ${dayIndex === highlightIndex ? 'border-text-primary' : 'border-border'}`}
                       >
                         <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-cream">
                           {day.kind === 'rest' ? <Moon className="w-4 h-4 text-text-light shrink-0" /> : <Dumbbell className="w-4 h-4 text-text-primary shrink-0" />}
+                          {isWeekly && (
+                            <span className="shrink-0 text-[9px] font-medium uppercase tracking-wider text-text-muted border border-border bg-white px-1.5 py-0.5">
+                              {WEEKDAY_NAMES[dayIndex]}
+                            </span>
+                          )}
                           <input
                             value={day.name}
                             onChange={(e) => setDayName(day.id, e.target.value)}
                             aria-label="Day name"
                             className="flex-1 min-w-0 bg-transparent text-[14px] font-medium text-text-primary outline-none border-b border-transparent focus:border-border"
                           />
-                          {dayIndex === pointerIndex ? (
+                          {isWeekly ? (
+                            dayIndex === todayWeekdayIndex && (
+                              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-cream bg-text-primary px-1.5 py-0.5">Today</span>
+                            )
+                          ) : dayIndex === pointerIndex ? (
                             <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-cream bg-text-primary px-1.5 py-0.5">Up next</span>
                           ) : (
                             <button
@@ -379,7 +405,7 @@ export default function Routine() {
                           </div>
 
                           {day.kind === 'rest' ? (
-                            <p className="text-[12px] text-text-light">A rest slot in the rotation — no exercises.</p>
+                            <p className="text-[12px] text-text-light">{isWeekly ? 'A rest day — no exercises.' : 'A rest slot in the rotation — no exercises.'}</p>
                           ) : (
                             <>
                               {day.exercises.length > 0 && (

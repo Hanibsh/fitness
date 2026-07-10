@@ -9,7 +9,7 @@ import {
 import { useAuth } from '../lib/auth'
 import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks, deleteSession } from '../lib/workoutStore'
 import { fetchRemoteHistory, fetchRemoteProgram, fetchRemoteBlocks, upsertRemoteBlocks, deleteRemoteSession } from '../lib/workoutRemote'
-import { todaysDay } from '../lib/program'
+import { todaysDay, scheduleMode, nextTrainingDate } from '../lib/program'
 import { activeBlock, sortedBlocks, blockWeek } from '../lib/blocks'
 import BlockModal from '../components/BlockModal'
 import { saveProfile } from '../lib/profile'
@@ -45,6 +45,14 @@ const VOLUME_RANGES = [
   { days: 30, label: 'Month', windowLabel: 'the last 30 days' },
   { days: 90, label: '3 Months', windowLabel: 'the last 3 months' },
 ]
+
+// "tomorrow" or "on Friday" — for the next planned training day.
+function upcomingDayLabel(ts) {
+  const d = new Date(ts); d.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(); tomorrow.setHours(0, 0, 0, 0); tomorrow.setDate(tomorrow.getDate() + 1)
+  if (d.getTime() === tomorrow.getTime()) return 'tomorrow'
+  return `on ${new Date(ts).toLocaleDateString(undefined, { weekday: 'long' })}`
+}
 
 function relativeDay(ts) {
   const day = new Date(ts); day.setHours(0, 0, 0, 0)
@@ -357,13 +365,25 @@ export default function Dashboard() {
 
   const { hero, month, lifetime, records, prs, split, activity, throwback } = stats
   // "Up next" comes from the active program when there is one (the real next day
-  // in the rotation), falling back to the name-based heuristic otherwise.
+  // in the schedule), falling back to the name-based heuristic otherwise. On a
+  // fixed weekly schedule, once today's session is logged the card looks ahead
+  // to the next training day instead of re-offering today.
   const nextDay = todaysDay(program)
-  const upNext = nextDay
-    ? nextDay.kind === 'rest'
-      ? { label: 'Rest day', sub: 'Recovery in your rotation' }
-      : { label: nextDay.name, sub: `${nextDay.exercises.length} exercise${nextDay.exercises.length !== 1 ? 's' : ''} planned` }
-    : { label: hero.next, sub: null }
+  const weeklyProgram = !!program && scheduleMode(program) === 'weekly'
+  const trainedToday = sessions.some((s) => new Date(s.date).toDateString() === new Date().toDateString())
+  const weeklyDoneToday = weeklyProgram && nextDay?.kind === 'train' && trainedToday
+  const lookahead = weeklyProgram && (weeklyDoneToday || nextDay?.kind === 'rest') ? nextTrainingDate(program) : null
+  const upNext = weeklyDoneToday
+    ? {
+        label: lookahead ? lookahead.day.name : 'Done for today',
+        sub: lookahead ? `${nextDay.name} logged — next ${upcomingDayLabel(lookahead.date)}` : "Today's session is logged",
+        done: true,
+      }
+    : nextDay
+      ? nextDay.kind === 'rest'
+        ? { label: 'Rest day', sub: weeklyProgram ? 'Scheduled day off' : 'Recovery in your rotation' }
+        : { label: nextDay.name, sub: `${nextDay.exercises.length} exercise${nextDay.exercises.length !== 1 ? 's' : ''} planned` }
+      : { label: hero.next, sub: null }
   // Active specialization block + its per-muscle summary.
   const active = activeBlock(blocks)
   const block = blockSummary(sessions, active, unit)
@@ -424,7 +444,9 @@ export default function Dashboard() {
                 <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-1">Up next</p>
                 <p className="font-heading text-[15px] font-medium break-words">{upNext.label}</p>
                 {upNext.sub && <p className="text-[11px] text-cream/50">{upNext.sub}</p>}
-                {nextDay?.kind === 'rest' ? (
+                {upNext.done ? (
+                  <p className="text-[11px] text-cream/70">Done for today ✓</p>
+                ) : nextDay?.kind === 'rest' ? (
                   <p className="text-[11px] text-cream/70">Enjoy your day off — relax and recover.</p>
                 ) : (
                   <Link to="/log" className="text-[11px] text-cream/70 underline hover:text-cream no-underline">

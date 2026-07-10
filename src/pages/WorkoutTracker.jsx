@@ -31,7 +31,7 @@ import {
   saveProgram,
 } from '../lib/workoutStore'
 import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts, fetchRemoteProgram, upsertRemoteProgram } from '../lib/workoutRemote'
-import { todaysDay, advanceProgram, draftFromDay } from '../lib/program'
+import { todaysDay, advanceProgram, draftFromDay, scheduleMode, nextTrainingDate } from '../lib/program'
 import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels, sessionAvgRest, formatRest } from '../lib/workoutStats'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
@@ -72,6 +72,14 @@ function fromInputDate(value) {
 function isSameDay(a, b) {
   const da = new Date(a), db = new Date(b)
   return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate()
+}
+
+// "tomorrow" or "on Friday" — for pointing at the next planned training day.
+function nextDayLabel(ts) {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  if (isSameDay(ts, tomorrow.getTime())) return 'tomorrow'
+  return `on ${new Date(ts).toLocaleDateString(undefined, { weekday: 'long' })}`
 }
 
 // A calendar day strictly after today — can't log a workout there.
@@ -213,6 +221,16 @@ export default function WorkoutTracker() {
   // already editing or mid-way through a started program session.
   const todayDay = program ? todaysDay(program) : null
   const showTodayCard = !!todayDay && !isEditing && !draft.programId
+  // Weekly programs are date-driven: finishing a session doesn't advance
+  // anything, so the card needs its own "already trained today" state (and
+  // rest days have nothing to mark done). Rotating programs keep the pointer.
+  const isWeeklyProgram = !!program && scheduleMode(program) === 'weekly'
+  const loggedToday = useMemo(() => history.some((s) => isSameDay(s.date, Date.now())), [history])
+  const weeklyDoneToday = isWeeklyProgram && todayDay?.kind === 'train' && loggedToday
+  const weeklyNext = useMemo(
+    () => (isWeeklyProgram && (weeklyDoneToday || todayDay?.kind === 'rest') ? nextTrainingDate(program) : null),
+    [isWeeklyProgram, weeklyDoneToday, todayDay, program]
+  )
 
   // Engine v2 nudge: which of today's target muscles are still recovering.
   // Informational only — never a gate on training.
@@ -1338,14 +1356,29 @@ export default function WorkoutTracker() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <p className="font-heading text-xl font-medium">Rest day</p>
-                    <p className="text-[12px] text-cream/60 mt-0.5">Recovery in your rotation — log freely below, or mark it done to move on.</p>
+                    <p className="text-[12px] text-cream/60 mt-0.5">
+                      {isWeeklyProgram
+                        ? `Enjoy your day off — relax and recover.${weeklyNext ? ` Back at it ${nextDayLabel(weeklyNext.date)} with ${weeklyNext.day.name}.` : ''}`
+                        : 'Recovery in your rotation — log freely below, or mark it done to move on.'}
+                    </p>
                   </div>
-                  <button
-                    onClick={() => markRestDone(todayDay)}
-                    className="shrink-0 inline-flex items-center justify-center gap-2 bg-cream text-text-primary font-medium px-5 py-2.5 border-none cursor-pointer text-[13px] hover:bg-white transition-colors"
-                  >
-                    Mark rest done
-                  </button>
+                  {!isWeeklyProgram && (
+                    <button
+                      onClick={() => markRestDone(todayDay)}
+                      className="shrink-0 inline-flex items-center justify-center gap-2 bg-cream text-text-primary font-medium px-5 py-2.5 border-none cursor-pointer text-[13px] hover:bg-white transition-colors"
+                    >
+                      Mark rest done
+                    </button>
+                  )}
+                </div>
+              ) : weeklyDoneToday ? (
+                <div>
+                  <p className="font-heading text-xl font-medium flex items-center gap-2">
+                    <Check className="w-5 h-5" /> {todayDay.name} — logged
+                  </p>
+                  <p className="text-[12px] text-cream/60 mt-0.5">
+                    Done for today.{weeklyNext ? ` Next up: ${weeklyNext.day.name} ${nextDayLabel(weeklyNext.date)}.` : ''}
+                  </p>
                 </div>
               ) : (
                 <>

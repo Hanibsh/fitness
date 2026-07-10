@@ -1,11 +1,18 @@
-// Training program + rotating schedule.
+// Training program + schedule.
 //
-// Pure, portable logic (same pattern as dashboard.js / workoutStats.js): a
-// program is an ordered CYCLE of days that you rotate through as you train, so
-// a missed calendar day never desyncs it. `pointer` is the index of the next
-// day up; completing that day advances the pointer (mod the cycle length).
-// Each training day lists planned exercises with a target set count + rep range
-// that pre-fill the logger when you start the session.
+// Pure, portable logic (same pattern as dashboard.js / workoutStats.js). A
+// program is an ordered list of days; HOW it schedules is inferred from its
+// shape — no mode setting for the user to understand:
+//
+//   - Exactly 7 days ⇒ a FIXED WEEKLY schedule, day 1 = Monday … day 7 =
+//     Sunday (rest days are ordinary rest slots among the 7). The same day
+//     always lands on the same weekday; missing a day never shifts anything.
+//   - Any other length ⇒ a rotating CYCLE: `pointer` is the index of the next
+//     day up; completing that day advances the pointer (mod the cycle length),
+//     so a missed calendar day never desyncs it and off days rotate.
+//
+// Each training day lists planned exercises with a target set count + rep
+// range that pre-fill the logger when you start the session.
 
 import { createExercise, createSet } from './workoutStore'
 import { getExercise } from './exerciseLibrary'
@@ -40,7 +47,26 @@ export function emptyProgram(name = 'My program') {
   return { id: newId(), name, days: [], pointer: 0, createdAt: now, updatedAt: now }
 }
 
-// ---- Rotation --------------------------------------------------------------
+// ---- Scheduling ------------------------------------------------------------
+
+const DAY_MS = 86400000
+
+// How this program schedules — inferred from its shape, never stored.
+export function scheduleMode(program) {
+  return program?.days?.length === 7 ? 'weekly' : 'rotating'
+}
+
+// Monday-first weekday index (Mon=0 … Sun=6), matching the weekly-streak
+// convention in dashboard.js.
+function mondayIndex(ts) {
+  return (new Date(ts).getDay() + 6) % 7
+}
+
+function startOfDay(ts) {
+  const d = new Date(ts)
+  d.setHours(0, 0, 0, 0)
+  return d.getTime()
+}
 
 // Normalise a pointer into a valid day index.
 function safeIndex(program) {
@@ -48,31 +74,74 @@ function safeIndex(program) {
   return n ? ((program.pointer % n) + n) % n : 0
 }
 
-// The next day up in the cycle (may be a rest day), or null for an empty program.
-export function todaysDay(program) {
+// The day that's up now (may be a rest day), or null for an empty program.
+// Weekly: whatever today's weekday maps to. Rotating: the pointer day.
+export function todaysDay(program, now = Date.now()) {
   if (!program || !program.days.length) return null
+  if (scheduleMode(program) === 'weekly') return program.days[mondayIndex(now)]
   return program.days[safeIndex(program)]
 }
 
 // Move the pointer to the slot after `dayId` (mod length). Falls back to
 // advancing the current pointer if the id isn't found (e.g. the day was
-// deleted). Returns a new program object.
+// deleted). Returns a new program object. `lastAdvancedAt` anchors the
+// calendar projection: if the rotation already advanced today, the pointer
+// day is planned for TOMORROW, not today. Weekly programs are date-driven —
+// nothing to advance, so this is a safe no-op there.
 export function advanceProgram(program, dayId) {
   if (!program || !program.days.length) return program
+  if (scheduleMode(program) === 'weekly') return program
   const idx = program.days.findIndex((d) => d.id === dayId)
   const from = idx === -1 ? safeIndex(program) : idx
-  return { ...program, pointer: (from + 1) % program.days.length, updatedAt: Date.now() }
+  return { ...program, pointer: (from + 1) % program.days.length, lastAdvancedAt: Date.now(), updatedAt: Date.now() }
 }
 
 // Manual correction: point AT `dayId` directly (unlike advanceProgram, which
 // moves past a day). Lets a user fix the rotation if it drifted from reality
-// — a forgotten "mark rest done," a workout logged out of order, etc. No-op if
-// the day isn't found.
+// — a forgotten "mark rest done," a workout logged out of order, etc. Clears
+// the advance stamp so the chosen day projects onto TODAY. No-op if the day
+// isn't found.
 export function setPointerToDay(program, dayId) {
   if (!program || !program.days.length) return program
   const idx = program.days.findIndex((d) => d.id === dayId)
   if (idx === -1) return program
-  return { ...program, pointer: idx, updatedAt: Date.now() }
+  return { ...program, pointer: idx, lastAdvancedAt: null, updatedAt: Date.now() }
+}
+
+// ---- Calendar projection -----------------------------------------------------
+
+// Rotating projections drift with reality (any missed day shifts everything),
+// so don't pretend to know the far future.
+export const PROJECTION_HORIZON_DAYS = 28
+
+// The day this program plans for a calendar date, or null (past dates, empty
+// programs, or beyond the horizon). Weekly programs are deterministic — the
+// weekday decides. Rotating programs project the cycle forward from the
+// pointer, one day per date, starting today — or tomorrow if the rotation
+// already advanced today (see advanceProgram).
+export function plannedDayForDate(program, date, { now = Date.now() } = {}) {
+  if (!program || !program.days.length) return null
+  const target = startOfDay(date)
+  const today = startOfDay(now)
+  if (target < today) return null
+  if (scheduleMode(program) === 'weekly') return program.days[mondayIndex(target)]
+  if (target > today + PROJECTION_HORIZON_DAYS * DAY_MS) return null
+  const anchor = program.lastAdvancedAt && startOfDay(program.lastAdvancedAt) === today ? today + DAY_MS : today
+  if (target < anchor) return null
+  const offset = Math.round((target - anchor) / DAY_MS)
+  return program.days[(safeIndex(program) + offset) % program.days.length]
+}
+
+// The next upcoming TRAINING day strictly after `now`'s date — { date, day }
+// or null. Powers "done for today — next: Upper A on Friday".
+export function nextTrainingDate(program, { now = Date.now() } = {}) {
+  if (!program || !program.days.length) return null
+  for (let i = 1; i <= PROJECTION_HORIZON_DAYS; i++) {
+    const date = startOfDay(now) + i * DAY_MS
+    const day = plannedDayForDate(program, date, { now })
+    if (day && day.kind === 'train') return { date, day }
+  }
+  return null
 }
 
 // ---- Prefill the logger from a planned day ---------------------------------
