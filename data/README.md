@@ -91,7 +91,7 @@ fatigue at failure — see `recovery-rubric.md` §0 for why.
 | Progressive Overload Potential | `Low`, `Moderate`, `High`, `Very High` |
 | Stability | `Highly unstable`, `Unstable`, `Moderate`, `Stable`, `Very stable` |
 | Hypertrophy Potential | `Low`, `Moderate`, `High`, `Excellent` |
-| Stimulus-to-Fatigue Ratio (SFR) | `Poor`, `Average`, `Good`, `Excellent` |
+| Stimulus-to-Fatigue Ratio (SFR) | `Poor`, `Average`, `Good`, `Excellent`. Target-muscle stimulus ÷ total fatigue (systemic + joint + stabilizer). A *derived* rating — must stay consistent with Fatigue Score / Hypertrophy Potential / Stability / Equipment (stable machines & cables tend high; axial free-weight compounds and unstable moves tend low). Feeds the advisor's "which exercise to trim first" logic. Rubric + audit rules in `data/sfr-rubric.md`; run `node scripts/audit-sfr.mjs` after edits. |
 | Stretch-Mediated Hypertrophy | `No`, `Partial`, `Yes` |
 | Resistance Profile | `Balanced`, `Shortened bias`, `Lengthened bias` |
 | Stability Requirement | Actually **equipment**: `Free weight`, `Machine`, `Cable`, `Bodyweight` |
