@@ -7906,9 +7906,9 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.25,
         "Rectus Abdominis": 0.25
       },
@@ -7941,7 +7941,7 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Upper Traps": 0.25,
         "Rectus Abdominis": 0.25
       },
@@ -7972,8 +7972,8 @@
       "type": "compound",
       "laterality": "bilateral",
       "muscles": {
-        "Rhomboids": 1,
-        "Upper Traps": 1,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.5,
         "Lats": 0.5,
         "Biceps": 0.25,
@@ -8007,9 +8007,9 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Spinal Erectors": 0.25
       },
       "fatigueScore": 1,
@@ -8040,9 +8040,9 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5
+        "Upper Traps": 0.25
       },
       "fatigueScore": 1,
       "recoveryWindowHours": [
@@ -8073,7 +8073,7 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Upper Traps": 0.25,
         "Spinal Erectors": 0.25
       },
@@ -8087,7 +8087,7 @@
         300
       ],
       "progressiveOverload": "very high",
-      "stability": "unstable",
+      "stability": "moderate",
       "hypertrophyPotential": "high",
       "sfr": "average",
       "stretchMediated": "none",
@@ -8104,9 +8104,9 @@
       "type": "compound",
       "laterality": "bilateral",
       "muscles": {
-        "Lats": 1,
-        "Rhomboids": 1,
-        "Upper Traps": 0.5,
+        "Mid Back": 1,
+        "Lats": 0.5,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.5,
         "Biceps": 0.25,
         "Spinal Erectors": 0.25
@@ -8121,7 +8121,7 @@
         300
       ],
       "progressiveOverload": "very high",
-      "stability": "unstable",
+      "stability": "moderate",
       "hypertrophyPotential": "excellent",
       "sfr": "average",
       "stretchMediated": "partial",
@@ -8138,9 +8138,9 @@
       "type": "compound",
       "laterality": "bilateral",
       "muscles": {
-        "Rhomboids": 1,
-        "Lats": 1,
-        "Upper Traps": 0.5,
+        "Mid Back": 1,
+        "Lats": 0.5,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.5,
         "Biceps": 0.25,
         "Spinal Erectors": 0.25
@@ -8155,7 +8155,7 @@
         300
       ],
       "progressiveOverload": "high",
-      "stability": "unstable",
+      "stability": "moderate",
       "hypertrophyPotential": "high",
       "sfr": "good",
       "stretchMediated": "none",
@@ -8173,9 +8173,9 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Spinal Erectors": 0.25
       },
       "fatigueScore": 3,
@@ -8188,7 +8188,7 @@
         300
       ],
       "progressiveOverload": "high",
-      "stability": "unstable",
+      "stability": "moderate",
       "hypertrophyPotential": "high",
       "sfr": "good",
       "stretchMediated": "none",
@@ -8206,9 +8206,9 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Spinal Erectors": 0.25
       },
       "fatigueScore": 3,
@@ -8221,7 +8221,7 @@
         300
       ],
       "progressiveOverload": "moderate",
-      "stability": "unstable",
+      "stability": "moderate",
       "hypertrophyPotential": "high",
       "sfr": "good",
       "stretchMediated": "none",
@@ -8239,9 +8239,9 @@
       "laterality": "unilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.25
       },
       "fatigueScore": 3,
@@ -8256,7 +8256,7 @@
       "progressiveOverload": "very high",
       "stability": "moderate",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "yes",
       "resistanceProfile": "shortened",
       "equipment": "free weight",
@@ -8272,9 +8272,9 @@
       "laterality": "unilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.25
       },
       "fatigueScore": 2,
@@ -8304,8 +8304,8 @@
       "type": "compound",
       "laterality": "bilateral",
       "muscles": {
-        "Rhomboids": 1,
-        "Upper Traps": 1,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.5,
         "Lats": 0.5,
         "Biceps": 0.25
@@ -8320,9 +8320,9 @@
         300
       ],
       "progressiveOverload": "high",
-      "stability": "very stable",
+      "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "none",
       "resistanceProfile": "shortened",
       "equipment": "free weight",
@@ -8339,7 +8339,7 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Upper Traps": 0.25
       },
       "fatigueScore": 3,
@@ -8352,9 +8352,9 @@
         300
       ],
       "progressiveOverload": "high",
-      "stability": "very stable",
+      "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "none",
       "resistanceProfile": "shortened",
       "equipment": "free weight",
@@ -8370,9 +8370,9 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.25
       },
       "fatigueScore": 3,
@@ -8385,9 +8385,9 @@
         300
       ],
       "progressiveOverload": "high",
-      "stability": "very stable",
+      "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "yes",
       "resistanceProfile": "shortened",
       "equipment": "free weight",
@@ -8404,7 +8404,7 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Upper Traps": 0.25
       },
       "fatigueScore": 3,
@@ -8419,7 +8419,7 @@
       "progressiveOverload": "high",
       "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "yes",
       "resistanceProfile": "balanced",
       "equipment": "cable",
@@ -8435,8 +8435,8 @@
       "laterality": "bilateral",
       "muscles": {
         "Rear Delts": 1,
-        "Rhomboids": 1,
-        "Upper Traps": 0.5,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Biceps": 0.25
       },
       "fatigueScore": 3,
@@ -8451,7 +8451,7 @@
       "progressiveOverload": "high",
       "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "yes",
       "resistanceProfile": "balanced",
       "equipment": "cable",
@@ -8466,8 +8466,8 @@
       "type": "compound",
       "laterality": "bilateral",
       "muscles": {
-        "Rhomboids": 1,
-        "Upper Traps": 1,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.5,
         "Lats": 0.5,
         "Biceps": 0.25
@@ -8484,7 +8484,7 @@
       "progressiveOverload": "high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8500,7 +8500,7 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
         "Upper Traps": 0.25
       },
@@ -8516,7 +8516,7 @@
       "progressiveOverload": "high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8533,7 +8533,7 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Upper Traps": 0.25
       },
       "fatigueScore": 3,
@@ -8548,7 +8548,7 @@
       "progressiveOverload": "high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8564,8 +8564,8 @@
       "laterality": "bilateral",
       "muscles": {
         "Rear Delts": 1,
-        "Rhomboids": 1,
-        "Upper Traps": 0.5,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Biceps": 0.25
       },
       "fatigueScore": 3,
@@ -8580,7 +8580,7 @@
       "progressiveOverload": "high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8596,9 +8596,9 @@
       "laterality": "unilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
-        "Upper Traps": 0.5,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.25
       },
       "fatigueScore": 3,
@@ -8613,7 +8613,7 @@
       "progressiveOverload": "high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8628,8 +8628,8 @@
       "type": "compound",
       "laterality": "bilateral",
       "muscles": {
-        "Rhomboids": 1,
-        "Upper Traps": 1,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.5,
         "Lats": 0.5,
         "Biceps": 0.25
@@ -8646,7 +8646,7 @@
       "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8662,8 +8662,8 @@
       "laterality": "both",
       "muscles": {
         "Rear Delts": 1,
-        "Rhomboids": 1,
-        "Upper Traps": 0.5,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Biceps": 0.25
       },
       "fatigueScore": 3,
@@ -8678,7 +8678,7 @@
       "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8694,7 +8694,7 @@
       "laterality": "both",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Biceps": 0.5,
         "Upper Traps": 0.25
       },
@@ -8710,7 +8710,7 @@
       "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8725,9 +8725,9 @@
       "type": "compound",
       "laterality": "unilateral",
       "muscles": {
-        "Rhomboids": 1,
-        "Lats": 1,
-        "Upper Traps": 0.5,
+        "Mid Back": 1,
+        "Lats": 0.5,
+        "Upper Traps": 0.25,
         "Biceps": 0.5,
         "Rear Delts": 0.25
       },
@@ -8743,7 +8743,7 @@
       "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8758,8 +8758,8 @@
       "type": "compound",
       "laterality": "bilateral",
       "muscles": {
-        "Rhomboids": 1,
-        "Upper Traps": 1,
+        "Mid Back": 1,
+        "Upper Traps": 0.25,
         "Rear Delts": 0.5,
         "Lats": 0.5,
         "Biceps": 0.25,
@@ -8794,7 +8794,7 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
+        "Mid Back": 0.5,
         "Upper Traps": 0.25,
         "Rectus Abdominis": 0.25
       },
@@ -8826,11 +8826,11 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Teres Major": 1,
-        "Rhomboids": 0.5,
+        "Teres Major": 0.5,
+        "Rhomboids": 0.25,
         "Biceps": 0.5,
         "Rear Delts": 0.25,
-        "Upper Traps": 0.25
+        "Upper Traps": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -8844,8 +8844,8 @@
       "progressiveOverload": "high",
       "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
-      "stretchMediated": "yes",
+      "sfr": "good",
+      "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "cable",
       "axialLoading": false,
@@ -8861,8 +8861,8 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25,
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125,
         "Rear Delts": 0.25
       },
       "fatigueScore": 3,
@@ -8877,8 +8877,8 @@
       "progressiveOverload": "high",
       "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
-      "stretchMediated": "yes",
+      "sfr": "good",
+      "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "cable",
       "axialLoading": false,
@@ -8894,8 +8894,8 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25,
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125,
         "Rear Delts": 0.25
       },
       "fatigueScore": 3,
@@ -8910,8 +8910,8 @@
       "progressiveOverload": "high",
       "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
-      "stretchMediated": "yes",
+      "sfr": "good",
+      "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "cable",
       "axialLoading": false,
@@ -8926,8 +8926,8 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Rhomboids": 1,
-        "Upper Traps": 0.5,
+        "Rhomboids": 0.5,
+        "Upper Traps": 0.125,
         "Rear Delts": 0.5,
         "Biceps": 0.25
       },
@@ -8944,7 +8944,7 @@
       "stability": "stable",
       "hypertrophyPotential": "high",
       "sfr": "average",
-      "stretchMediated": "yes",
+      "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "cable",
       "axialLoading": false,
@@ -8960,8 +8960,8 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25,
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125,
         "Rear Delts": 0.25
       },
       "fatigueScore": 3,
@@ -8976,7 +8976,7 @@
       "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -8993,8 +8993,8 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -9008,7 +9008,7 @@
       "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -9026,7 +9026,7 @@
         "Lats": 1,
         "Biceps": 0.5,
         "Rhomboids": 0.25,
-        "Upper Traps": 0.25
+        "Upper Traps": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -9040,7 +9040,7 @@
       "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "partial",
       "resistanceProfile": "balanced",
       "equipment": "machine",
@@ -9056,11 +9056,11 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Teres Major": 1,
-        "Rhomboids": 0.5,
+        "Teres Major": 0.5,
+        "Rhomboids": 0.25,
         "Biceps": 0.5,
         "Rear Delts": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -9090,11 +9090,11 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Teres Major": 1,
-        "Rhomboids": 0.5,
+        "Teres Major": 0.5,
+        "Rhomboids": 0.25,
         "Biceps": 0.5,
         "Rear Delts": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -9105,7 +9105,7 @@
         210,
         300
       ],
-      "progressiveOverload": "high",
+      "progressiveOverload": "moderate",
       "stability": "moderate",
       "hypertrophyPotential": "excellent",
       "sfr": "good",
@@ -9125,9 +9125,9 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125,
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -9158,9 +9158,9 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125,
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -9171,7 +9171,7 @@
         210,
         300
       ],
-      "progressiveOverload": "high",
+      "progressiveOverload": "moderate",
       "stability": "moderate",
       "hypertrophyPotential": "excellent",
       "sfr": "good",
@@ -9192,7 +9192,7 @@
         "Lats": 1,
         "Biceps": 0.5,
         "Rhomboids": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 3,
       "recoveryWindowHours": [
@@ -9203,7 +9203,7 @@
         210,
         300
       ],
-      "progressiveOverload": "high",
+      "progressiveOverload": "moderate",
       "stability": "moderate",
       "hypertrophyPotential": "excellent",
       "sfr": "good",
@@ -9223,8 +9223,8 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125
       },
       "fatigueScore": 2,
       "recoveryWindowHours": [
@@ -9254,8 +9254,8 @@
       "laterality": "bilateral",
       "muscles": {
         "Lats": 1,
-        "Teres Major": 1,
-        "Rhomboids": 0.5,
+        "Teres Major": 0.5,
+        "Rhomboids": 0.25,
         "Biceps": 0.5,
         "Rear Delts": 0.25
       },
@@ -9288,8 +9288,8 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125
       },
       "fatigueScore": 2,
       "recoveryWindowHours": [
@@ -9320,9 +9320,9 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125,
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 1,
       "recoveryWindowHours": [
@@ -9353,9 +9353,9 @@
       "muscles": {
         "Lats": 1,
         "Biceps": 0.5,
-        "Rhomboids": 0.5,
-        "Upper Traps": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rhomboids": 0.25,
+        "Upper Traps": 0.125,
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 1,
       "recoveryWindowHours": [
@@ -9387,7 +9387,7 @@
         "Lats": 1,
         "Biceps": 0.5,
         "Rhomboids": 0.25,
-        "Rectus Abdominis": 0.25
+        "Rectus Abdominis": 0.125
       },
       "fatigueScore": 1,
       "recoveryWindowHours": [
@@ -9464,7 +9464,7 @@
       "progressiveOverload": "moderate",
       "stability": "stable",
       "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
+      "sfr": "good",
       "stretchMediated": "yes",
       "resistanceProfile": "lengthened",
       "equipment": "free weight",

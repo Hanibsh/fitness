@@ -83,3 +83,25 @@ error — kept as-is. The banded row variants (`Stretch-Mediated Hypertrophy`
 source-data judgment call neither script touched — flagged to Hani, not
 auto-changed (Stretch-Mediated isn't read by any app code yet, so it's data
 hygiene, not urgent).
+
+**Double-check refinement (same day, Hani-approved decisions):**
+`node scripts/refine-newstuff.mjs` applied a second pass over the 51 merged
+rows after a 5-dimension review (muscles / SFR / category / recovery / rest) —
+see `_newstuff_refine_report.md` for the row list. Key corrections: (1) the
+rich AI muscle lists were double-to-triple counting Back-group volume vs the
+mother file's calibration (engine.js SUMS same-group atoms — a new pulldown
+credited 2.75 Back sets/set vs mother Lat Pulldown's 1.0), fixed by damping
+with `:weight` syntax (Teres Major:0.5, Rhomboids:0.25, Upper Traps:0.125-0.25)
+while keeping every muscle listed; (2) `Rhomboids` renamed to `Mid Back` in the
+horizontal rows so all ~35 row movements share mother's atom (Rhomboids stays
+on vertical pulls); (3) SFR demoted Excellent→Good on 22 rows to match the
+fact-checked precedent tier (Lat Pulldown/Seated Cable Row/Seated Row Machine
+= Good), keeping Excellent only on Machine Supported Pull Ups + Standing Cable
+Pullovers (the Braced Single Arm Cable Pulldown profile: fatigue 2 + stable +
+direct isolation); (4) bent-over rows Unstable→Moderate and chest-supported
+barbell/DB rows Very Stable→Stable per mother precedent; weighted pull-ups
+overload High→Moderate (mother Weighted Pull-Up); cable pulldowns stretch
+Yes→Partial. Recovery windows and rest times needed no changes (0 audit flags).
+Known-open: the Stretch-Mediated column is still internally mixed across the
+wider lat family (mother rows Partial vs new rows No/Yes; band rows None vs
+band pull-ups Yes) — surfaced to Hani, awaiting a call.
