@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -182,6 +182,7 @@ export default function Dashboard() {
   const [unit, setUnit] = useState(() => getUnit())
   const [selectedDay, setSelectedDay] = useState(null) // { date, sessions }
   const [monthPage, setMonthPage] = useState('calendar') // calendar/summary card: which page is showing
+  const calendarSectionRef = useRef(null)
   const [goals, setGoals] = useState(() => getGoals())
   const [editingGoals, setEditingGoals] = useState(false)
   const [blockModal, setBlockModal] = useState(null) // { block } | null; block null = new
@@ -238,6 +239,15 @@ export default function Dashboard() {
   // the editor (WorkoutTracker reads editSessionId from navigation state).
   function editDaySession(session) {
     navigate('/log', { state: { editSessionId: session.id } })
+  }
+
+  // Hero "Today"/"Tomorrow" click target: select that date in the calendar's
+  // existing day panel (same one the calendar grid itself uses) and scroll to
+  // it, so the whole app has one place that shows "what's on this day."
+  function goToDay(date, daySessions) {
+    setMonthPage('calendar')
+    setSelectedDay({ date, sessions: daySessions })
+    calendarSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   // Delete a session straight from the calendar day panel — no need to
@@ -362,9 +372,12 @@ export default function Dashboard() {
   // rotation that already advanced today it returns null, i.e. done.
   // No program falls back to the name-based "Up next" heuristic.
   const weeklyProgram = !!program && scheduleMode(program) === 'weekly'
-  const trainedToday = sessions.some((s) => new Date(s.date).toDateString() === new Date().toDateString())
+  const todaySessions = sessions.filter((s) => new Date(s.date).toDateString() === new Date().toDateString())
+  const trainedToday = todaySessions.length > 0
   const todayPlanned = plannedDayForDate(program, Date.now())
-  const tomorrowPlanned = plannedDayForDate(program, Date.now() + 24 * 60 * 60 * 1000)
+  const tomorrowDate = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const tomorrowSessions = sessions.filter((s) => new Date(s.date).toDateString() === tomorrowDate.toDateString())
+  const tomorrowPlanned = plannedDayForDate(program, tomorrowDate.getTime())
   const exerciseCount = (day) => `${day.exercises.length} exercise${day.exercises.length !== 1 ? 's' : ''}`
   const upToday = !program
     ? { label: hero.next, sub: null }
@@ -438,25 +451,42 @@ export default function Dashboard() {
               )}
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-1">{program ? 'Today' : 'Up next'}</p>
-                <p className="font-heading text-[15px] font-medium break-words">{upToday.label}</p>
-                {upToday.sub && <p className="text-[11px] text-cream/50">{upToday.sub}</p>}
-                {upToday.done ? (
-                  <p className="text-[11px] text-cream/70">Done for today ✓</p>
-                ) : upToday.rest ? (
-                  <p className="text-[11px] text-cream/70">Enjoy your day off — relax and recover.</p>
-                ) : (
-                  <Link to="/log" className="text-[11px] text-cream/70 underline hover:text-cream no-underline">
+                <button
+                  type="button"
+                  onClick={() => goToDay(new Date(), todaySessions)}
+                  aria-label={`See today's exercises${upToday.label ? `: ${upToday.label}` : ''}`}
+                  className="block w-full text-left cursor-pointer group bg-transparent border-none p-0"
+                >
+                  <p className="font-heading text-[15px] font-medium break-words group-hover:underline">{upToday.label}</p>
+                  {upToday.sub && <p className="text-[11px] text-cream/50">{upToday.sub}</p>}
+                  {upToday.done ? (
+                    <p className="text-[11px] text-cream/70">Done for today ✓</p>
+                  ) : upToday.rest ? (
+                    <p className="text-[11px] text-cream/70">Enjoy your day off — relax and recover.</p>
+                  ) : null}
+                </button>
+                {!upToday.done && !upToday.rest && (
+                  <Link
+                    to="/log"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[11px] text-cream/70 underline hover:text-cream no-underline"
+                  >
                     {program ? 'Start today’s session →' : 'Start logging →'}
                   </Link>
                 )}
                 {upTomorrow && (
-                  <>
-                    <p className="text-[10px] uppercase tracking-wider text-cream/50 mt-3 mb-0.5">Tomorrow</p>
-                    <p className="text-[13px] font-medium break-words">
+                  <button
+                    type="button"
+                    onClick={() => goToDay(tomorrowDate, tomorrowSessions)}
+                    aria-label={`See tomorrow's exercises: ${upTomorrow.label}`}
+                    className="block w-full text-left cursor-pointer group bg-transparent border-none p-0 mt-3"
+                  >
+                    <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-0.5">Tomorrow</p>
+                    <p className="text-[13px] font-medium break-words group-hover:underline">
                       {upTomorrow.label}
                       {upTomorrow.sub && <span className="text-[11px] font-normal text-cream/50"> · {upTomorrow.sub}</span>}
                     </p>
-                  </>
+                  </button>
                 )}
               </div>
             </div>
@@ -464,6 +494,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* SECTION 2 — CALENDAR / THIS MONTH (paged: calendar first, summary second) */}
+        <div ref={calendarSectionRef}>
         <Card>
           <SectionHeading
             icon={CalendarDays}
@@ -600,6 +631,7 @@ export default function Dashboard() {
             </div>
           )}
         </Card>
+        </div>
 
         {/* SECTION 5 — MUSCLE VOLUME (effective sets, range-selectable) */}
         <Card>
