@@ -2405,7 +2405,7 @@
         "Hip Flexors": 0.5,
         "Obliques": 0.25
       },
-      "fatigueScore": 1,
+      "fatigueScore": 2,
       "recoveryWindowHours": [
         24,
         48
@@ -3045,14 +3045,14 @@
         "Glute Max": 0.5,
         "Spinal Erectors": 0.25
       },
-      "fatigueScore": 3,
+      "fatigueScore": 4,
       "recoveryWindowHours": [
         72,
         96
       ],
       "restSeconds": [
-        180,
-        240
+        240,
+        360
       ],
       "progressiveOverload": "very high",
       "stability": "very stable",
@@ -3061,7 +3061,7 @@
       "stretchMediated": "none",
       "resistanceProfile": "balanced",
       "equipment": "machine",
-      "axialLoading": false,
+      "axialLoading": true,
       "skill": "moderate",
       "notes": null
     },
@@ -3903,7 +3903,7 @@
         "Upper Traps": 0.5,
         "Rotator Cuff": 0.25
       },
-      "fatigueScore": 3,
+      "fatigueScore": 2,
       "recoveryWindowHours": [
         24,
         48
@@ -4418,7 +4418,7 @@
       "stretchMediated": "none",
       "resistanceProfile": "balanced",
       "equipment": "free weight",
-      "axialLoading": true,
+      "axialLoading": false,
       "skill": "moderate",
       "notes": null
     },

@@ -77,7 +77,7 @@ Machine Fly,Chest,Isolation,Bilateral,Middle Chest,Front Delts,,,1,24-48 hours,H
 Dumbbell Fly,Chest,Isolation,Bilateral,Middle Chest,Front Delts,,,1,24-48 hours,Low,Moderate,High,Good,No,Shortened Bias,Free Weight,No,Moderate,2-3 minutes,
 Incline Dumbbell Fly,Chest,Isolation,Bilateral,Upper Chest,Front Delts,,,1,24-48 hours,Low,Moderate,High,Good,No,Shortened Bias,Free Weight,No,Moderate,2-3 minutes,
 Incline Cable Fly,Chest,Isolation,Can Be Both,Upper Chest,Front Delts,,,1,24-48 hours,Moderate,Stable,High,Excellent,No,Balanced,Cable,No,Moderate,2-3 minutes,
-Dragon Flag,Core,Isolation,Bilateral,Rectus Abdominis,Hip Flexors,Obliques,,1,24-48 hours,Low,Moderate,Moderate,Good,No,Balanced,Bodyweight,No,Very High,2 minutes,
+Dragon Flag,Core,Isolation,Bilateral,Rectus Abdominis,Hip Flexors,Obliques,,2,24-48 hours,Low,Moderate,Moderate,Good,No,Balanced,Bodyweight,No,Very High,2 minutes,
 Decline Crunches,Core,Isolation,Bilateral,Rectus Abdominis,Obliques,Hip Flexors,,1,24-48 hours,Moderate,Moderate,High,Good,No,Balanced,Free Weight,No,Moderate,2 minutes,
 Crunch Machine,Core,Isolation,Bilateral,Rectus Abdominis,Obliques,Transverse Abdominis,,1,24-48 hours,High,Very Stable,Excellent,Excellent,No,Balanced,Machine,No,Moderate,2 minutes,
 Russian Twist,Core,Isolation,Bilateral,Obliques,Rectus Abdominis,,,1,24-48 hours,Low,Moderate,Moderate,Good,No,Balanced,Free Weight,No,Low,2 minutes,"Can be weighted. Focus on torso rotation, not just moving the hands."
@@ -98,7 +98,7 @@ Barbell Hip Thrusts,Legs,Compound,Bilateral,Glute Max,Hamstrings,Quadriceps,,4,4
 Dumbbell Walking Lunge,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,4,48-72 hours,Moderate,Highly Unstable,High,Poor,No,Balanced,Free Weight,No,Moderate,3-4 minutes,
 Barbell Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,48-72 hours,Very High,Moderate,High,Average,Partial,Lengthened Bias,Free Weight,Yes,High,4-7 minutes,Stance width and depth dictate Glute vs Quad bias.
 Glute Kickback Machine,Legs,Isolation,Bilateral,Glute Max,Hamstrings,,,3,36-60 hours,High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
-Smith Machine Good Morning,Legs,Compound,Bilateral,Hamstrings,Glute Max,Spinal Erectors,,3,72-96 hours,Very High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
+Smith Machine Good Morning,Legs,Compound,Bilateral,Hamstrings,Glute Max,Spinal Erectors,,4,72-96 hours,Very High,Very Stable,Excellent,Good,No,Balanced,Machine,Yes,Moderate,4-6 minutes,
 Belt Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,48-72 hours,Very High,Moderate,High,Average,Partial,Lengthened Bias,Free Weight,Yes,High,4-7 minutes,Stance width and depth dictate Glute vs Quad bias.
 Stiff Leg Deadlift,Legs,Compound,Bilateral,Hamstrings,Glute Max,Spinal Erectors,,5,72-96 hours,Very High,Moderate,High,Poor,No,Balanced,Free Weight,Yes,High,4-7 minutes,
 Barbell Glute Bridge,Legs,Compound,Bilateral,Glute Max,Hamstrings,Quadriceps,,3,48-72 hours,Very High,Moderate,High,Average,No,Balanced,Free Weight,No,Moderate,2-3 minutes,
@@ -126,7 +126,7 @@ Seated Barbell Shoulder Press,Shoulders,Compound,Bilateral,Front Delts,Side Delt
 Smith Machine Behind The Neck Press,Shoulders,Compound,Bilateral,Side Delts,Front Delts,"Long Head Triceps, Lateral Head Triceps, Medial Head Triceps",,3,36-60 hours,Very High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
 Smith Machine Shoulder Press,Shoulders,Compound,Bilateral,Front Delts,Side Delts,"Long Head Triceps, Lateral Head Triceps, Medial Head Triceps",,3,36-60 hours,Very High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
 Lever Shoulder Press,Shoulders,Compound,Bilateral,Front Delts,Side Delts,"Long Head Triceps, Lateral Head Triceps, Medial Head Triceps",,3,36-60 hours,High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
-Face Pull,Shoulders,Isolation,Bilateral,Rear Delts,Upper Traps,Rotator Cuff,,3,24-48 hours,Moderate,Stable,Low,Good,No,Balanced,Cable,No,Moderate,2 minutes,
+Face Pull,Shoulders,Isolation,Bilateral,Rear Delts,Upper Traps,Rotator Cuff,,2,24-48 hours,Moderate,Stable,Low,Good,No,Balanced,Cable,No,Moderate,2 minutes,
 Dumbbell Shoulder Press,Shoulders,Compound,Can Be Both,Front Delts,Side Delts,"Long Head Triceps, Lateral Head Triceps, Medial Head Triceps",,3,48-72 hours,High,Moderate,High,Average,No,Balanced,Free Weight,No,Moderate,3.5-5 minutes,
 Barbell Upright Row,Shoulders,Hybrid,Bilateral,Upper Traps,Side Delts,Front Delts,,3,48-72 hours,Very High,Moderate,High,Average,Partial,Shortened Bias,Free Weight,No,Moderate,3.5-5 minutes,"Elbow flare determines bias: tucked = Lats, flared = Upper Back/Rear Delts."
 Dumbbell Chest Supported Lateral Raise,Shoulders,Isolation,Bilateral,Side Delts,Rear Delts,Upper Traps,,1,24-48 hours,Low,Stable,Excellent,Good,Partial,Shortened Bias,Free Weight,No,Low,2-3 minutes,Lean slightly forward to better align Side Delts against gravity.
@@ -142,7 +142,7 @@ Incline Dumbbell Side Lateral Raise,Shoulders,Isolation,Unilateral,Side Delts,Re
 EZ Bar Upright Row,Traps,Hybrid,Bilateral,Upper Traps:0.8,Side Delts:0.7,"Mid Traps:0.4,Front Delts:0.3",,3,48-72 hours,High,Moderate,High,Average,Partial,Shortened Bias,Free Weight,No,Moderate,3.5-5 minutes,"Elbow flare determines bias: tucked = Lats, flared = Upper Back/Rear Delts."
 Cable Upright Row,Traps,Hybrid,Can Be Both,Upper Traps:0.8,Side Delts:0.7,"Mid Traps:0.4,Front Delts:0.3",,3,48-72 hours,High,Stable,High,Good,Partial,Balanced,Cable,No,Moderate,3.5-5 minutes,"Elbow flare determines bias: tucked = Lats, flared = Upper Back/Rear Delts."
 Dumbbell Upright Row,Traps,Hybrid,Can Be Both,Upper Traps:0.8,Side Delts:0.7,"Mid Traps:0.4,Front Delts:0.3",,3,48-72 hours,High,Moderate,High,Average,Partial,Shortened Bias,Free Weight,No,Moderate,3.5-5 minutes,"Elbow flare determines bias: tucked = Lats, flared = Upper Back/Rear Delts."
-Barbell Shrug,Traps,Isolation,Bilateral,Upper Traps,Rhomboids,Brachioradialis,,1,24-48 hours,Very High,Moderate,Moderate,Good,No,Balanced,Free Weight,Yes,Moderate,2-3 minutes,
+Barbell Shrug,Traps,Isolation,Bilateral,Upper Traps,Rhomboids,Brachioradialis,,1,24-48 hours,Very High,Moderate,Moderate,Good,No,Balanced,Free Weight,No,Moderate,2-3 minutes,
 Prone Incline Shrug,Traps,Isolation,Bilateral,Upper Traps,Rhomboids,Rear Delts,,1,24-48 hours,Moderate,Stable,Moderate,Good,No,Balanced,Free Weight,No,Moderate,2-3 minutes,
 Dumbbell Shrug,Traps,Isolation,Bilateral,Upper Traps,Rhomboids,Brachioradialis,,1,24-48 hours,Moderate,Moderate,Moderate,Good,No,Balanced,Free Weight,No,Moderate,2-3 minutes,
 Incline Dumbbell Y-Raise,Traps,Isolation,Can Be Both,Upper Traps,Rear Delts,Rhomboids,,1,24-48 hours,Low,Moderate,High,Good,No,Shortened Bias,Free Weight,No,Low,2-3 minutes,

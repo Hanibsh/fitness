@@ -23,74 +23,39 @@ Fatigue Score and Estimated Recovery Window were **not** touched on these 4 —
 only Recommended Rest Time moved, since that was the one field out of step
 with the other two.
 
-## Flagged for review — NOT applied (12 exercises, judgment calls)
+## Judgment calls — resolved 2026-07-10 (Hani approved all 4 recommendations)
 
-These have more than one plausible resolution (which field is "wrong" isn't
-mechanically derivable from the other columns), so per the agreed Step 3 plan
-they're surfaced for a decision rather than auto-fixed.
+| Exercise | Field(s) | Before | After |
+|---|---|---|---|
+| Smith Machine Good Morning | Fatigue / Axial / Rest | 3 / No / 3-4min | **4 / Yes / 4-6min** — brought in line with its own 72-96h window and near-identical Stiff Leg Deadlift (fatigue 5, axial Yes, same window) |
+| Barbell Shrug | Axial Loading | Yes | **No** — small-ROM, arms-at-sides hold doesn't carry squat/deadlift-style spinal-compression risk; fatigue/window/rest already agreed with each other |
+| Dragon Flag | Fatigue | 1 | **2** — full-body-lever hold with Skill = Very High was understated at 1; kept below Toes to Bar (3) |
+| Face Pull | Fatigue | 3 | **2** — trimmed the 3x spread vs. near-identical Cable Rear Delt Fly (1), kept a small premium for rotator-cuff/upper-trap involvement |
 
-### Smith Machine Good Morning — fatigue vs. window disagree
-Fatigue 3, but window 72-96h (that window is otherwise reserved for fatigue-5
-axial hinges). The near-identical free-weight version, **Stiff Leg Deadlift**,
-has the *same* 72-96h window with fatigue **5**, axial **Yes**, rest **4-7min**
-— Smith Good Morning sits at fatigue 3 / axial No / rest 3-4min despite an
-identical target-muscle set and window. This was already named as a known
-problem row in project memory before this audit.
-**My read:** the Smith machine likely doesn't cut fatigue this much for a
-hip-hinge pattern (it removes balance demand, not spinal/hamstring loading) —
-lean toward raising fatigue (3→4), axial (No→Yes), and rest (3-4min→4-6min)
-to match the window, rather than shortening the window. Your call.
+Applied directly to `data/professional_hypertrophy_db_v3.csv`. Re-running the
+audit after these fixes: flags dropped from 18 → 10, and the remaining 10 are
+exactly the two groups below (already reviewed, no action needed).
 
-### Barbell Shrug — axial flag disagrees with everything else
-Axial Loading = Yes, but fatigue 1 / window 24-48h / rest 2-3min (all
-isolation-tier). Fatigue/window/rest all agree with *each other* — it's the
-axial flag that's the outlier.
-**My read:** "Axial Loading" here may be over-literal — the column is meant
-to flag exercises with real spinal-compression risk (squat/deadlift-style),
-and a shrug's small-ROM, arms-at-sides hold doesn't carry that risk despite
-technically loading the spine. Lean toward changing Axial Loading to **No**
-rather than raising fatigue/window/rest. Your call.
-
-### Smith Machine Squat / Hack Squats Machine — fatigue 5 on machines
+### Reviewed, no change — Smith Machine Squat / Hack Squats Machine (fatigue 5 on machines)
 Rule R5 assumes stable equipment lowers systemic fatigue, but squat-pattern
 movements are mass/joint-driven, not balance-driven — removing the balance
 demand often lets you load them *heavier*, which can offset or exceed the
-stability discount.
-**My read:** likely fine as-is (false positive on Rule 5) — no change
-recommended, but flagging since the rule fired.
+stability discount. Likely fine as-is (false positive on Rule 5).
 
-### Dragon Flag (fatigue 1) vs. Toes to Bar (fatigue 3)
-Both isolation, bodyweight, rectus-abdominis-primary. Dragon Flag has
-Skill = Very High and is widely regarded as one of the more demanding
-core moves (full-body lever), which sits oddly next to a fatigue score of 1.
-**My read:** Dragon Flag's fatigue may be understated — worth a second look,
-possibly 2. No change applied.
+### Reviewed, no change — Glute Max free-weight group (Sumo Deadlift 5, Trap Bar Deadlift 5, Barbell Hip Thrusts 4, Single-Leg DB Hip Thrust 4, Barbell Glute Bridge 3)
+Dismissed as a false positive — this groups by primary muscle only, which
+conflates genuinely different movement patterns (maximal axial deadlifts vs.
+non-axial hip-extension work). The spread is justified by movement pattern.
 
-### Face Pull (fatigue 3) vs. Cable Rear Delt Fly (fatigue 1)
-Both isolation, cable, rear-delt-primary. A 3-point spread for two fairly
-similar rear-delt cable exercises looks wide. Face Pull's rotator-cuff/upper-trap
-involvement and multi-directional pull plausibly justify *some* premium over
-a straight fly, but 3x on a 1-5 scale looks like a stretch.
-**My read:** consider trimming Face Pull to fatigue 2. No change applied.
-
-### Glute Max free-weight group (Sumo Deadlift 5, Trap Bar Deadlift 5, Barbell Hip Thrusts 4, Single-Leg DB Hip Thrust 4, Barbell Glute Bridge 3)
-Reviewed and **dismissed as a false positive** — this groups by primary
-muscle only, which conflates genuinely different movement patterns (maximal
-axial deadlifts vs. non-axial hip-extension work). The spread is justified by
-movement pattern, not a data error.
-
-### Quadriceps machine group (Smith Machine Squat 5, Hack Squats Machine 5, Leg Press 3)
-Reviewed, **likely fine** — Leg Press removes torso-stabilization demand
-(back supported on a pad) that squat-pattern machines still require, which
-plausibly justifies the gap. No change recommended.
+### Reviewed, no change — Quadriceps machine group (Smith Machine Squat 5, Hack Squats Machine 5, Leg Press 3)
+Leg Press removes torso-stabilization demand (back supported on a pad) that
+squat-pattern machines still require, which plausibly justifies the gap.
 
 ## Next step
 
-Awaiting your decisions on the 6 flagged items above (Smith Good Morning,
-Barbell Shrug, Dragon Flag, Face Pull — the other two are "likely fine, no
-action"). Once resolved, rebuild (`npm run build:exercises`) and re-run this
-script to confirm zero flags, then move to Step 4 (document column semantics
-+ re-anchor `engineConfig.js`'s RIR curve per `recovery-rubric.md` §0).
+Step 2 complete — 0 outstanding flags requiring action. Move to Step 4
+(document column semantics + re-anchor `engineConfig.js`'s RIR curve per
+`recovery-rubric.md` §0).
 
 SFR / Hypertrophy Potential / Stretch-Mediated Hypertrophy remain out of
 scope for this pass (deferred to a later session per Hani's instruction).
