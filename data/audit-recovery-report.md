@@ -4,7 +4,7 @@ Run via `node scripts/audit-recovery.mjs` against the 8 cross-column rules in
 `recovery-rubric.md` §5 (147 exercises with valid data, 1 unnamed blank row).
 16 unique exercises flagged across 8 rule categories, 22 flag instances total.
 
-## Applied (4 exercises, 1 field each — `data/exercise-overrides.mjs`)
+## Applied (4 exercises, 1 field each — directly in the CSV)
 
 Same fix pattern already approved once (JM Press / Triceps Dips: fatigue too
 low for the stated rest). Here the mismatch runs the other way: **rest too
