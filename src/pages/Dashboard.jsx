@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  Flame, Dumbbell, TrendingUp, Clock, Trophy, Target, Activity, History,
+  Flame, Dumbbell, TrendingUp, Trophy, Target, Activity, History,
   ChevronRight, Award, CalendarDays, Plus, Pencil, MessageCircle, ArrowRight, Crosshair, Trash2,
   BatteryCharging, Lightbulb,
 } from 'lucide-react'
@@ -73,19 +73,6 @@ function SectionHeading({ children, icon: Icon, right }) {
         <h2 className="font-heading text-lg font-medium text-text-primary">{children}</h2>
       </div>
       {right}
-    </div>
-  )
-}
-
-function StatTile({ icon: Icon, label, value, sub }) {
-  return (
-    <div className="bg-white border border-border p-4 sm:p-5">
-      <div className="flex items-center gap-1.5 mb-2 text-text-light">
-        {Icon && <Icon className="w-3.5 h-3.5" />}
-        <span className="text-[10px] uppercase tracking-wider">{label}</span>
-      </div>
-      <p className="font-heading text-2xl font-medium text-text-primary leading-none break-words">{value}</p>
-      {sub && <p className="text-[11px] text-text-muted mt-1.5">{sub}</p>}
     </div>
   )
 }
@@ -194,6 +181,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [unit, setUnit] = useState(() => getUnit())
   const [selectedDay, setSelectedDay] = useState(null) // { date, sessions }
+  const [monthPage, setMonthPage] = useState('calendar') // calendar/summary card: which page is showing
   const [goals, setGoals] = useState(() => getGoals())
   const [editingGoals, setEditingGoals] = useState(false)
   const [blockModal, setBlockModal] = useState(null) // { block } | null; block null = new
@@ -382,7 +370,6 @@ export default function Dashboard() {
   const pastBlocks = sortedBlocks(blocks).filter((b) => b.id !== active?.id)
   const maxBlockMuscle = block ? Math.max(1, ...block.perMuscle.map((p) => p.sets)) : 1
   const maxSplit = Math.max(1, ...split.map((s) => s.value))
-  const trainingTime = formatDuration(month.durationMs)
   const nextMilestone = records.bestE1rm.value ? Math.ceil((records.bestE1rm.value + 1) / 5) * 5 : 0
 
   return (
@@ -437,87 +424,107 @@ export default function Dashboard() {
                 <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-1">Up next</p>
                 <p className="font-heading text-[15px] font-medium break-words">{upNext.label}</p>
                 {upNext.sub && <p className="text-[11px] text-cream/50">{upNext.sub}</p>}
-                <Link to="/log" className="text-[11px] text-cream/70 underline hover:text-cream no-underline">
-                  {nextDay ? 'Start today’s session →' : 'Start logging →'}
-                </Link>
+                {nextDay?.kind === 'rest' ? (
+                  <p className="text-[11px] text-cream/70">Enjoy your day off — relax and recover.</p>
+                ) : (
+                  <Link to="/log" className="text-[11px] text-cream/70 underline hover:text-cream no-underline">
+                    {nextDay ? 'Start today’s session →' : 'Start logging →'}
+                  </Link>
+                )}
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* SECTION 2 — QUICK STATS */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <StatTile icon={Flame} label="Weekly streak" value={hero.streak} sub={`${hero.streak === 1 ? 'week' : 'weeks'} in a row`} />
-          <StatTile icon={Dumbbell} label="Workouts this month" value={month.workouts} sub={`${month.daysTrained} day${month.daysTrained !== 1 ? 's' : ''} trained`} />
-          <StatTile icon={TrendingUp} label="Volume this month" value={fmtNum(month.volume)} sub={unit} />
-          <StatTile icon={Clock} label="Training time" value={trainingTime || '—'} sub={trainingTime ? 'this month' : 'not tracked yet'} />
-        </div>
-
-        {/* SECTION 3 + 4 — CALENDAR & MONTHLY SUMMARY */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <Card>
-            <SectionHeading icon={CalendarDays}>Workout calendar</SectionHeading>
-            <WorkoutCalendar
-              sessions={sessions}
-              selectedDate={selectedDay?.date}
-              onSelectDay={(date, daySessions) => setSelectedDay({ date, sessions: daySessions })}
-            />
-            {selectedDay && (
-              <div className="mt-4 pt-4 border-t border-border">
-                <p className="text-[12px] font-medium text-text-primary mb-2">
-                  {selectedDay.date.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
-                </p>
-                {selectedDay.sessions.length === 0 ? (
-                  <p className="text-[12px] text-text-muted">No workout logged this day.</p>
-                ) : (
-                  <div className="space-y-2.5">
-                    {selectedDay.sessions.map((s) => (
-                      <div key={s.id} className="bg-cream border border-border p-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="text-[12px] font-medium text-text-primary break-words">{s.name || 'Workout'}</p>
-                            <p className="text-[11px] text-text-muted mt-0.5">
-                              {s.exercises.length} exercise{s.exercises.length !== 1 ? 's' : ''}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              onClick={() => editDaySession(s)}
-                              aria-label={`Edit ${s.name || 'workout'}`}
-                              title="Edit this workout"
-                              className="inline-flex items-center gap-1 text-[11px] font-medium text-cream bg-text-primary px-2.5 py-1 border-none cursor-pointer hover:bg-accent-hover transition-colors"
-                            >
-                              <Pencil className="w-3 h-3" /> Edit
-                            </button>
-                            <button
-                              onClick={() => deleteDaySession(s)}
-                              aria-label={`Delete ${s.name || 'workout'}`}
-                              title="Delete this workout"
-                              className="text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer p-1"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                        {s.exercises.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {s.exercises.map((ex) => (
-                              <span key={ex.id} className="text-[11px] text-text-muted bg-white border border-border px-2 py-0.5">
-                                {ex.name}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+        {/* SECTION 2 — CALENDAR / THIS MONTH (paged: calendar first, summary second) */}
+        <Card>
+          <SectionHeading
+            icon={CalendarDays}
+            right={
+              <div className="flex border border-border shrink-0">
+                <button
+                  onClick={() => setMonthPage('calendar')}
+                  className={`px-3 py-1.5 text-[12px] font-medium cursor-pointer transition-colors ${
+                    monthPage === 'calendar' ? 'bg-text-primary text-cream' : 'bg-white text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  Calendar
+                </button>
+                <button
+                  onClick={() => setMonthPage('summary')}
+                  className={`px-3 py-1.5 text-[12px] font-medium cursor-pointer transition-colors ${
+                    monthPage === 'summary' ? 'bg-text-primary text-cream' : 'bg-white text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  Summary
+                </button>
               </div>
-            )}
-          </Card>
+            }
+          >
+            {monthPage === 'calendar' ? 'Workout calendar' : 'This month'}
+          </SectionHeading>
 
-          <Card>
-            <SectionHeading icon={CalendarDays}>This month</SectionHeading>
+          {monthPage === 'calendar' ? (
+            <>
+              <WorkoutCalendar
+                sessions={sessions}
+                selectedDate={selectedDay?.date}
+                onSelectDay={(date, daySessions) => setSelectedDay({ date, sessions: daySessions })}
+              />
+              {selectedDay && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-[12px] font-medium text-text-primary mb-2">
+                    {selectedDay.date.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+                  </p>
+                  {selectedDay.sessions.length === 0 ? (
+                    <p className="text-[12px] text-text-muted">No workout logged this day.</p>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {selectedDay.sessions.map((s) => (
+                        <div key={s.id} className="bg-cream border border-border p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[12px] font-medium text-text-primary break-words">{s.name || 'Workout'}</p>
+                              <p className="text-[11px] text-text-muted mt-0.5">
+                                {s.exercises.length} exercise{s.exercises.length !== 1 ? 's' : ''}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => editDaySession(s)}
+                                aria-label={`Edit ${s.name || 'workout'}`}
+                                title="Edit this workout"
+                                className="inline-flex items-center gap-1 text-[11px] font-medium text-cream bg-text-primary px-2.5 py-1 border-none cursor-pointer hover:bg-accent-hover transition-colors"
+                              >
+                                <Pencil className="w-3 h-3" /> Edit
+                              </button>
+                              <button
+                                onClick={() => deleteDaySession(s)}
+                                aria-label={`Delete ${s.name || 'workout'}`}
+                                title="Delete this workout"
+                                className="text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer p-1"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                          {s.exercises.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {s.exercises.map((ex) => (
+                                <span key={ex.id} className="text-[11px] text-text-muted bg-white border border-border px-2 py-0.5">
+                                  {ex.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               <MiniStat label="Workouts" value={month.workouts} />
               <MiniStat label="Days trained" value={month.daysTrained} />
@@ -529,8 +536,8 @@ export default function Dashboard() {
               <MiniStat label="PRs" value={month.prs} />
               <MiniStat label="Exercises" value={month.exercises} />
             </div>
-          </Card>
-        </div>
+          )}
+        </Card>
 
         {/* SECTION 5 — MUSCLE VOLUME (effective sets, range-selectable) */}
         <Card>
@@ -805,15 +812,21 @@ export default function Dashboard() {
             </div>
             <div className="space-y-5">
               <ProgressGoal label="Monthly workouts" value={month.workouts} target={goals.monthlyWorkouts} />
-              {goals.lifts.map((g) => (
-                <ProgressGoal
-                  key={g.id}
-                  label={g.exercise}
-                  value={Math.round(bestsByName[g.exercise.trim().toLowerCase()]?.weight || 0)}
-                  target={g.target}
-                  unit={unit}
-                />
-              ))}
+              {goals.lifts.map((g) => {
+                const metric = g.metric || 'weight'
+                const best = bestsByName[g.exercise.trim().toLowerCase()]
+                const value = metric === 'reps' ? best?.reps || 0 : Math.round((metric === 'e1rm' ? best?.e1rm : best?.weight) || 0)
+                const suffix = metric === 'e1rm' ? ' — est. 1RM' : metric === 'reps' ? ' — reps' : ''
+                return (
+                  <ProgressGoal
+                    key={g.id}
+                    label={`${g.exercise}${suffix}`}
+                    value={value}
+                    target={g.target}
+                    unit={metric === 'reps' ? '' : unit}
+                  />
+                )
+              })}
               {goals.lifts.length === 0 && records.bestE1rm.name && (
                 <ProgressGoal
                   label={`${records.bestE1rm.name} — next milestone`}
