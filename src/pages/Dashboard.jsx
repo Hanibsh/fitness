@@ -465,7 +465,7 @@ export default function Dashboard() {
             right={
               <div className="flex items-center gap-3 shrink-0">
                 <Link
-                  to="/routine"
+                  to={program ? `/routine/${program.id}` : '/routine'}
                   className="inline-flex items-center gap-1 text-[12px] text-text-muted hover:text-text-primary no-underline transition-colors"
                 >
                   <CalendarRange className="w-3.5 h-3.5" /> Edit routine

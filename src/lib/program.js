@@ -23,6 +23,17 @@ function newId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
+// Move an item within an array by delta, returning a new array. Shared by
+// every reorderable list in the builder (routines, days, planned exercises).
+export function moveInArray(arr, index, delta) {
+  const to = index + delta
+  if (to < 0 || to >= arr.length) return arr
+  const next = arr.slice()
+  const [item] = next.splice(index, 1)
+  next.splice(to, 0, item)
+  return next
+}
+
 // ---- Factories -------------------------------------------------------------
 
 // A planned exercise inside a training day. `exerciseId` links to the DB when

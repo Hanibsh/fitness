@@ -1437,7 +1437,7 @@ export default function WorkoutTracker() {
                   <CalendarDays className="w-4 h-4 text-cream/70 shrink-0" />
                   <p className="text-[11px] uppercase tracking-wider text-cream/60">Today’s session</p>
                 </div>
-                <Link to="/routine" className="text-[11px] text-cream/70 underline hover:text-cream no-underline shrink-0">Edit program</Link>
+                <Link to={`/routine/${program.id}`} className="text-[11px] text-cream/70 underline hover:text-cream no-underline shrink-0">Edit program</Link>
               </div>
 
               {todayDay.kind === 'rest' ? (
