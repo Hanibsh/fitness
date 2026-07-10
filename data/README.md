@@ -90,9 +90,9 @@ fatigue at failure — see `recovery-rubric.md` §0 for why.
 | Estimated Recovery Window | e.g. `48-72 hours`. Time to recover after a HARD set (~0-2 RIR) — see the load-bearing definition above. Archetype bands (isolation 24-48h → maximal axial hinges 72-120h) in `recovery-rubric.md` §2. |
 | Progressive Overload Potential | `Low`, `Moderate`, `High`, `Very High` |
 | Stability | `Highly unstable`, `Unstable`, `Moderate`, `Stable`, `Very stable` |
-| Hypertrophy Potential | `Low`, `Moderate`, `High`, `Excellent` |
+| Hypertrophy Potential | `Low`, `Moderate`, `High`, `Excellent`. Overall growth stimulus — should track loosely with SFR and Stability/Equipment (a genuinely low-stimulus lift can't have a "good" SFR). Not read by any app code yet — data hygiene ahead of a future feature. Rubric in `data/hp-stretch-rubric.md`. |
 | Stimulus-to-Fatigue Ratio (SFR) | `Poor`, `Average`, `Good`, `Excellent`. Target-muscle stimulus ÷ total fatigue (systemic + joint + stabilizer). A *derived* rating — must stay consistent with Fatigue Score / Hypertrophy Potential / Stability / Equipment (stable machines & cables tend high; axial free-weight compounds and unstable moves tend low). Feeds the advisor's "which exercise to trim first" logic. Rubric + audit rules in `data/sfr-rubric.md`; run `node scripts/audit-sfr.mjs` after edits. |
-| Stretch-Mediated Hypertrophy | `No`, `Partial`, `Yes` |
+| Stretch-Mediated Hypertrophy | `No`, `Partial`, `Yes`. Does the exercise load the target muscle at long (stretched) muscle length — a descriptive tag, not a claim of bonus gains (the "distinct mechanism" framing is contested in the literature). Should track Resistance Profile: `Lengthened Bias` implies at least `Partial`; the reverse isn't required (`Shortened Bias` can still load real stretch tension — cam machines, dead-hang starts). Not read by any app code yet. Rubric in `data/hp-stretch-rubric.md`. |
 | Resistance Profile | `Balanced`, `Shortened bias`, `Lengthened bias` |
 | Stability Requirement | Actually **equipment**: `Free weight`, `Machine`, `Cable`, `Bodyweight` |
 | Axial Loading | `No`, `Yes`. Real spinal-compression risk (squat/deadlift-style) — not just "holds a loaded barbell" (a shrug loads a barbell but isn't axial in this sense; see the Barbell Shrug case in `recovery-rubric.md`). |
