@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, CalendarRange, Copy } from 'lucide-react'
 import { useProgramsState } from '../lib/useProgramsState'
+import ConfirmModal from '../components/ConfirmModal'
 
 // The routines list: every saved routine, reorderable, with Set active /
 // Duplicate / Delete, and a tap-through to the full-page editor. Creating or
@@ -10,6 +12,7 @@ import { useProgramsState } from '../lib/useProgramsState'
 export default function Routine() {
   const navigate = useNavigate()
   const { user, programsState, loading, duplicateRoutine, setActiveRoutine, moveRoutine, deleteRoutine } = useProgramsState()
+  const [confirmDelete, setConfirmDelete] = useState(null) // { id, name } | null
 
   function openEditor(program) {
     navigate(`/routine/${program.id}`)
@@ -101,7 +104,7 @@ export default function Routine() {
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); deleteRoutine(p.id) }}
+                            onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: p.id, name: p.name }) }}
                             aria-label={`Delete ${p.name}`}
                             title="Delete"
                             className="text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer p-1"
@@ -129,6 +132,15 @@ export default function Routine() {
           )}
         </motion.div>
       </div>
+
+      {confirmDelete && (
+        <ConfirmModal
+          title={`Delete "${confirmDelete.name}"?`}
+          message="This removes all its days and exercises. This can't be undone."
+          onConfirm={() => deleteRoutine(confirmDelete.id)}
+          onClose={() => setConfirmDelete(null)}
+        />
+      )}
     </div>
   )
 }

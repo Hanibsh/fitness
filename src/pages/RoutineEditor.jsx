@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Plus, X, ChevronUp, ChevronDown, Dumbbell, Moon, Trash2, Locate } from 'lucide-react'
 import { useProgramsState } from '../lib/useProgramsState'
+import ConfirmModal from '../components/ConfirmModal'
 import {
   emptyProgram,
   createDay,
@@ -26,6 +28,7 @@ export default function RoutineEditor() {
   const navigate = useNavigate()
   const isNew = id === 'new'
   const { programsState, loading, saveProgram, addRoutine, setActiveRoutine, deleteRoutine } = useProgramsState()
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const editingProgram = !isNew ? programsState.programs.find((p) => p.id === id) || null : null
   const isEditingActive = !!editingProgram && editingProgram.id === programsState.activeId
@@ -353,11 +356,20 @@ export default function RoutineEditor() {
             </button>
           </div>
 
-          <button onClick={handleDelete} className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer mt-8 transition-colors">
+          <button onClick={() => setConfirmDelete(true)} className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer mt-8 transition-colors">
             <Trash2 className="w-3.5 h-3.5" /> Delete this routine
           </button>
         </motion.div>
       </div>
+
+      {confirmDelete && (
+        <ConfirmModal
+          title={`Delete "${editingProgram.name}"?`}
+          message="This removes all its days and exercises. This can't be undone."
+          onConfirm={handleDelete}
+          onClose={() => setConfirmDelete(false)}
+        />
+      )}
     </div>
   )
 }
