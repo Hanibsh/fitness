@@ -187,6 +187,7 @@ export default function Dashboard() {
   const [editingGoals, setEditingGoals] = useState(false)
   const [blockModal, setBlockModal] = useState(null) // { block } | null; block null = new
   const [expandedMuscle, setExpandedMuscle] = useState(null) // weekly-volume drill-down
+  const [expandedRecovery, setExpandedRecovery] = useState(null) // recovery drill-down
   const [volumeRangeDays, setVolumeRangeDays] = useState(7) // weekly-volume window: 7/30/90
   const [editingNick, setEditingNick] = useState(false)
 
@@ -713,7 +714,8 @@ export default function Dashboard() {
           <SectionHeading icon={BatteryCharging}>Recovery</SectionHeading>
           <p className="text-[12px] text-text-muted mb-4 -mt-2">
             How recovered each muscle is right now — from how hard, how directly and how recently you trained it.
-            Estimates to guide the next session, not gospel.
+            Tap a muscle for the sub-muscle breakdown; a group carries the combined load of its parts, so it can read
+            lower than any single one. Estimates to guide the next session, not gospel.
           </p>
           {(() => {
             const trained = recovery.muscles.filter((m) => m.lastTrained).sort((a, b) => a.recoveryPct - b.recoveryPct)
@@ -727,30 +729,58 @@ export default function Dashboard() {
                   {/* Engine tracks strain (100 = wrecked); shown flipped so higher = better, like the muscle rows. */}
                   <StatusChip tone={strainTone}>{recovery.systemic.level} · {100 - recovery.systemic.pct}%</StatusChip>
                 </div>
-                {trained.map((m) => (
-                  <div key={m.muscle} title={m.lastTrained ? `Last trained: ${relativeDay(m.lastTrained)}` : undefined}>
-                    <div className="flex justify-between items-center gap-2 flex-wrap text-[12px] mb-1">
-                      <span className="text-text-secondary flex items-center gap-2">
-                        {m.muscle}
-                        <StatusChip tone={m.status === 'ready' ? 'green' : 'amber'}>
-                          {m.status === 'ready' ? 'Ready' : 'Recovering'}
-                        </StatusChip>
-                      </span>
-                      <span className="text-text-muted tabular-nums">
-                        {m.recoveryPct}%
-                        {m.status === 'recovering' && m.readyAt && (
-                          <span className="text-text-light"> · ready {formatReadyIn(m.readyAt)}</span>
-                        )}
-                      </span>
+                {trained.map((m) => {
+                  const expandable = m.atoms?.length > 0
+                  const open = expandedRecovery === m.muscle
+                  return (
+                    <div key={m.muscle} title={m.lastTrained ? `Last trained: ${relativeDay(m.lastTrained)}` : undefined}>
+                      <button
+                        onClick={() => expandable && setExpandedRecovery(open ? null : m.muscle)}
+                        className={`w-full text-left bg-transparent border-none p-0 ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
+                      >
+                        <div className="flex justify-between items-center gap-2 flex-wrap text-[12px] mb-1">
+                          <span className="text-text-secondary flex items-center gap-2">
+                            {m.muscle}
+                            {expandable && <ChevronRight className={`w-3 h-3 text-text-light transition-transform ${open ? 'rotate-90' : ''}`} />}
+                            <StatusChip tone={m.status === 'ready' ? 'green' : 'amber'}>
+                              {m.status === 'ready' ? 'Ready' : 'Recovering'}
+                            </StatusChip>
+                          </span>
+                          <span className="text-text-muted tabular-nums">
+                            {m.recoveryPct}%
+                            {m.status === 'recovering' && m.readyAt && (
+                              <span className="text-text-light"> · ready {formatReadyIn(m.readyAt)}</span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-cream border border-border overflow-hidden">
+                          <div
+                            className={`h-full transition-all ${m.status === 'ready' ? 'bg-green-500' : 'bg-amber-400'}`}
+                            style={{ width: `${m.recoveryPct}%` }}
+                          />
+                        </div>
+                      </button>
+                      {open && (
+                        <div className="mt-1.5 ml-3 pl-3 border-l border-border space-y-1.5">
+                          {m.atoms.map((a) => (
+                            <div key={a.atom}>
+                              <div className="flex justify-between items-center text-[11px] mb-0.5">
+                                <span className="text-text-muted">{a.atom}</span>
+                                <span className="text-text-light tabular-nums">{a.recoveryPct}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-cream border border-border overflow-hidden">
+                                <div
+                                  className={`h-full transition-all ${a.status === 'ready' ? 'bg-green-500' : 'bg-amber-400'}`}
+                                  style={{ width: `${a.recoveryPct}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div className="w-full h-2 bg-cream border border-border overflow-hidden">
-                      <div
-                        className={`h-full transition-all ${m.status === 'ready' ? 'bg-green-500' : 'bg-amber-400'}`}
-                        style={{ width: `${m.recoveryPct}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
                 {untouched.length > 0 && (
                   <p className="text-[11px] text-text-light pt-2">
                     Fully recovered: {untouched.map((m) => m.muscle).join(' · ')}

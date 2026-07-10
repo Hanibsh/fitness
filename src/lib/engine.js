@@ -192,11 +192,11 @@ function setFatigueDeposits(set, ex, db, extraMult = 1) {
   if (db && db.muscles && Object.keys(db.muscles).length) {
     for (const [atom, w] of Object.entries(db.muscles)) {
       const g = ATOM_TO_GROUP[atom]
-      if (g) entries.push({ muscle: g, f0: w * base, tau })
+      if (g) entries.push({ muscle: g, atom, f0: w * base, tau })
     }
   } else {
     const g = muscleForExercise(ex.name)
-    if (g) entries.push({ muscle: g, f0: base, tau })
+    if (g) entries.push({ muscle: g, atom: null, f0: base, tau })
   }
   const systemicF0 =
     coef * rf * (db?.axialLoading ? AXIAL_MULT : 1) * (db?.equipment === 'free weight' ? FREE_WEIGHT_MULT : 1)
@@ -359,7 +359,9 @@ export function personalizedModel(sessions) {
 //
 // Returns {
 //   muscles: [{ muscle, recoveryPct, status:'ready'|'recovering', readyAt,
-//               lastTrained }],           // one per ENGINE_MUSCLES
+//               lastTrained,
+//               atoms:[{ atom, recoveryPct, status }] }],  // one per ENGINE_MUSCLES;
+//                                          // atoms = trained sub-muscles, most-fatigued first
 //   systemic: { pct, level:'fresh'|'moderate'|'high' },  // pct = strain, 100 = wrecked
 //   personal: { observations, notes:[{ muscle, mult }] }, // learned recovery speeds
 // }
@@ -370,6 +372,7 @@ export function muscleRecovery(sessions, { now = Date.now(), personalize = true 
   // Keep each deposit as {f0, tau, ts} so the same sum-of-exponentials can be
   // re-evaluated at future times for the ready-time scan.
   const deposits = {} // engine muscle -> [{ f0, tau, ts }]
+  const atomDeposits = {} // DB atom -> [{ f0, tau, ts }] (for the group drill-down)
   const systemicDeposits = [] // [{ f0, ts }]
   const lastTrained = {} // engine muscle -> latest set timestamp
 
@@ -378,8 +381,11 @@ export function muscleRecovery(sessions, { now = Date.now(), personalize = true 
     const ts = Math.min(set.completedAt || s.date, now)
     const novelty = noveltyMult((model.exposureBefore.get(s.id) || {})[exerciseKey(ex)] || 0)
     const { entries, systemicF0 } = setFatigueDeposits(set, ex, db, novelty)
-    for (const { muscle, f0, tau } of entries) {
+    for (const { muscle, atom, f0, tau } of entries) {
       ;(deposits[muscle] = deposits[muscle] || []).push({ f0, tau: tau * tauScale(muscle), ts })
+      // Atoms inherit their group's learned recovery-speed multiplier, so the
+      // drill-down and the group headline stay on one consistent scale.
+      if (atom) (atomDeposits[atom] = atomDeposits[atom] || []).push({ f0, tau: tau * tauScale(muscle), ts })
       if (!lastTrained[muscle] || ts > lastTrained[muscle]) lastTrained[muscle] = ts
     }
     systemicDeposits.push({ f0: systemicF0, ts })
@@ -405,12 +411,24 @@ export function muscleRecovery(sessions, { now = Date.now(), personalize = true 
         }
       }
     }
+    // Per-sub-muscle breakdown for the drill-down: each trained atom in this
+    // group, over the SAME group capacity (so the group — carrying the summed
+    // load of all its atoms — sits at or below any single one), most-fatigued
+    // first. Mirrors effectiveWeeklyVolume's atoms[].
+    const atoms = Object.entries(atomDeposits)
+      .filter(([atom]) => ATOM_TO_GROUP[atom] === muscle)
+      .map(([atom, atomList]) => {
+        const pct = Math.round(100 * Math.max(0, 1 - decayedSum(atomList, now) / capacity))
+        return { atom, recoveryPct: pct, status: pct >= READY_THRESHOLD ? 'ready' : 'recovering' }
+      })
+      .sort((a, b) => a.recoveryPct - b.recoveryPct)
     return {
       muscle,
       recoveryPct,
       status: ready ? 'ready' : 'recovering',
       readyAt,
       lastTrained: lastTrained[muscle] || null,
+      atoms,
     }
   })
 
