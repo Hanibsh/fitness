@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedAt": "2026-07-11",
-  "count": 307,
+  "count": 297,
   "exercises": [
     {
       "id": "barbell-jm-press",
@@ -61,37 +61,6 @@
       "stretchMediated": "none",
       "resistanceProfile": "balanced",
       "equipment": "free weight",
-      "axialLoading": false,
-      "skill": "moderate",
-      "notes": null
-    },
-    {
-      "id": "lever-triceps-dip",
-      "name": "Lever Triceps Dip",
-      "category": "Arms",
-      "type": "compound",
-      "laterality": "bilateral",
-      "muscles": {
-        "Triceps": 1,
-        "Middle Chest": 0.5,
-        "Front Delts": 0.25
-      },
-      "fatigueScore": 1,
-      "recoveryWindowHours": [
-        24,
-        48
-      ],
-      "restSeconds": [
-        180,
-        240
-      ],
-      "progressiveOverload": "high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
-      "stretchMediated": "none",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
       "axialLoading": false,
       "skill": "moderate",
       "notes": null
@@ -2264,36 +2233,6 @@
       "notes": null
     },
     {
-      "id": "machine-fly",
-      "name": "Machine Fly",
-      "category": "Chest",
-      "type": "isolation",
-      "laterality": "bilateral",
-      "muscles": {
-        "Middle Chest": 1,
-        "Front Delts": 0.5
-      },
-      "fatigueScore": 1,
-      "recoveryWindowHours": [
-        24,
-        48
-      ],
-      "restSeconds": [
-        120,
-        180
-      ],
-      "progressiveOverload": "high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
-      "stretchMediated": "none",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "moderate",
-      "notes": null
-    },
-    {
       "id": "dumbbell-fly",
       "name": "Dumbbell Fly",
       "category": "Chest",
@@ -3456,8 +3395,8 @@
       "notes": null
     },
     {
-      "id": "bulgarian-split-squats",
-      "name": "Bulgarian Split Squats",
+      "id": "barbell-bulgarian-split-squat",
+      "name": "Barbell Bulgarian Split Squat",
       "category": "Legs",
       "type": "compound",
       "laterality": "unilateral",
@@ -5288,37 +5227,6 @@
       "notes": null
     },
     {
-      "id": "plate-loaded-chest-press",
-      "name": "Plate-Loaded Chest Press",
-      "category": "Chest",
-      "type": "compound",
-      "laterality": "bilateral",
-      "muscles": {
-        "Middle Chest": 1,
-        "Front Delts": 0.5,
-        "Triceps": 0.5
-      },
-      "fatigueScore": 2,
-      "recoveryWindowHours": [
-        24,
-        48
-      ],
-      "restSeconds": [
-        120,
-        180
-      ],
-      "progressiveOverload": "very high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "excellent",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": "Maximal tension yield with low injury risk"
-    },
-    {
       "id": "plate-loaded-incline-chest-press",
       "name": "Plate-Loaded Incline Chest Press",
       "category": "Chest",
@@ -6637,8 +6545,8 @@
       "notes": null
     },
     {
-      "id": "goblet-bulgarian-lunge",
-      "name": "Goblet Bulgarian Lunge",
+      "id": "goblet-bulgarian-split-squat",
+      "name": "Goblet Bulgarian Split Squat",
       "category": "Legs",
       "type": "compound",
       "laterality": "unilateral",
@@ -6669,8 +6577,8 @@
       "notes": null
     },
     {
-      "id": "dumbbell-bulgarian-lunge",
-      "name": "Dumbbell Bulgarian Lunge",
+      "id": "dumbbell-bulgarian-split-squat",
+      "name": "Dumbbell Bulgarian Split Squat",
       "category": "Legs",
       "type": "compound",
       "laterality": "unilateral",
@@ -7112,8 +7020,8 @@
       "notes": null
     },
     {
-      "id": "smith-machine-bulgarian-lunge",
-      "name": "Smith Machine Bulgarian Lunge",
+      "id": "smith-machine-bulgarian-split-squat",
+      "name": "Smith Machine Bulgarian Split Squat",
       "category": "Legs",
       "type": "compound",
       "laterality": "unilateral",
@@ -7208,8 +7116,8 @@
       "notes": null
     },
     {
-      "id": "bodyweight-bulgarian-lunge",
-      "name": "Bodyweight Bulgarian Lunge",
+      "id": "bodyweight-bulgarian-split-squat",
+      "name": "Bodyweight Bulgarian Split Squat",
       "category": "Legs",
       "type": "compound",
       "laterality": "unilateral",
@@ -8453,8 +8361,8 @@
       "notes": null
     },
     {
-      "id": "selector-chest-supported-row-machine-overhand-grip",
-      "name": "Selector Chest Supported Row Machine, Overhand Grip",
+      "id": "chest-supported-row-machine-overhand-grip",
+      "name": "Chest Supported Row Machine, Overhand Grip",
       "category": "Back",
       "type": "compound",
       "laterality": "bilateral",
@@ -8486,8 +8394,8 @@
       "notes": null
     },
     {
-      "id": "selector-chest-supported-row-machine-neutral-grip-narrow",
-      "name": "Selector Chest Supported Row Machine, Neutral Grip, Narrow",
+      "id": "chest-supported-row-machine-neutral-grip-narrow",
+      "name": "Chest Supported Row Machine, Neutral Grip, Narrow",
       "category": "Back",
       "type": "compound",
       "laterality": "bilateral",
@@ -8518,8 +8426,8 @@
       "notes": null
     },
     {
-      "id": "selector-chest-supported-row-machine-underhand-grip",
-      "name": "Selector Chest Supported Row Machine, Underhand Grip",
+      "id": "chest-supported-row-machine-underhand-grip",
+      "name": "Chest Supported Row Machine, Underhand Grip",
       "category": "Back",
       "type": "compound",
       "laterality": "bilateral",
@@ -8550,8 +8458,8 @@
       "notes": null
     },
     {
-      "id": "selector-chest-supported-row-machine-wide-grip",
-      "name": "Selector Chest Supported Row Machine, Wide Grip",
+      "id": "chest-supported-row-machine-wide-grip",
+      "name": "Chest Supported Row Machine, Wide Grip",
       "category": "Back",
       "type": "compound",
       "laterality": "bilateral",
@@ -8582,8 +8490,8 @@
       "notes": null
     },
     {
-      "id": "selector-chest-supported-row-machine-single-arm",
-      "name": "Selector Chest Supported Row Machine, Single Arm",
+      "id": "chest-supported-row-machine-single-arm",
+      "name": "Chest Supported Row Machine, Single Arm",
       "category": "Back",
       "type": "compound",
       "laterality": "unilateral",
@@ -8604,136 +8512,6 @@
         300
       ],
       "progressiveOverload": "high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "good",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": null
-    },
-    {
-      "id": "plate-loaded-chest-supported-row-machine-overhand-grip",
-      "name": "Plate Loaded Chest Supported Row Machine, Overhand Grip",
-      "category": "Back",
-      "type": "compound",
-      "laterality": "bilateral",
-      "muscles": {
-        "Mid Back": 1,
-        "Upper Traps": 0.25,
-        "Rear Delts": 0.5,
-        "Lats": 0.5,
-        "Biceps": 0.25
-      },
-      "fatigueScore": 3,
-      "recoveryWindowHours": [
-        48,
-        72
-      ],
-      "restSeconds": [
-        210,
-        300
-      ],
-      "progressiveOverload": "very high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "good",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": null
-    },
-    {
-      "id": "plate-loaded-chest-supported-row-machine-overhand-wide",
-      "name": "Plate Loaded Chest Supported Row Machine, Overhand, Wide",
-      "category": "Back",
-      "type": "compound",
-      "laterality": "both",
-      "muscles": {
-        "Rear Delts": 1,
-        "Mid Back": 1,
-        "Upper Traps": 0.25,
-        "Biceps": 0.25
-      },
-      "fatigueScore": 3,
-      "recoveryWindowHours": [
-        48,
-        72
-      ],
-      "restSeconds": [
-        210,
-        300
-      ],
-      "progressiveOverload": "very high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "good",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": null
-    },
-    {
-      "id": "plate-loaded-chest-supported-row-machine-neutral-grip-narrow",
-      "name": "Plate Loaded Chest Supported Row Machine, Neutral Grip, Narrow",
-      "category": "Back",
-      "type": "compound",
-      "laterality": "both",
-      "muscles": {
-        "Lats": 1,
-        "Mid Back": 0.5,
-        "Biceps": 0.5,
-        "Upper Traps": 0.25
-      },
-      "fatigueScore": 3,
-      "recoveryWindowHours": [
-        48,
-        72
-      ],
-      "restSeconds": [
-        210,
-        300
-      ],
-      "progressiveOverload": "very high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "good",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": null
-    },
-    {
-      "id": "plate-loaded-single-arm-chest-supported-row-machine-overhand-grip-narrow",
-      "name": "Plate Loaded Single Arm Chest Supported Row Machine, Overhand Grip, Narrow",
-      "category": "Back",
-      "type": "compound",
-      "laterality": "unilateral",
-      "muscles": {
-        "Mid Back": 1,
-        "Lats": 0.5,
-        "Upper Traps": 0.25,
-        "Biceps": 0.5,
-        "Rear Delts": 0.25
-      },
-      "fatigueScore": 3,
-      "recoveryWindowHours": [
-        48,
-        72
-      ],
-      "restSeconds": [
-        210,
-        300
-      ],
-      "progressiveOverload": "very high",
       "stability": "very stable",
       "hypertrophyPotential": "excellent",
       "sfr": "good",
@@ -8943,103 +8721,6 @@
       "axialLoading": false,
       "skill": "high",
       "notes": "High shoulder mobility required"
-    },
-    {
-      "id": "overhand-grip-plate-loaded-lat-pulldown",
-      "name": "Overhand Grip Plate Loaded Lat Pulldown",
-      "category": "Back",
-      "type": "compound",
-      "laterality": "bilateral",
-      "muscles": {
-        "Lats": 1,
-        "Biceps": 0.5,
-        "Rhomboids": 0.25,
-        "Upper Traps": 0.125,
-        "Rear Delts": 0.25
-      },
-      "fatigueScore": 3,
-      "recoveryWindowHours": [
-        48,
-        72
-      ],
-      "restSeconds": [
-        210,
-        300
-      ],
-      "progressiveOverload": "very high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "good",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": null
-    },
-    {
-      "id": "neutral-grip-plate-loaded-lat-pulldown",
-      "name": "Neutral Grip Plate Loaded Lat Pulldown",
-      "category": "Back",
-      "type": "compound",
-      "laterality": "both",
-      "muscles": {
-        "Lats": 1,
-        "Biceps": 0.5,
-        "Rhomboids": 0.25,
-        "Upper Traps": 0.125
-      },
-      "fatigueScore": 3,
-      "recoveryWindowHours": [
-        48,
-        72
-      ],
-      "restSeconds": [
-        210,
-        300
-      ],
-      "progressiveOverload": "very high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "good",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": null
-    },
-    {
-      "id": "underhand-grip-plate-loaded-lat-pulldown",
-      "name": "Underhand Grip Plate Loaded Lat Pulldown",
-      "category": "Back",
-      "type": "compound",
-      "laterality": "both",
-      "muscles": {
-        "Lats": 1,
-        "Biceps": 0.5,
-        "Rhomboids": 0.25,
-        "Upper Traps": 0.125
-      },
-      "fatigueScore": 3,
-      "recoveryWindowHours": [
-        48,
-        72
-      ],
-      "restSeconds": [
-        210,
-        300
-      ],
-      "progressiveOverload": "very high",
-      "stability": "very stable",
-      "hypertrophyPotential": "excellent",
-      "sfr": "good",
-      "stretchMediated": "partial",
-      "resistanceProfile": "balanced",
-      "equipment": "machine",
-      "axialLoading": false,
-      "skill": "low",
-      "notes": null
     },
     {
       "id": "wide-grip-pull-up",
