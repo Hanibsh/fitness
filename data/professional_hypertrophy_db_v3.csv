@@ -93,7 +93,7 @@ Preacher Dumbbell Wrist Curl,Forearms,Isolation,Can Be Both,Wrist Flexors,,,,1,2
 Preacher Dumbbell Reverse Wrist Curl,Forearms,Isolation,Can Be Both,Wrist Extensors,Brachioradialis:0.3,,,1,24-48 hours,Low,Very Stable,High,Excellent,Yes,Lengthened Bias,Free Weight,No,Low,2 minutes,Bench provides external stability for strict isolation of the extensors.
 Seated One Arm Forearm Cable Curls,Forearms,Isolation,Unilateral,Wrist Flexors,Deep Finger Flexors:0.6,,,1,24-48 hours,Moderate,Stable,High,Excellent,Partial,Balanced,Cable,No,Low,2 minutes,
 Seated One Arm Forearm Reverse Curls,Forearms,Isolation,Unilateral,"Brachioradialis:0.9,Brachialis:0.8",Wrist Extensors:0.5,,,1,24-48 hours,Moderate,Stable,High,Good,Partial,Balanced,Free Weight,No,Low,2 minutes,
-Smith Machine Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,36-60 hours,Very High,Very Stable,Excellent,Average,Partial,Balanced,Machine,Yes,High,3-4 minutes,Stance width and depth dictate Glute vs Quad bias.
+Smith Machine Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,48-72 hours,Very High,Very Stable,Excellent,Average,Partial,Balanced,Machine,Yes,High,3-4 minutes,Stance width and depth dictate Glute vs Quad bias.
 Barbell Hip Thrusts,Legs,Compound,Bilateral,Glute Max,Hamstrings,Quadriceps,,4,48-72 hours,Very High,Moderate,High,Average,No,Balanced,Free Weight,No,Moderate,3-4 minutes,
 Dumbbell Walking Lunge,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,4,48-72 hours,Moderate,Highly Unstable,High,Poor,No,Balanced,Free Weight,No,Moderate,3-4 minutes,
 Barbell Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,48-72 hours,Very High,Moderate,High,Average,Partial,Lengthened Bias,Free Weight,Yes,High,4-7 minutes,Stance width and depth dictate Glute vs Quad bias.
@@ -104,9 +104,9 @@ Stiff Leg Deadlift,Legs,Compound,Bilateral,Hamstrings,Glute Max,Spinal Erectors,
 Barbell Glute Bridge,Legs,Compound,Bilateral,Glute Max,Hamstrings,Quadriceps,,3,48-72 hours,Very High,Moderate,High,Average,No,Balanced,Free Weight,No,Moderate,2-3 minutes,
 Hip Adduction Machine,Legs,Isolation,Bilateral,Adductors,Glute Max,Hamstrings,,3,36-60 hours,High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
 Hip Abduction Machine,Legs,Isolation,Bilateral,Abductors,Glute Max,,,3,36-60 hours,High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
-Smith Machine Hip Thrust,Legs,Compound,Bilateral,Glute Max,Hamstrings,Quadriceps,,4,36-60 hours,Very High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
+Smith Machine Hip Thrust,Legs,Compound,Bilateral,Glute Max,Hamstrings,Quadriceps,,4,48-72 hours,Very High,Very Stable,Excellent,Good,No,Balanced,Machine,No,Moderate,3-4 minutes,
 Pendulum Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,48-72 hours,Very High,Moderate,High,Average,Partial,Lengthened Bias,Free Weight,Yes,High,4-7 minutes,Stance width and depth dictate Glute vs Quad bias.
-Hack Squats Machine,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,36-60 hours,Very High,Very Stable,Excellent,Good,Partial,Balanced,Machine,No,High,3-4 minutes,Stance width and depth dictate Glute vs Quad bias.
+Hack Squats Machine,Legs,Compound,Bilateral,Quadriceps,Glute Max,Hamstrings,,5,48-72 hours,Very High,Very Stable,Excellent,Good,Partial,Balanced,Machine,No,High,3-4 minutes,Stance width and depth dictate Glute vs Quad bias.
 Trap Bar Deadlift,Legs,Compound,Bilateral,Glute Max,Hamstrings,Quadriceps,,5,72-120 hours,Very High,Moderate,High,Poor,No,Balanced,Free Weight,Yes,High,4-7 minutes,
 Leg Press,Legs,Compound,Can Be Both,Quadriceps,Glute Max,Hamstrings,,3,48-72 hours,Very High,Moderate,Excellent,Good,No,Balanced,Machine,No,Moderate,3.5-5 minutes,
 Single-Leg Dumbbell Hip Thrust,Legs,Compound,Unilateral,Glute Max,Hamstrings,Quadriceps,,4,48-72 hours,Moderate,Moderate,High,Average,No,Balanced,Free Weight,No,Moderate,3-4 minutes,
@@ -202,7 +202,7 @@ Concentration Curl,Arms,Isolation,Unilateral,Biceps,Brachialis,,,1,24-48 hours,M
 Barbell Good Morning,Legs,Compound,Bilateral,"Hamstrings, Glute Max",Spinal Erectors,Rectus Abdominis,,5,72-96 hours,Very High,Unstable,High,Average,Yes,Lengthened Bias,Free Weight,Yes,High,4-7 minutes,High axial loading
 Barbell Staggered Stance Good Morning,Legs,Compound,Bilateral,"Hamstrings, Glute Max","Spinal Erectors, Rectus Abdominis",,,5,72-96 hours,High,Moderate,High,Good,Yes,Lengthened Bias,Free Weight,Yes,Moderate,4-7 minutes,
 Kettlebell Swing,Legs,Compound,Bilateral,"Glute Max, Hamstrings",Spinal Erectors,Rectus Abdominis,,3,48-72 hours,Moderate,Unstable,High,Average,No,Balanced,Free Weight,No,High,3-4 minutes,Explosive movement
-Smith Machine Staggered Stance Good Morning,Legs,Compound,Bilateral,"Hamstrings, Glute Max","Spinal Erectors, Rectus Abdominis",,,2,24-48 hours,High,Stable,High,Excellent,Yes,Lengthened Bias,Machine,No,Low,2-3 minutes,
+Smith Machine Staggered Stance Good Morning,Legs,Compound,Bilateral,"Hamstrings, Glute Max","Spinal Erectors, Rectus Abdominis",,,4,72-96 hours,High,Stable,High,Excellent,Yes,Lengthened Bias,Machine,Yes,Low,4-6 minutes,
 Roman Chair Single Leg Back Extension,Legs,Isolation,Unilateral,"Hamstrings, Glute Max",Spinal Erectors,,,1,24-48 hours,Moderate,Stable,Excellent,Excellent,Yes,Balanced,Bodyweight,No,Moderate,2-3 minutes,
 Hamstring Sliders,Legs,Isolation,Bilateral,Hamstrings,Glute Max,Rectus Abdominis,,1,24-48 hours,Low,Moderate,High,Good,Yes,Balanced,Bodyweight,No,Moderate,2-3 minutes,
 TRX Hamstring Sliders,Legs,Isolation,Bilateral,Hamstrings,Glute Max,Rectus Abdominis,,1,24-48 hours,Low,Moderate,High,Good,Yes,Balanced,Bodyweight,No,Moderate,2-3 minutes,
@@ -215,8 +215,8 @@ Hip Thrust With Bands,Legs,Compound,Bilateral,Glute Max,Rectus Abdominis,,,1,24-
 Standing Cable Hip Extension,Legs,Isolation,Unilateral,Glute Max,Hamstrings,,,1,24-48 hours,Moderate,Stable,Excellent,Excellent,No,Balanced,Cable,No,Low,2-3 minutes,
 Elevated Heel Goblet Squat With Constant Tension,Legs,Compound,Bilateral,Quadriceps,Glute Max,Rectus Abdominis,,3,48-72 hours,High,Stable,Excellent,Excellent,Yes,Lengthened Bias,Free Weight,No,Moderate,3-4 minutes,Constant tension
 Goblet Lunge,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,3,48-72 hours,Moderate,Moderate,High,Average,No,Lengthened Bias,Free Weight,No,Moderate,3-4 minutes,
-Goblet Bulgarian Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,5,48-72 hours,High,Moderate,Excellent,Excellent,Yes,Lengthened Bias,Free Weight,No,High,4-7 minutes,
-Dumbbell Bulgarian Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,5,48-72 hours,High,Moderate,Excellent,Excellent,Yes,Lengthened Bias,Free Weight,No,High,4-7 minutes,
+Goblet Bulgarian Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,4,48-72 hours,High,Moderate,Excellent,Excellent,Yes,Lengthened Bias,Free Weight,No,High,4-6 minutes,
+Dumbbell Bulgarian Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,4,48-72 hours,High,Moderate,Excellent,Excellent,Yes,Lengthened Bias,Free Weight,No,High,4-6 minutes,
 Barbell Lunge,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,4,48-72 hours,High,Moderate,High,Average,No,Lengthened Bias,Free Weight,Yes,High,4-6 minutes,
 Front Rack Barbell Lunge,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,4,48-72 hours,High,Moderate,High,Average,No,Lengthened Bias,Free Weight,Yes,High,4-6 minutes,
 Landmine Reverse Lunge,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,3,48-72 hours,High,Stable,Excellent,Excellent,Yes,Lengthened Bias,Free Weight,No,Moderate,3-4 minutes,
@@ -230,7 +230,7 @@ Landmine Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Rectus Abdominis,,3,
 Landmine Squat Wide Stance,Legs,Compound,Bilateral,"Quadriceps, Adductors",Glute Max,Rectus Abdominis,,3,48-72 hours,High,Stable,Excellent,Excellent,Yes,Lengthened Bias,Free Weight,No,Moderate,3-4 minutes,
 Hack Squat Wide Stance,Legs,Compound,Bilateral,"Quadriceps, Adductors",Glute Max,,,3,48-72 hours,Very High,Very Stable,Excellent,Excellent,Yes,Lengthened Bias,Machine,No,Low,3-4 minutes,
 Dumbbell Step Up,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,3,48-72 hours,High,Moderate,Excellent,Excellent,Yes,Balanced,Free Weight,No,Moderate,3-4 minutes,
-Smith Machine Bulgarian Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,5,48-72 hours,High,Very Stable,Excellent,Excellent,Yes,Lengthened Bias,Machine,No,Moderate,4-7 minutes,
+Smith Machine Bulgarian Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,4,48-72 hours,High,Very Stable,Excellent,Excellent,Yes,Lengthened Bias,Machine,No,Moderate,4-6 minutes,
 Smith Machine Lunge,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,2,24-48 hours,High,Very Stable,High,Good,No,Lengthened Bias,Machine,No,Low,2-3 minutes,
 Bodyweight Lunge,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,1,24-48 hours,Low,Moderate,Moderate,Average,No,Lengthened Bias,Bodyweight,No,Low,2-3 minutes,
 Bodyweight Bulgarian Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,3,48-72 hours,Low,Moderate,High,Good,Yes,Lengthened Bias,Bodyweight,No,Moderate,3-4 minutes,
@@ -240,8 +240,8 @@ TRX Jump Squat,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Gastrocnemius,Rec
 TRX Jumping Lunge,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,3,48-72 hours,Low,Moderate,Moderate,Average,No,Lengthened Bias,Bodyweight,No,Moderate,3-4 minutes,
 Squat With Bands,Legs,Compound,Bilateral,Quadriceps,Glute Max,Rectus Abdominis,,1,24-48 hours,High,Stable,High,Good,No,Lengthened Bias,Resistance Band,No,Moderate,2-3 minutes,
 Reverse Lunge With Bands,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,1,24-48 hours,High,Stable,High,Good,No,Lengthened Bias,Resistance Band,No,Moderate,2-3 minutes,
-Kettlebell Front Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Rectus Abdominis,,5,48-72 hours,High,Stable,Excellent,Excellent,No,Balanced,Free Weight,No,Moderate,4-7 minutes,
-Double Kettlebell Front Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Rectus Abdominis,,5,48-72 hours,High,Stable,Excellent,Excellent,No,Balanced,Free Weight,No,Moderate,4-7 minutes,
+Kettlebell Front Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Rectus Abdominis,,4,48-72 hours,High,Stable,Excellent,Excellent,No,Balanced,Free Weight,No,Moderate,4-6 minutes,
+Double Kettlebell Front Squat,Legs,Compound,Bilateral,Quadriceps,Glute Max,Rectus Abdominis,,4,48-72 hours,High,Stable,Excellent,Excellent,No,Balanced,Free Weight,No,Moderate,4-6 minutes,
 Kettlebell Reverse Lunge,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,3,48-72 hours,High,Stable,Excellent,Excellent,No,Lengthened Bias,Free Weight,No,Moderate,3-4 minutes,
 Box Squat Single Leg,Legs,Compound,Unilateral,"Quadriceps, Glute Max",Adductors,Rectus Abdominis,,3,48-72 hours,High,Stable,Excellent,Excellent,Yes,Balanced,Free Weight,No,High,3-4 minutes,
 Jump Squat,Legs,Compound,Bilateral,"Quadriceps, Glute Max",Gastrocnemius,Rectus Abdominis,,3,48-72 hours,Moderate,Moderate,High,Good,No,Balanced,Bodyweight,No,Moderate,3-4 minutes,

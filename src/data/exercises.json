@@ -2882,8 +2882,8 @@
       },
       "fatigueScore": 5,
       "recoveryWindowHours": [
-        36,
-        60
+        48,
+        72
       ],
       "restSeconds": [
         180,
@@ -3221,8 +3221,8 @@
       },
       "fatigueScore": 4,
       "recoveryWindowHours": [
-        36,
-        60
+        48,
+        72
       ],
       "restSeconds": [
         180,
@@ -3283,8 +3283,8 @@
       },
       "fatigueScore": 5,
       "recoveryWindowHours": [
-        36,
-        60
+        48,
+        72
       ],
       "restSeconds": [
         180,
@@ -6246,14 +6246,14 @@
         "Spinal Erectors": 0.5,
         "Rectus Abdominis": 0.5
       },
-      "fatigueScore": 2,
+      "fatigueScore": 4,
       "recoveryWindowHours": [
-        24,
-        48
+        72,
+        96
       ],
       "restSeconds": [
-        120,
-        180
+        240,
+        360
       ],
       "progressiveOverload": "high",
       "stability": "stable",
@@ -6262,7 +6262,7 @@
       "stretchMediated": "yes",
       "resistanceProfile": "lengthened",
       "equipment": "machine",
-      "axialLoading": false,
+      "axialLoading": true,
       "skill": "low",
       "notes": null
     },
@@ -6648,14 +6648,14 @@
         "Adductors": 0.5,
         "Rectus Abdominis": 0.25
       },
-      "fatigueScore": 5,
+      "fatigueScore": 4,
       "recoveryWindowHours": [
         48,
         72
       ],
       "restSeconds": [
         240,
-        420
+        360
       ],
       "progressiveOverload": "high",
       "stability": "moderate",
@@ -6680,14 +6680,14 @@
         "Adductors": 0.5,
         "Rectus Abdominis": 0.25
       },
-      "fatigueScore": 5,
+      "fatigueScore": 4,
       "recoveryWindowHours": [
         48,
         72
       ],
       "restSeconds": [
         240,
-        420
+        360
       ],
       "progressiveOverload": "high",
       "stability": "moderate",
@@ -7123,14 +7123,14 @@
         "Adductors": 0.5,
         "Rectus Abdominis": 0.25
       },
-      "fatigueScore": 5,
+      "fatigueScore": 4,
       "recoveryWindowHours": [
         48,
         72
       ],
       "restSeconds": [
         240,
-        420
+        360
       ],
       "progressiveOverload": "high",
       "stability": "very stable",
@@ -7441,14 +7441,14 @@
         "Glute Max": 0.5,
         "Rectus Abdominis": 0.25
       },
-      "fatigueScore": 5,
+      "fatigueScore": 4,
       "recoveryWindowHours": [
         48,
         72
       ],
       "restSeconds": [
         240,
-        420
+        360
       ],
       "progressiveOverload": "high",
       "stability": "stable",
@@ -7472,14 +7472,14 @@
         "Glute Max": 0.5,
         "Rectus Abdominis": 0.25
       },
-      "fatigueScore": 5,
+      "fatigueScore": 4,
       "recoveryWindowHours": [
         48,
         72
       ],
       "restSeconds": [
         240,
-        420
+        360
       ],
       "progressiveOverload": "high",
       "stability": "stable",
