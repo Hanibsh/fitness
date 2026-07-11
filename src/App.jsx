@@ -24,6 +24,8 @@ const RoutineEditor = lazy(() => import('./pages/RoutineEditor'))
 const Account = lazy(() => import('./pages/Account'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Exercises = lazy(() => import('./pages/Exercises'))
+const ExerciseDetail = lazy(() => import('./pages/ExerciseDetail'))
 
 function App() {
   const { user, loading } = useAuth()
@@ -38,6 +40,8 @@ function App() {
         <Route path="/" element={homeElement} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tools" element={<Tools />} />
+        <Route path="/exercises" element={<Exercises />} />
+        <Route path="/exercises/:id" element={<ExerciseDetail />} />
         <Route path="/log" element={<WorkoutTracker />} />
         <Route path="/routine" element={<Routine />} />
         <Route path="/routine/:id" element={<RoutineEditor />} />
