@@ -7,6 +7,7 @@
 // delegated to `searchExercises` in exerciseLibrary.js.
 
 import exercisesDb from '../data/exercises.json'
+import { CATEGORIES, SUBCATEGORIES, categoryBySlug } from '../data/muscleInfo'
 
 // Display order for the browse page's category sections.
 // Keep the VALUES in sync with HOME_CATEGORIES in scripts/muscle-taxonomy.mjs.
@@ -38,6 +39,74 @@ export function allByCategory() {
   }
   for (const list of groups.values()) list.sort(byTypeThenName)
   return [...groups.entries()].filter(([, list]) => list.length)
+}
+
+// ---- Bank hub taxonomy (browse-only, derived from the muscles map) ---------
+//
+// The public bank is navigated as home-category hubs → optional subcategory
+// hubs. Membership is derived from each row's PRIMARY movers, so nothing is
+// re-tagged in the data (see src/data/muscleInfo.js for the taxonomy + copy).
+
+// Primary (highest-weight) atom name(s) for an exercise — its main movers.
+function primaryAtoms(e) {
+  const entries = Object.entries(e.muscles || {})
+  if (!entries.length) return []
+  const max = Math.max(...entries.map(([, w]) => w))
+  return entries.filter(([, w]) => w === max).map(([m]) => m)
+}
+
+// Exercises for a subcategory slug: rows in the parent's source category whose
+// primary movers include one of the subcategory's atoms.
+export function subcategoryExercises(subSlug) {
+  const sub = SUBCATEGORIES[subSlug]
+  if (!sub) return []
+  const parent = categoryBySlug(sub.parent)
+  const atoms = new Set(sub.atoms)
+  return ALL.filter(
+    (e) => e.category === parent?.source && primaryAtoms(e).some((a) => atoms.has(a))
+  ).sort(byTypeThenName)
+}
+
+// Exercises for a leaf category slug (non-split `source` categories, or a
+// derived `atoms` tile like Glutes). Split categories return [] here — they
+// render subcategory tiles, not a flat list.
+export function categoryExercises(catSlug) {
+  const cat = categoryBySlug(catSlug)
+  if (!cat) return []
+  if (cat.atoms) {
+    const atoms = new Set(cat.atoms)
+    return ALL.filter((e) => primaryAtoms(e).some((a) => atoms.has(a))).sort(byTypeThenName)
+  }
+  if (cat.subs) return []
+  return ALL.filter((e) => e.category === cat.source).sort(byTypeThenName)
+}
+
+// How many exercises a category tile represents (source total for split
+// categories; derived count for atom tiles).
+export function categoryCount(catSlug) {
+  const cat = categoryBySlug(catSlug)
+  if (!cat) return 0
+  if (cat.atoms) {
+    const atoms = new Set(cat.atoms)
+    return ALL.filter((e) => primaryAtoms(e).some((a) => atoms.has(a))).length
+  }
+  return ALL.filter((e) => e.category === cat.source).length
+}
+
+// Landing tiles: every home category with its display count.
+export function bankCategories() {
+  return CATEGORIES.map((c) => ({ slug: c.slug, name: c.name, count: categoryCount(c.slug) }))
+}
+
+// Subcategory tiles for a split category, each with its display count.
+export function subcategoryTiles(catSlug) {
+  const cat = categoryBySlug(catSlug)
+  if (!cat?.subs) return []
+  return cat.subs.map((slug) => ({
+    slug,
+    name: SUBCATEGORIES[slug].name,
+    count: subcategoryExercises(slug).length,
+  }))
 }
 
 // Filter option lists, derived from the data so they never drift from the DB.

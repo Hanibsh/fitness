@@ -1,36 +1,21 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Search, X, Home } from 'lucide-react'
+import { Search, X, Home, ChevronRight } from 'lucide-react'
 import { searchExercises } from '../lib/exerciseLibrary'
 import {
   allByCategory,
+  bankCategories,
   getFullExercise,
   EQUIPMENT,
   TYPES,
-  primaryMuscles,
   titleCase,
   EXERCISE_COUNT,
 } from '../lib/exerciseBank'
+import { MUSCLE_INFO } from '../data/muscleInfo'
+import ExerciseCard from '../components/ExerciseCard'
 
 const AT_HOME = ['bodyweight', 'resistance band']
-
-function ExerciseCard({ e }) {
-  return (
-    <Link
-      to={`/exercises/${e.id}`}
-      className="block bg-white border border-border rounded-xl p-4 no-underline hover:border-border-hover transition-all group"
-    >
-      <h3 className="font-heading text-[14px] font-medium text-text-primary group-hover:text-accent-hover transition-colors leading-snug">
-        {e.name}
-      </h3>
-      <p className="text-text-muted text-[12px] mt-1.5">
-        {titleCase(e.equipment)} · {titleCase(e.type)}
-      </p>
-      <p className="text-text-light text-[11px] mt-1 truncate">{primaryMuscles(e).join(', ')}</p>
-    </Link>
-  )
-}
 
 function Chip({ active, onClick, children }) {
   return (
@@ -44,6 +29,28 @@ function Chip({ active, onClick, children }) {
     >
       {children}
     </button>
+  )
+}
+
+// Home-category tile for the default browse view.
+function CategoryTile({ cat }) {
+  const info = MUSCLE_INFO[cat.slug]
+  return (
+    <Link
+      to={`/exercises/group/${cat.slug}`}
+      className="block bg-white border border-border rounded-xl p-5 no-underline hover:border-border-hover transition-all group"
+    >
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="font-heading text-[17px] font-medium text-text-primary group-hover:text-accent-hover transition-colors">
+          {cat.name}
+        </h2>
+        <span className="text-text-light text-[12px] shrink-0">{cat.count}</span>
+      </div>
+      {info?.teaser && <p className="text-text-muted text-[12.5px] mt-1.5 leading-snug">{info.teaser}</p>}
+      <span className="inline-flex items-center gap-0.5 text-[12px] text-text-light group-hover:text-accent-hover transition-colors mt-3">
+        Explore <ChevronRight className="w-3.5 h-3.5" />
+      </span>
+    </Link>
   )
 }
 
@@ -80,14 +87,18 @@ export default function Exercises() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, hasQuery, equip, types])
 
-  // No query → category sections, rows filtered; empty sections dropped.
+  // Filters only (no query) → category sections, rows filtered; empty dropped.
   const sections = useMemo(() => {
-    if (hasQuery) return null
+    if (hasQuery || !hasFilters) return null
     return allByCategory()
       .map(([cat, rows]) => [cat, rows.filter(matches)])
       .filter(([, rows]) => rows.length)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasQuery, equip, types])
+  }, [hasQuery, hasFilters, equip, types])
+
+  // Pristine view (no query, no filters) → home-category tiles.
+  const showTiles = !hasQuery && !hasFilters
+  const categories = useMemo(() => (showTiles ? bankCategories() : null), [showTiles])
 
   const clearAll = () => {
     setQuery('')
@@ -104,7 +115,7 @@ export default function Exercises() {
             Every exercise, explained
           </h1>
           <p className="text-text-muted text-[15px]">
-            {EXERCISE_COUNT} movements — the muscles they hit, stimulus-to-fatigue, recovery, and rest.
+            {EXERCISE_COUNT} movements — pick a muscle group, or search across everything.
           </p>
         </motion.div>
 
@@ -158,7 +169,16 @@ export default function Exercises() {
           )}
         </div>
 
-        {/* Results */}
+        {/* Category tiles (pristine view) */}
+        {categories && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {categories.map((cat) => (
+              <CategoryTile key={cat.slug} cat={cat} />
+            ))}
+          </div>
+        )}
+
+        {/* Search results */}
         {results && (
           <div>
             <p className="text-text-light text-[12px] mb-4">
@@ -176,6 +196,7 @@ export default function Exercises() {
           </div>
         )}
 
+        {/* Filtered category sections (filters only, no query) */}
         {sections &&
           (sections.length ? (
             sections.map(([category, rows]) => (

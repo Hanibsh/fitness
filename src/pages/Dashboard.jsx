@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   Flame, Dumbbell, TrendingUp, Trophy, Target, Activity, History,
   ChevronRight, Award, CalendarDays, Plus, Pencil, MessageCircle, ArrowRight, Crosshair, Trash2,
-  BatteryCharging, Lightbulb, CalendarRange,
+  BatteryCharging, Lightbulb, CalendarRange, HelpCircle,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks, deleteSession } from '../lib/workoutStore'
@@ -20,6 +20,7 @@ import {
   exerciseBests, blockSummary,
 } from '../lib/dashboard'
 import { effectiveWeeklyVolume, muscleRecovery, formatReadyIn } from '../lib/engine'
+import { muscleHref } from '../data/muscleInfo'
 import { adviseTraining } from '../lib/advisor'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import ExerciseProgress from '../components/ExerciseProgress'
@@ -657,7 +658,7 @@ export default function Dashboard() {
             Muscle volume
           </SectionHeading>
           <p className="text-[12px] text-text-muted mb-4 -mt-2">
-            Effective sets per muscle over {VOLUME_RANGES.find((r) => r.days === volumeRangeDays).windowLabel} — weighted by how directly each set trains the muscle, how close to failure, and diminishing returns within a marathon session. Tap a muscle for the breakdown.
+            Effective sets per muscle over {VOLUME_RANGES.find((r) => r.days === volumeRangeDays).windowLabel} — weighted by how directly each set trains the muscle, how close to failure, and diminishing returns within a marathon session. Tap a muscle for the breakdown, or the ? to learn what it is.
           </p>
           {volume.every((v) => v.sets === 0) ? (
             <p className="text-[13px] text-text-muted">No sets logged in this range.</p>
@@ -668,25 +669,38 @@ export default function Dashboard() {
                 const pct = Math.min(100, Math.round((v.sets / v.landmarks.high) * 100))
                 const expandable = v.atoms.length > 0
                 const open = expandedMuscle === v.muscle
+                const href = muscleHref(v.muscle)
                 return (
                   <div key={v.muscle}>
-                    <button
-                      onClick={() => expandable && setExpandedMuscle(open ? null : v.muscle)}
-                      className={`w-full text-left bg-transparent border-none p-0 ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
-                    >
-                      <div className="flex justify-between items-center text-[12px] mb-1">
-                        <span className="text-text-secondary flex items-center gap-1">
-                          {v.muscle}
-                          {expandable && <ChevronRight className={`w-3 h-3 text-text-light transition-transform ${open ? 'rotate-90' : ''}`} />}
-                        </span>
-                        <span className="text-text-muted tabular-nums">
-                          {v.sets}<span className="text-text-light"> / {v.landmarks.low}–{v.landmarks.high}</span>
-                        </span>
-                      </div>
-                      <div className="w-full h-2 bg-cream border border-border overflow-hidden">
-                        <div className={`h-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
-                      </div>
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => expandable && setExpandedMuscle(open ? null : v.muscle)}
+                        className={`flex-1 min-w-0 text-left bg-transparent border-none p-0 ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
+                      >
+                        <div className="flex justify-between items-center text-[12px] mb-1">
+                          <span className="text-text-secondary flex items-center gap-1">
+                            {v.muscle}
+                            {expandable && <ChevronRight className={`w-3 h-3 text-text-light transition-transform ${open ? 'rotate-90' : ''}`} />}
+                          </span>
+                          <span className="text-text-muted tabular-nums">
+                            {v.sets}<span className="text-text-light"> / {v.landmarks.low}–{v.landmarks.high}</span>
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-cream border border-border overflow-hidden">
+                          <div className={`h-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+                        </div>
+                      </button>
+                      {href && (
+                        <Link
+                          to={href}
+                          aria-label={`What is ${v.muscle}?`}
+                          title={`What is ${v.muscle}?`}
+                          className="shrink-0 text-text-light hover:text-text-primary"
+                        >
+                          <HelpCircle className="w-3.5 h-3.5" />
+                        </Link>
+                      )}
+                    </div>
                     {open && (
                       <div className="mt-1.5 ml-3 pl-3 border-l border-border space-y-1.5">
                         {v.atoms.map((a) => (
@@ -714,8 +728,8 @@ export default function Dashboard() {
           <SectionHeading icon={BatteryCharging}>Recovery</SectionHeading>
           <p className="text-[12px] text-text-muted mb-4 -mt-2">
             How recovered each muscle is right now — from how hard, how directly and how recently you trained it.
-            Tap a muscle for the sub-muscle breakdown; a group carries the combined load of its parts, so it can read
-            lower than any single one. Estimates to guide the next session, not gospel.
+            Tap a muscle for the sub-muscle breakdown, or the ? to learn what it is; a group carries the combined load
+            of its parts, so it can read lower than any single one. Estimates to guide the next session, not gospel.
           </p>
           {(() => {
             const trained = recovery.muscles.filter((m) => m.lastTrained).sort((a, b) => a.recoveryPct - b.recoveryPct)
@@ -732,34 +746,47 @@ export default function Dashboard() {
                 {trained.map((m) => {
                   const expandable = m.atoms?.length > 0
                   const open = expandedRecovery === m.muscle
+                  const href = muscleHref(m.muscle)
                   return (
                     <div key={m.muscle} title={m.lastTrained ? `Last trained: ${relativeDay(m.lastTrained)}` : undefined}>
-                      <button
-                        onClick={() => expandable && setExpandedRecovery(open ? null : m.muscle)}
-                        className={`w-full text-left bg-transparent border-none p-0 ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
-                      >
-                        <div className="flex justify-between items-center gap-2 flex-wrap text-[12px] mb-1">
-                          <span className="text-text-secondary flex items-center gap-2">
-                            {m.muscle}
-                            {expandable && <ChevronRight className={`w-3 h-3 text-text-light transition-transform ${open ? 'rotate-90' : ''}`} />}
-                            <StatusChip tone={m.status === 'ready' ? 'green' : 'amber'}>
-                              {m.status === 'ready' ? 'Ready' : 'Recovering'}
-                            </StatusChip>
-                          </span>
-                          <span className="text-text-muted tabular-nums">
-                            {m.recoveryPct}%
-                            {m.status === 'recovering' && m.readyAt && (
-                              <span className="text-text-light"> · ready {formatReadyIn(m.readyAt)}</span>
-                            )}
-                          </span>
-                        </div>
-                        <div className="w-full h-2 bg-cream border border-border overflow-hidden">
-                          <div
-                            className={`h-full transition-all ${m.status === 'ready' ? 'bg-green-500' : 'bg-amber-400'}`}
-                            style={{ width: `${m.recoveryPct}%` }}
-                          />
-                        </div>
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => expandable && setExpandedRecovery(open ? null : m.muscle)}
+                          className={`flex-1 min-w-0 text-left bg-transparent border-none p-0 ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
+                        >
+                          <div className="flex justify-between items-center gap-2 flex-wrap text-[12px] mb-1">
+                            <span className="text-text-secondary flex items-center gap-2">
+                              {m.muscle}
+                              {expandable && <ChevronRight className={`w-3 h-3 text-text-light transition-transform ${open ? 'rotate-90' : ''}`} />}
+                              <StatusChip tone={m.status === 'ready' ? 'green' : 'amber'}>
+                                {m.status === 'ready' ? 'Ready' : 'Recovering'}
+                              </StatusChip>
+                            </span>
+                            <span className="text-text-muted tabular-nums">
+                              {m.recoveryPct}%
+                              {m.status === 'recovering' && m.readyAt && (
+                                <span className="text-text-light"> · ready {formatReadyIn(m.readyAt)}</span>
+                              )}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-cream border border-border overflow-hidden">
+                            <div
+                              className={`h-full transition-all ${m.status === 'ready' ? 'bg-green-500' : 'bg-amber-400'}`}
+                              style={{ width: `${m.recoveryPct}%` }}
+                            />
+                          </div>
+                        </button>
+                        {href && (
+                          <Link
+                            to={href}
+                            aria-label={`What is ${m.muscle}?`}
+                            title={`What is ${m.muscle}?`}
+                            className="shrink-0 text-text-light hover:text-text-primary"
+                          >
+                            <HelpCircle className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                      </div>
                       {open && (
                         <div className="mt-1.5 ml-3 pl-3 border-l border-border space-y-1.5">
                           {m.atoms.map((a) => (

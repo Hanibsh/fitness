@@ -25,6 +25,7 @@ const Account = lazy(() => import('./pages/Account'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Exercises = lazy(() => import('./pages/Exercises'))
+const ExerciseCategory = lazy(() => import('./pages/ExerciseCategory'))
 const ExerciseDetail = lazy(() => import('./pages/ExerciseDetail'))
 
 function App() {
@@ -41,6 +42,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tools" element={<Tools />} />
         <Route path="/exercises" element={<Exercises />} />
+        <Route path="/exercises/group/:cat" element={<ExerciseCategory />} />
+        <Route path="/exercises/group/:cat/:sub" element={<ExerciseCategory />} />
         <Route path="/exercises/:id" element={<ExerciseDetail />} />
         <Route path="/log" element={<WorkoutTracker />} />
         <Route path="/routine" element={<Routine />} />
