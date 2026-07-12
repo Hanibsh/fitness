@@ -76,3 +76,30 @@ export function currentBreak(sessions, annotations, { now = Date.now() } = {}) {
   }
   return days > 0 ? { days, reasons: [...reasons] } : null
 }
+
+function reasonsBetween(annotations, start, end) {
+  const set = new Set()
+  for (const a of annotations) {
+    if (a.date > start && a.date < end) set.add(a.reason)
+  }
+  return [...set]
+}
+
+// Raw facts about a possible layoff around your training, for the advisor to
+// apply its own thresholds to: how long since your last session (whether
+// still ongoing or just ended), and the gap before that session if there was
+// one — each with whatever annotation reasons fall inside it. Unlike
+// currentBreak, this doesn't require every day to be annotated — a plain
+// unexplained gap in sessions still counts; annotations just explain why.
+export function layoffContext(sessions, annotations, { now = Date.now() } = {}) {
+  if (!sessions.length) return null
+  const sorted = [...sessions].sort((a, b) => b.date - a.date)
+  const latest = sorted[0]
+  const previous = sorted[1] || null
+  return {
+    sinceLatest: Math.floor((now - latest.date) / DAY_MS),
+    ongoingReasons: reasonsBetween(annotations, latest.date, now),
+    gapBeforeLatest: previous ? Math.floor((latest.date - previous.date) / DAY_MS) : null,
+    priorReasons: previous ? reasonsBetween(annotations, previous.date, latest.date) : [],
+  }
+}

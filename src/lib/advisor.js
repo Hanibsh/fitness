@@ -12,10 +12,12 @@ import { effectiveWeeklyVolume, muscleRecovery, personalizedModel, primaryMuscle
 import { activeBlock } from './blocks'
 import { muscleForExercise } from './dashboard'
 import { exerciseIdForName } from './exerciseLibrary'
+import { layoffContext, reasonLabel } from './dayLog'
 import {
   SFR_RANK, ADVISOR_MIN_SESSIONS, ADVISOR_BLOCK_SLACK,
   ADVISOR_UNDERRECOVERED_MIN, ADVISOR_UNDERRECOVERED_WINDOW,
-  ADVISOR_REGRESSION_STREAK, ADVISOR_REGRESSION_EPS, ADVISOR_MAX_RECS,
+  ADVISOR_REGRESSION_STREAK, ADVISOR_REGRESSION_EPS,
+  ADVISOR_LAYOFF_MIN_DAYS, ADVISOR_LAYOFF_RETURN_WINDOW_DAYS, ADVISOR_MAX_RECS,
 } from './engineConfig'
 
 const DAY = 86400000
@@ -44,7 +46,7 @@ function recentExercises(sessions, days, now) {
 // Up to ADVISOR_MAX_RECS recommendations, worst first:
 //   { id, severity: 'red'|'amber'|'green', title, detail }
 // Empty array when there isn't enough history yet.
-export function adviseTraining(sessions, { blocks = [], now = Date.now() } = {}) {
+export function adviseTraining(sessions, { blocks = [], annotations = [], now = Date.now() } = {}) {
   if (!sessions || sessions.length < ADVISOR_MIN_SESSIONS) return []
   const model = personalizedModel(sessions)
   const volume = effectiveWeeklyVolume(sessions, { days: 7, now })
@@ -53,6 +55,37 @@ export function adviseTraining(sessions, { blocks = [], now = Date.now() } = {})
   const week = recentExercises(sessions, 7, now)
   const fortnight = recentExercises(sessions, 14, now)
   const recs = []
+
+  // R0 — layoff: still mid-break, or your latest session followed a gap of
+  // ADVISOR_LAYOFF_MIN_DAYS+. Not a fatigue-management case (nothing to trim),
+  // just context: ease back in and expect a temporary strength dip — normal,
+  // and it comes back fast. Annotations (if any) explain why, in your words.
+  const layoff = layoffContext(sessions, annotations, { now })
+  const reasonSuffix = (reasons) => (reasons.length ? ` (${reasons.map(reasonLabel).join(', ').toLowerCase()})` : '')
+  if (layoff && layoff.sinceLatest >= ADVISOR_LAYOFF_MIN_DAYS) {
+    recs.push({
+      id: 'layoff-ongoing',
+      severity: 'amber',
+      title: `${layoff.sinceLatest} days since your last session${reasonSuffix(layoff.ongoingReasons)}`,
+      detail:
+        `No rush — when you're ready to jump back in, go a bit lighter than your last numbers and let RIR guide you back up. ` +
+        `A layoff this long usually costs a little strength at first, but it comes back fast.`,
+    })
+  } else if (
+    layoff &&
+    layoff.gapBeforeLatest != null &&
+    layoff.gapBeforeLatest >= ADVISOR_LAYOFF_MIN_DAYS &&
+    layoff.sinceLatest <= ADVISOR_LAYOFF_RETURN_WINDOW_DAYS
+  ) {
+    recs.push({
+      id: 'layoff-returned',
+      severity: 'amber',
+      title: `Back after ${layoff.gapBeforeLatest} days off${reasonSuffix(layoff.priorReasons)}`,
+      detail:
+        `Ease into this first week back — go a bit lighter than before and let RIR guide you up rather than chasing your old numbers immediately. ` +
+        `Strength dips after a layoff like this are normal and bounce back quickly.`,
+    })
+  }
 
   // R1 — over the productive ceiling: trim the worst stimulus-to-fatigue
   // exercise feeding that muscle. Specialization-block focus muscles get slack

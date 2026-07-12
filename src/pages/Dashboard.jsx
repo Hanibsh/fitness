@@ -7,8 +7,8 @@ import {
   BatteryCharging, Lightbulb, CalendarRange, HelpCircle,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
-import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks, deleteSession } from '../lib/workoutStore'
-import { fetchRemoteHistory, fetchRemoteProgram, fetchRemoteBlocks, upsertRemoteBlocks, deleteRemoteSession } from '../lib/workoutRemote'
+import { getHistory, getUnit, getGoals, saveGoals, getProgram, getBlocks, saveBlocks, deleteSession, getDayAnnotations } from '../lib/workoutStore'
+import { fetchRemoteHistory, fetchRemoteProgram, fetchRemoteBlocks, upsertRemoteBlocks, deleteRemoteSession, fetchRemoteDayAnnotations } from '../lib/workoutRemote'
 import { scheduleMode, plannedDayForDate } from '../lib/program'
 import { activeBlock, sortedBlocks, blockWeek } from '../lib/blocks'
 import BlockModal from '../components/BlockModal'
@@ -185,6 +185,7 @@ export default function Dashboard() {
   const [sessions, setSessions] = useState([])
   const [program, setProgram] = useState(null)
   const [blocks, setBlocks] = useState([])
+  const [annotations, setAnnotations] = useState([])
   const [loading, setLoading] = useState(true)
   const [unit, setUnit] = useState(() => getUnit())
   const [selectedDay, setSelectedDay] = useState(null) // { date, sessions }
@@ -205,15 +206,18 @@ export default function Dashboard() {
       setUnit(getUnit())
       if (user) {
         try {
-          const [remote, prog, blks] = await Promise.all([fetchRemoteHistory(user.id), fetchRemoteProgram(user.id), fetchRemoteBlocks(user.id)])
-          if (!cancelled) { setSessions(remote); setProgram(prog || getProgram()); setBlocks(blks || getBlocks()) }
+          const [remote, prog, blks, annos] = await Promise.all([
+            fetchRemoteHistory(user.id), fetchRemoteProgram(user.id), fetchRemoteBlocks(user.id), fetchRemoteDayAnnotations(user.id),
+          ])
+          if (!cancelled) { setSessions(remote); setProgram(prog || getProgram()); setBlocks(blks || getBlocks()); setAnnotations(annos) }
         } catch {
-          if (!cancelled) { setSessions(getHistory()); setProgram(getProgram()); setBlocks(getBlocks()) }
+          if (!cancelled) { setSessions(getHistory()); setProgram(getProgram()); setBlocks(getBlocks()); setAnnotations(getDayAnnotations()) }
         }
       } else {
         setSessions(getHistory())
         setProgram(getProgram())
         setBlocks(getBlocks())
+        setAnnotations(getDayAnnotations())
       }
       if (!cancelled) setLoading(false)
     }
@@ -297,7 +301,7 @@ export default function Dashboard() {
   // few minutes of staleness while the page sits open doesn't matter).
   const recovery = useMemo(() => muscleRecovery(sessions), [sessions])
   // Engine v3: the advisor's targeted volume-trimming recommendations.
-  const advice = useMemo(() => adviseTraining(sessions, { blocks }), [sessions, blocks])
+  const advice = useMemo(() => adviseTraining(sessions, { blocks, annotations }), [sessions, blocks, annotations])
 
   const exerciseNames = useMemo(() => loggedExerciseNames(sessions), [sessions])
   // Best working-set weight per exercise (display unit) — the "current" value
@@ -549,6 +553,7 @@ export default function Dashboard() {
               <WorkoutCalendar
                 sessions={sessions}
                 program={program}
+                annotations={annotations}
                 selectedDate={selectedDay?.date}
                 onSelectDay={(date, daySessions) => setSelectedDay({ date, sessions: daySessions })}
               />

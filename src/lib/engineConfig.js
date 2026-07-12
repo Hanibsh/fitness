@@ -178,4 +178,6 @@ export const ADVISOR_UNDERRECOVERED_MIN = 3 // trained under-recovered in ≥ th
 export const ADVISOR_UNDERRECOVERED_WINDOW = 4 // …of the last this-many workings
 export const ADVISOR_REGRESSION_STREAK = 3 // consecutive below-trend sessions
 export const ADVISOR_REGRESSION_EPS = -0.005 // "below trend" = residual under this
+export const ADVISOR_LAYOFF_MIN_DAYS = 7 // a gap this long (or an ongoing one) is worth flagging
+export const ADVISOR_LAYOFF_RETURN_WINDOW_DAYS = 10 // "just back" stays relevant for this long after
 export const ADVISOR_MAX_RECS = 3
