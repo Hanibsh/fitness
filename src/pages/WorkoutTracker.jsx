@@ -30,10 +30,12 @@ import {
   getBodyweightLog,
   getProgram,
   saveProgram,
+  getDayAnnotations,
 } from '../lib/workoutStore'
-import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts, fetchRemoteProgram, upsertRemoteProgram } from '../lib/workoutRemote'
+import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts, fetchRemoteProgram, upsertRemoteProgram, fetchRemoteDayAnnotations } from '../lib/workoutRemote'
 import { todaysDay, advanceProgram, draftFromDay, scheduleMode, nextTrainingDate } from '../lib/program'
 import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels, sessionAvgRest, formatRest, lastLoggedExercise } from '../lib/workoutStats'
+import { annotationForDate, reasonLabel } from '../lib/dayLog'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
 import { useAuth } from '../lib/auth'
@@ -219,6 +221,7 @@ export default function WorkoutTracker() {
   const [draft, setDraft] = useState(() => migrateDraft(getDraft()) || emptyDraft())
   const [history, setHistory] = useState([])
   const [program, setProgram] = useState(null)
+  const [annotations, setAnnotations] = useState([])
   const [loadingHistory, setLoadingHistory] = useState(true)
   const [importable, setImportable] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -269,9 +272,14 @@ export default function WorkoutTracker() {
   const loggedToday = useMemo(() => history.some((s) => isSameDay(s.date, Date.now())), [history])
   const weeklyDoneToday = isWeeklyProgram && todayDay?.kind === 'train' && loggedToday
   const weeklyNext = useMemo(
-    () => (isWeeklyProgram && (weeklyDoneToday || todayDay?.kind === 'rest') ? nextTrainingDate(program) : null),
-    [isWeeklyProgram, weeklyDoneToday, todayDay, program]
+    () => (isWeeklyProgram && (weeklyDoneToday || todayDay?.kind === 'rest') ? nextTrainingDate(program, { annotations }) : null),
+    [isWeeklyProgram, weeklyDoneToday, todayDay, program, annotations]
   )
+  // Today marked off (sick/injury/travel/rest/other) — a training day still
+  // shows up here (todaysDay doesn't know about annotations, see program.js),
+  // so the card below swaps to an acknowledgment + skip instead of "Start session".
+  const todayAnnotation = useMemo(() => annotationForDate(annotations, Date.now()), [annotations])
+  const skipTodayCard = !!todayAnnotation && todayDay?.kind === 'train' && !weeklyDoneToday
 
   // Engine v2 nudge: which of today's target muscles are still recovering.
   // Informational only — never a gate on training.
@@ -326,23 +334,28 @@ export default function WorkoutTracker() {
       setLoadError('')
       if (user) {
         try {
-          const [remote, prof, prog] = await Promise.all([fetchRemoteHistory(user.id), fetchProfile(user.id), fetchRemoteProgram(user.id)])
+          const [remote, prof, prog, annos] = await Promise.all([
+            fetchRemoteHistory(user.id), fetchProfile(user.id), fetchRemoteProgram(user.id), fetchRemoteDayAnnotations(user.id),
+          ])
           if (cancelled) return
           setHistory(remote)
           setProfile(prof)
           setProgram(prog || getProgram())
+          setAnnotations(annos)
           const local = getHistory()
           setImportable(local.length > 0 ? local : null)
         } catch {
           if (!cancelled) {
             setHistory([])
             setProgram(getProgram())
+            setAnnotations(getDayAnnotations())
             setLoadError("Couldn't load your workouts — check your connection and refresh.")
           }
         }
       } else {
         setHistory(getHistory())
         setProgram(getProgram())
+        setAnnotations(getDayAnnotations())
         setImportable(null)
         setProfile(null)
       }
@@ -867,7 +880,9 @@ export default function WorkoutTracker() {
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 40)
   }
 
-  // Rest day: advance past it without logging anything.
+  // Advance the rotation past `day` without logging anything — for an actual
+  // rest day, or for a training day you've marked off (sick/injury/etc.) and
+  // are skipping rather than logging.
   function markRestDone(day) {
     if (!program) return
     const advanced = advanceProgram(program, day.id)
@@ -1669,6 +1684,30 @@ export default function WorkoutTracker() {
                   <p className="text-[12px] text-cream/60 mt-0.5">
                     Done for today.{weeklyNext ? ` Next up: ${weeklyNext.day.name} ${nextDayLabel(weeklyNext.date)}.` : ''}
                   </p>
+                </div>
+              ) : skipTodayCard ? (
+                <div>
+                  <p className="font-heading text-xl font-medium">{todayDay.name} — marked off</p>
+                  <p className="text-[12px] text-cream/60 mt-0.5">
+                    You marked today as {reasonLabel(todayAnnotation.reason).toLowerCase()}
+                    {todayAnnotation.note ? ` — "${todayAnnotation.note}"` : ''}. No pressure — log it anyway if you're up for it, or skip ahead.
+                  </p>
+                  <div className="flex items-center gap-3 flex-wrap mt-4">
+                    <button
+                      onClick={() => startTodaysSession(todayDay)}
+                      className="inline-flex items-center justify-center gap-2 bg-cream text-text-primary font-medium px-5 py-2.5 border-none cursor-pointer text-[14px] hover:bg-white transition-colors"
+                    >
+                      <Check className="w-4 h-4" /> Log anyway
+                    </button>
+                    {!isWeeklyProgram && (
+                      <button
+                        onClick={() => markRestDone(todayDay)}
+                        className="shrink-0 inline-flex items-center justify-center gap-2 bg-transparent text-cream border border-cream/30 font-medium px-5 py-2.5 cursor-pointer text-[13px] hover:border-cream/60 transition-colors"
+                      >
+                        Skip — move to next
+                      </button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <>

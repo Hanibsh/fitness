@@ -200,7 +200,7 @@ export default function CalendarPage() {
     [sessions, annotations])
 
   const selectedAnnotation = selectedDay ? annotationForDate(annotations, selectedDay.date.getTime()) : null
-  const selectedPlanned = selectedDay && selectedDay.sessions.length === 0 ? plannedDayForDate(program, selectedDay.date.getTime()) : null
+  const selectedPlanned = selectedDay && selectedDay.sessions.length === 0 ? plannedDayForDate(program, selectedDay.date.getTime(), { annotations }) : null
 
   if (loading) {
     return (

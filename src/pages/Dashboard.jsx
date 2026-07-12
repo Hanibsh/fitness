@@ -386,10 +386,10 @@ export default function Dashboard() {
   const weeklyProgram = !!program && scheduleMode(program) === 'weekly'
   const todaySessions = sessions.filter((s) => new Date(s.date).toDateString() === new Date().toDateString())
   const trainedToday = todaySessions.length > 0
-  const todayPlanned = plannedDayForDate(program, Date.now())
+  const todayPlanned = plannedDayForDate(program, Date.now(), { annotations })
   const tomorrowDate = new Date(Date.now() + 24 * 60 * 60 * 1000)
   const tomorrowSessions = sessions.filter((s) => new Date(s.date).toDateString() === tomorrowDate.toDateString())
-  const tomorrowPlanned = plannedDayForDate(program, tomorrowDate.getTime())
+  const tomorrowPlanned = plannedDayForDate(program, tomorrowDate.getTime(), { annotations })
   const exerciseCount = (day) => `${day.exercises.length} exercise${day.exercises.length !== 1 ? 's' : ''}`
   const upToday = !program
     ? { label: hero.next, sub: null }
@@ -566,7 +566,7 @@ export default function Dashboard() {
                     (() => {
                       // Nothing logged: for today/future dates show what the
                       // program has planned there instead of a dead end.
-                      const planned = plannedDayForDate(program, selectedDay.date.getTime())
+                      const planned = plannedDayForDate(program, selectedDay.date.getTime(), { annotations })
                       if (planned && planned.kind === 'train') {
                         return (
                           <div>

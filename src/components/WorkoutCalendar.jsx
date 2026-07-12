@@ -120,8 +120,9 @@ export default function WorkoutCalendar({ sessions, onSelectDay, selectedDate, p
           const hasWorkout = daySessions.length > 0
           const annotation = annotations.length ? annotationForDate(annotations, date.getTime()) : null
           // Program projection: an upcoming planned training day gets an empty
-          // circle — unless the day already has a logged workout (filled wins).
-          const planned = !hasWorkout && program ? plannedDayForDate(program, date.getTime()) : null
+          // circle — unless the day already has a logged workout (filled wins)
+          // or the day itself is annotated off (plannedDayForDate suppresses it).
+          const planned = !hasWorkout && program ? plannedDayForDate(program, date.getTime(), { annotations }) : null
           const plannedTrain = planned && planned.kind === 'train' ? planned : null
           return (
             <button

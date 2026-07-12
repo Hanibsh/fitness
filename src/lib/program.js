@@ -126,30 +126,40 @@ export function setPointerToDay(program, dayId) {
 export const PROJECTION_HORIZON_DAYS = 28
 
 // The day this program plans for a calendar date, or null (past dates, empty
-// programs, or beyond the horizon). Weekly programs are deterministic — the
-// weekday decides. Rotating programs project the cycle forward from the
-// pointer, one day per date, starting today — or tomorrow if the rotation
-// already advanced today (see advanceProgram).
-export function plannedDayForDate(program, date, { now = Date.now() } = {}) {
+// programs, beyond the horizon, or a date you've marked off). Weekly programs
+// are deterministic — the weekday decides, except an annotated date is
+// suppressed (you already know you're off; no need for a training-day
+// projection to say otherwise — the fixed weekly schedule itself doesn't
+// shift). Rotating programs project the cycle forward from the pointer, one
+// day per date, starting today — or tomorrow if the rotation already
+// advanced today (see advanceProgram) — and an annotated date doesn't consume
+// a slot: it's skipped and everything after it shifts up by one, same as if
+// that day simply hadn't happened yet. `annotations` is optional so callers
+// that haven't been updated for this still work, just without the skip.
+export function plannedDayForDate(program, date, { now = Date.now(), annotations = [] } = {}) {
   if (!program || !program.days.length) return null
   const target = startOfDay(date)
   const today = startOfDay(now)
   if (target < today) return null
+  const pausedDays = new Set(annotations.map((a) => startOfDay(a.date)))
+  if (pausedDays.has(target)) return null
   if (scheduleMode(program) === 'weekly') return program.days[mondayIndex(target)]
   if (target > today + PROJECTION_HORIZON_DAYS * DAY_MS) return null
   const anchor = program.lastAdvancedAt && startOfDay(program.lastAdvancedAt) === today ? today + DAY_MS : today
   if (target < anchor) return null
-  const offset = Math.round((target - anchor) / DAY_MS)
+  let paused = 0
+  for (let d = anchor; d < target; d += DAY_MS) if (pausedDays.has(d)) paused++
+  const offset = Math.round((target - anchor) / DAY_MS) - paused
   return program.days[(safeIndex(program) + offset) % program.days.length]
 }
 
 // The next upcoming TRAINING day strictly after `now`'s date — { date, day }
 // or null. Powers "done for today — next: Upper A on Friday".
-export function nextTrainingDate(program, { now = Date.now() } = {}) {
+export function nextTrainingDate(program, { now = Date.now(), annotations = [] } = {}) {
   if (!program || !program.days.length) return null
   for (let i = 1; i <= PROJECTION_HORIZON_DAYS; i++) {
     const date = startOfDay(now) + i * DAY_MS
-    const day = plannedDayForDate(program, date, { now })
+    const day = plannedDayForDate(program, date, { now, annotations })
     if (day && day.kind === 'train') return { date, day }
   }
   return null
