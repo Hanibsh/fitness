@@ -26,7 +26,7 @@ export const CATEGORIES = [
   { slug: 'back', name: 'Back', source: 'Back' },
   { slug: 'shoulders', name: 'Shoulders', source: 'Shoulders', subs: ['front-delts', 'side-delts', 'rear-delts'] },
   { slug: 'arms', name: 'Arms', source: 'Arms', subs: ['biceps', 'triceps', 'forearms'] },
-  { slug: 'legs', name: 'Legs', source: 'Legs', subs: ['glutes', 'quads', 'hamstrings', 'calves', 'adductors'] },
+  { slug: 'legs', name: 'Legs', source: 'Legs', subs: ['glutes', 'quads', 'hamstrings', 'calves', 'adductors', 'abductors'] },
   { slug: 'traps', name: 'Neck and Traps', source: 'Neck and Traps' },
   { slug: 'core', name: 'Core', source: 'Core' },
 ]
@@ -49,6 +49,7 @@ export const SUBCATEGORIES = {
   hamstrings: { name: 'Hamstrings', parent: 'legs', value: 'Hamstrings' },
   calves: { name: 'Calves', parent: 'legs', value: 'Calves' },
   adductors: { name: 'Adductors', parent: 'legs', value: 'Adductors' },
+  abductors: { name: 'Abductors', parent: 'legs', value: 'Abductors' },
 }
 
 // Educational copy, keyed by category OR subcategory slug.
@@ -165,8 +166,13 @@ export const MUSCLE_INFO = {
   },
   adductors: {
     blurb:
-      'The adductors on the inner thigh pull the leg toward your midline and assist the squat and hinge; the abductors on the outside move it away. Wide stances and dedicated machines hit them.',
+      'The adductors on the inner thigh pull the leg toward your midline and assist the squat and hinge. Wide stances, Copenhagen planks and the adduction machine hit them.',
     size: 'A surprisingly large share of total thigh mass.',
+  },
+  abductors: {
+    blurb:
+      'The hip abductors — the gluteus medius and minimus on the outer hip — move the leg away from your midline and stabilise the pelvis on every step and single-leg movement. The abduction machine and banded work target them directly.',
+    size: 'Small stabilisers, but key for hip health and a balanced hip.',
   },
 }
 

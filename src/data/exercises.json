@@ -5610,7 +5610,7 @@
       "category": "Arms",
       "subCategory": "Triceps",
       "type": "isolation",
-      "laterality": "bilateral",
+      "laterality": "both",
       "muscles": {
         "Triceps": 1
       },
@@ -5642,7 +5642,7 @@
       "category": "Arms",
       "subCategory": "Triceps",
       "type": "isolation",
-      "laterality": "bilateral",
+      "laterality": "both",
       "muscles": {
         "Triceps": 1
       },
@@ -7989,7 +7989,7 @@
       "id": "hip-abduction-machine",
       "name": "Hip Abduction Machine",
       "category": "Legs",
-      "subCategory": "Glutes",
+      "subCategory": "Abductors",
       "type": "isolation",
       "laterality": "bilateral",
       "muscles": {
