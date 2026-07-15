@@ -1,126 +1,132 @@
 // Clickable-region geometry for the interactive anatomy map (see
-// components/InteractiveAnatomy.jsx). Each anatomy image holds a front figure
-// and a back figure side by side, with different pixel positions and scales
-// per sex — so each source declares a tight bounding BOX per view (measured
-// from the actual PNGs), and the SVG overlay crops to that box via viewBox.
+// components/InteractiveAnatomy.jsx). Each anatomy image (1024x1024) holds a
+// front figure and a back figure side by side. Every image declares a tight
+// bounding BOX per view (measured from the actual art), and the SVG overlay
+// crops to that box via viewBox.
 //
-// Region polygons are declared ONCE in NORMALIZED coordinates (0..1 within a
-// view's box), not raw pixels — so the same shapes drape over both the male
-// and female figures, since both are centered standing figures with the same
-// anatomical layout. They're approximate hotspots (generous blobs), not
-// surgical outlines. Add `?anatomy-debug` on /exercises in dev to see them
-// drawn over the art and to log click coordinates for tuning.
+// Muscle ZONES are traced by hand, per sex + view, following the muscle
+// outlines so a tap on the drawing lands on the right muscle. Coordinates are
+// normalized (0..1) WITHIN that view's box, so they stay aligned at any render
+// size. Zones are being added muscle-group by muscle-group; a (sex, view) with
+// no entry simply has no clickable overlay yet.
+//
+// Tuning workflow: crop a figure to its box, upscale, draw candidate polygons
+// over it with sharp, eyeball, adjust. `?anatomy-debug` on /exercises also logs
+// click coordinates in the image's pixel space.
 import { SUBCATEGORIES } from './muscleInfo'
 
-// Boxes are natural-pixel {x,y,w,h} of each figure within its image.
+// Boxes are natural-pixel {x,y,w,h} of each figure within its 1024x1024 image.
 export const ANATOMY_SOURCES = {
   male: {
     src: 'images/anatomy-male.webp',
-    w: 1111,
-    h: 768,
-    front: { x: 4, y: 30, w: 410, h: 712 },
-    back: { x: 700, y: 30, w: 404, h: 712 },
+    w: 1024,
+    h: 1024,
+    front: { x: 56, y: 30, w: 408, h: 970 },
+    back: { x: 560, y: 30, w: 408, h: 970 },
   },
   female: {
     src: 'images/anatomy-female.webp',
-    w: 869,
-    h: 768,
-    front: { x: 100, y: 38, w: 322, h: 700 },
-    back: { x: 430, y: 38, w: 314, h: 700 },
+    w: 1024,
+    h: 1024,
+    front: { x: 34, y: 38, w: 456, h: 950 },
+    back: { x: 534, y: 38, w: 454, h: 950 },
   },
 }
 
 export const SEXES = [
-  { id: 'male', label: 'Male' },
   { id: 'female', label: 'Female' },
+  { id: 'male', label: 'Male' },
 ]
 
-// A rectangle helper keeps the region list readable (most hotspots are blobs).
-const rect = (x0, y0, x1, y1) => [
-  [x0, y0],
-  [x1, y0],
-  [x1, y1],
-  [x0, y1],
-]
+const SEX_KEY = 'leon_anatomy_sex'
+const DEFAULT_SEX = 'female' // the view that currently has traced zones
 
-// Each region: id, the hub slug it links to (deepest sensible hub), a label,
-// the view it lives on, and one or more normalized polygons (left/right pairs
-// light up together). Order matters where hotspots overlap — later regions win
-// the click (e.g. adductors sit on top of the inner quad edges).
-export const ANATOMY_REGIONS = [
-  // ---- Front view ----
-  { id: 'f-traps', slug: 'traps', label: 'Neck & Traps', view: 'front', shapes: [rect(0.44, 0.115, 0.56, 0.16)] },
-  {
-    id: 'f-shoulders', slug: 'shoulders', label: 'Shoulders', view: 'front',
-    shapes: [rect(0.29, 0.15, 0.42, 0.23), rect(0.58, 0.15, 0.71, 0.23)],
-  },
-  { id: 'f-chest', slug: 'chest', label: 'Chest', view: 'front', shapes: [rect(0.35, 0.17, 0.65, 0.28)] },
-  {
-    id: 'f-biceps', slug: 'biceps', label: 'Biceps', view: 'front',
-    shapes: [rect(0.26, 0.22, 0.37, 0.33), rect(0.63, 0.22, 0.74, 0.33)],
-  },
-  {
-    id: 'f-forearms', slug: 'forearms', label: 'Forearms', view: 'front',
-    shapes: [rect(0.19, 0.34, 0.31, 0.46), rect(0.69, 0.34, 0.81, 0.46)],
-  },
-  { id: 'f-core', slug: 'core', label: 'Core', view: 'front', shapes: [rect(0.40, 0.28, 0.60, 0.45)] },
-  {
-    id: 'f-quads', slug: 'quads', label: 'Quads', view: 'front',
-    shapes: [rect(0.39, 0.50, 0.495, 0.69), rect(0.505, 0.50, 0.61, 0.69)],
-  },
-  { id: 'f-adductors', slug: 'adductors', label: 'Adductors', view: 'front', shapes: [rect(0.455, 0.51, 0.545, 0.64)] },
-
-  // ---- Back view ----
-  { id: 'b-traps', slug: 'traps', label: 'Neck & Traps', view: 'back', shapes: [rect(0.41, 0.13, 0.59, 0.24)] },
-  {
-    id: 'b-reardelts', slug: 'rear-delts', label: 'Rear Delts', view: 'back',
-    shapes: [rect(0.29, 0.16, 0.40, 0.23), rect(0.60, 0.16, 0.71, 0.23)],
-  },
-  {
-    id: 'b-triceps', slug: 'triceps', label: 'Triceps', view: 'back',
-    shapes: [rect(0.26, 0.23, 0.37, 0.34), rect(0.63, 0.23, 0.74, 0.34)],
-  },
-  {
-    id: 'b-forearms', slug: 'forearms', label: 'Forearms', view: 'back',
-    shapes: [rect(0.19, 0.35, 0.31, 0.47), rect(0.69, 0.35, 0.81, 0.47)],
-  },
-  {
-    id: 'b-lats', slug: 'lats', label: 'Lats', view: 'back',
-    shapes: [rect(0.35, 0.24, 0.46, 0.35), rect(0.54, 0.24, 0.65, 0.35)],
-  },
-  { id: 'b-midback', slug: 'mid-back', label: 'Mid Back', view: 'back', shapes: [rect(0.45, 0.20, 0.55, 0.30)] },
-  { id: 'b-erectors', slug: 'spinal-erectors', label: 'Spinal Erectors', view: 'back', shapes: [rect(0.45, 0.30, 0.55, 0.40)] },
-  {
-    id: 'b-glutes', slug: 'glutes', label: 'Glutes', view: 'back',
-    shapes: [rect(0.38, 0.40, 0.50, 0.51), rect(0.50, 0.40, 0.62, 0.51)],
-  },
-  {
-    id: 'b-hamstrings', slug: 'hamstrings', label: 'Hamstrings', view: 'back',
-    shapes: [rect(0.40, 0.52, 0.495, 0.67), rect(0.505, 0.52, 0.60, 0.67)],
-  },
-  {
-    id: 'b-calves', slug: 'calves', label: 'Calves', view: 'back',
-    shapes: [rect(0.41, 0.72, 0.495, 0.87), rect(0.505, 0.72, 0.59, 0.87)],
-  },
-]
-
-export function regionsForView(view) {
-  return ANATOMY_REGIONS.filter((r) => r.view === view)
+export function readAnatomySex() {
+  try {
+    const s = localStorage.getItem(SEX_KEY)
+    if (s === 'male' || s === 'female') return s
+  } catch { /* ignore */ }
+  return DEFAULT_SEX
 }
 
-// Regions that belong to a hub slug — the region's own slug, or a region whose
-// slug is a subcategory of the hub (so the Arms hub highlights biceps/triceps/
-// forearms, Legs highlights quads/glutes/etc.).
-export function regionsForHub(slug) {
-  return ANATOMY_REGIONS.filter((r) => r.slug === slug || SUBCATEGORIES[r.slug]?.parent === slug)
+export function writeAnatomySex(id) {
+  try { localStorage.setItem(SEX_KEY, id) } catch { /* ignore */ }
 }
 
-// Which views a hub's regions occupy — so a hub with only back-view muscles
-// (e.g. Lats) shows just the back figure. Falls back to both.
-export function viewsFor(slug) {
-  const views = new Set(regionsForHub(slug).map((r) => r.view))
-  if (views.size === 1) return [...views]
-  return ['front', 'back']
+// Traced clickable zones: sex → view → [{ slug, label, shapes }]. Each shape is
+// a normalized polygon (array of [nx, ny]) within the view's box. Left/right
+// pairs share a slug and light up together. Draw order within a view matters
+// where zones overlap — later wins the click (adductors sit over the inner
+// quad edges, so they come last).
+export const ANATOMY_ZONES = {
+  female: {
+    front: [
+      {
+        slug: 'chest', label: 'Chest',
+        shapes: [[[0.5, 0.1965], [0.3984, 0.1935], [0.3641, 0.2266], [0.3781, 0.2641], [0.4031, 0.3038], [0.4766, 0.3151], [0.5, 0.3106], [0.5234, 0.3151], [0.5969, 0.3038], [0.6219, 0.2641], [0.6359, 0.2266], [0.6016, 0.1935]]],
+      },
+      {
+        slug: 'shoulders', label: 'Shoulders',
+        shapes: [
+          [[0.3875, 0.186], [0.3203, 0.189], [0.2578, 0.2086], [0.2234, 0.2386], [0.2469, 0.2686], [0.3281, 0.2641], [0.3719, 0.2363], [0.3937, 0.2011]],
+          [[0.6125, 0.186], [0.6797, 0.189], [0.7422, 0.2086], [0.7766, 0.2386], [0.7531, 0.2686], [0.6719, 0.2641], [0.6281, 0.2363], [0.6062, 0.2011]],
+        ],
+      },
+      {
+        slug: 'biceps', label: 'Biceps',
+        shapes: [
+          [[0.2219, 0.2491], [0.35, 0.2701], [0.3219, 0.3466], [0.2687, 0.4171], [0.1719, 0.4111], [0.1906, 0.3338], [0.2109, 0.2791]],
+          [[0.7781, 0.2491], [0.65, 0.2701], [0.6781, 0.3466], [0.7312, 0.4171], [0.8281, 0.4111], [0.8094, 0.3338], [0.7891, 0.2791]],
+        ],
+      },
+      {
+        slug: 'forearms', label: 'Forearms',
+        shapes: [
+          [[0.1719, 0.4111], [0.2687, 0.4186], [0.2437, 0.4651], [0.2344, 0.5161], [0.1219, 0.5101], [0.1406, 0.4576]],
+          [[0.8281, 0.4111], [0.7312, 0.4186], [0.7562, 0.4651], [0.7656, 0.5161], [0.8781, 0.5101], [0.8594, 0.4576]],
+        ],
+      },
+      {
+        slug: 'quads', label: 'Quads',
+        shapes: [
+          [[0.3625, 0.5176], [0.4875, 0.5289], [0.4906, 0.6602], [0.4813, 0.7614], [0.3906, 0.7614], [0.3688, 0.6452], [0.3563, 0.5701]],
+          [[0.6375, 0.5176], [0.5125, 0.5289], [0.5094, 0.6602], [0.5188, 0.7614], [0.6094, 0.7614], [0.6312, 0.6452], [0.6438, 0.5701]],
+        ],
+      },
+      {
+        slug: 'adductors', label: 'Adductors',
+        shapes: [[[0.4734, 0.5289], [0.5266, 0.5289], [0.5344, 0.6377], [0.5031, 0.6962], [0.4688, 0.6377]]],
+      },
+    ],
+  },
+}
+
+// Clickable zones for a given sex + view (empty if none traced yet).
+export function zonesFor(sex, view) {
+  return ANATOMY_ZONES[sex]?.[view] || []
+}
+
+// Does a zone belong to a hub slug — the zone's own slug, or a zone whose slug
+// is a subcategory of the hub (Arms hub ⊃ biceps/forearms, Legs ⊃ quads/…).
+function zoneMatchesHub(zone, slug) {
+  return zone.slug === slug || SUBCATEGORIES[zone.slug]?.parent === slug
+}
+
+// Zones (tagged with their view) that a hub should highlight, for a given sex.
+export function zonesForHub(sex, slug) {
+  const out = []
+  for (const view of ['front', 'back']) {
+    for (const z of zonesFor(sex, view)) {
+      if (zoneMatchesHub(z, slug)) out.push({ ...z, view })
+    }
+  }
+  return out
+}
+
+// Which views carry a hub's zones (so a front-only muscle shows just the front
+// figure). Empty when the hub has no traced zones yet for this sex.
+export function viewsForHub(sex, slug) {
+  return [...new Set(zonesForHub(sex, slug).map((z) => z.view))]
 }
 
 // Convert a normalized polygon to an SVG points string in the box's pixel

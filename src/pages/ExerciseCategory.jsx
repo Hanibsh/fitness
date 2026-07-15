@@ -6,14 +6,18 @@ import { categoryBySlug, SUBCATEGORIES, MUSCLE_INFO } from '../data/muscleInfo'
 import ExerciseCard from '../components/ExerciseCard'
 import MuscleGuide from '../components/MuscleGuide'
 import InteractiveAnatomy from '../components/InteractiveAnatomy'
-import { regionsForHub, viewsFor } from '../data/anatomyRegions'
+import { readAnatomySex, viewsForHub } from '../data/anatomyRegions'
 
-// The muscle guide beside a highlighted mini body-map. If the hub has no mapped
-// region (e.g. a delt sub-head), it falls back to the parent's regions; if even
-// that is empty, the guide simply spans full width.
+// The muscle guide beside a highlighted mini body-map. Shows the map only when
+// the current sex has traced zones for this hub (or its parent, e.g. a delt
+// sub-head falls back to the shoulders zones); otherwise the guide is full
+// width. Zones are added muscle-group by muscle-group, so many hubs have none
+// yet and simply render the guide alone.
 function HubHeader({ slug, parentSlug, info }) {
-  let mapSlug = regionsForHub(slug).length ? slug : null
-  if (!mapSlug && parentSlug && regionsForHub(parentSlug).length) mapSlug = parentSlug
+  const sex = readAnatomySex()
+  let mapSlug = viewsForHub(sex, slug).length ? slug : null
+  if (!mapSlug && parentSlug && viewsForHub(sex, parentSlug).length) mapSlug = parentSlug
+  const views = mapSlug ? viewsForHub(sex, mapSlug) : []
   return (
     <div className={mapSlug ? 'grid md:grid-cols-[1fr_240px] gap-6 items-start' : ''}>
       <MuscleGuide info={info} />
@@ -21,7 +25,7 @@ function HubHeader({ slug, parentSlug, info }) {
         <InteractiveAnatomy
           interactive={false}
           highlight={mapSlug}
-          views={viewsFor(mapSlug)}
+          views={views}
           showSexToggle={false}
           compact
           className="mt-6 mb-8"
