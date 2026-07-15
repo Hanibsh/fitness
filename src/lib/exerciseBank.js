@@ -75,9 +75,9 @@ export function subcategoryExercises(subSlug) {
   ).sort(byTypeThenName)
 }
 
-// Exercises for a leaf category slug (non-split `source` categories, or a
-// derived `atoms` tile like Glutes). Split categories return [] here — they
-// render subcategory tiles, not a flat list.
+// Exercises for a category slug: a derived `atoms` tile (like Glutes) pulls by
+// primary mover; every other category returns its full stored-`category` list.
+// Split categories use this as the "All exercises" roster under their sub tiles.
 export function categoryExercises(catSlug) {
   const cat = categoryBySlug(catSlug)
   if (!cat) return []
@@ -85,7 +85,6 @@ export function categoryExercises(catSlug) {
     const atoms = new Set(cat.atoms)
     return ALL.filter((e) => primaryAtoms(e).some((a) => atoms.has(a))).sort(byTypeThenName)
   }
-  if (cat.subs) return []
   return ALL.filter((e) => e.category === cat.source).sort(byTypeThenName)
 }
 
