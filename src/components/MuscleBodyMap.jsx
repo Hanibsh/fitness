@@ -2,6 +2,13 @@ import { useMemo } from 'react'
 import InteractiveAnatomy from './InteractiveAnatomy'
 import { zoneSlugForEngineMuscle } from '../data/anatomyRegions'
 
+// PARKED — not mounted anywhere. Pulled off the dashboard on 2026-07-17: tinting
+// the label chips reads as choppy rather than as a heatmap, and it needs a design
+// rework before it goes back. Kept because the data plumbing below (the engine →
+// zone mapping and the merge rule) is the fiddly part and is worth reusing.
+// Re-mount by dropping <MuscleBodyMap mode recovery volume /> into Dashboard.jsx
+// above the Muscle volume card.
+//
 // The dashboard's body map: the same labelled anatomy art as the exercise bank,
 // with each muscle's label tinted by how recovered it is, or how much volume
 // it's getting. It's a glance, not a ledger — the lists under it stay the
