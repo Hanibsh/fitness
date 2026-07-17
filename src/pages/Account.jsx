@@ -258,7 +258,7 @@ export default function Account() {
                     </div>
 
                     <div>
-                      <label className={labelCls}>Experience</label>
+                      <label className={labelCls}>Training age</label>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {EXPERIENCE_LEVELS.map((e) => choice(experience === e.value, () => setExperience(experience === e.value ? '' : e.value), e.label, e.sub))}
                       </div>
@@ -266,7 +266,8 @@ export default function Account() {
 
                     <div>
                       <label className={labelCls}>Equipment</label>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {/* two presets, so a 4-col grid would leave them stranded at half width */}
+                      <div className="grid grid-cols-2 gap-2">
                         {EQUIPMENT_PRESETS.map((eq) => choice(equipment === eq.value, () => setEquipment(equipment === eq.value ? '' : eq.value), eq.label))}
                       </div>
                     </div>

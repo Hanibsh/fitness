@@ -7,36 +7,36 @@
 // modes) — the app is hypertrophy-only by design; goal tunes nutrition + volume
 // posture, not the program type.
 
+import { AT_HOME_EQUIPMENT, ALL_EQUIPMENT } from '../data/equipmentGroups'
+
 export const GOALS = [
   { value: 'lose_fat', label: 'Lose fat' },
   { value: 'gain_muscle', label: 'Gain muscle' },
-  { value: 'recomp', label: 'Recomp' },
+  { value: 'recomp', label: 'Recomposition' },
   { value: 'maintain', label: 'Maintain' },
 ]
 
-// Self-selected training tier. Research is consistent that the tier predicts
-// programming needs better than raw calendar time, so this is the real signal —
-// and since each tier already states its year range, it IS the answer to "how
-// long have you been training". A separate duration input asked the same
-// question twice, so it's gone (2026-07-17), along with days/week and time per
-// session. The schedule the user actually trains is observable from their logged
-// sessions and routine; asking them to also declare it invited the two to
-// disagree. Don't reintroduce them without a consumer that needs the stated
-// intent rather than the real behaviour.
+// Training age — years of consistent training, self-selected as a tier. The tier
+// predicts programming needs better than raw calendar time does, and since each
+// one states its own year range, it IS the answer to "how long have you been
+// training": a separate duration input asked the same question twice, so it's
+// gone (2026-07-17), along with days/week and time per session. The schedule
+// someone actually trains is observable from their logged sessions and routine;
+// asking them to also declare it invited the two to disagree. Don't reintroduce
+// them without a consumer that needs the stated intent over the real behaviour.
 export const EXPERIENCE_LEVELS = [
-  { value: 'beginner', label: 'Beginner', sub: '< 1 yr' },
-  { value: 'intermediate', label: 'Intermediate', sub: '1–3 yrs' },
-  { value: 'advanced', label: 'Advanced', sub: '3+ yrs' },
+  { value: 'beginner', label: 'Beginner', sub: '0–2 years' },
+  { value: 'intermediate', label: 'Intermediate', sub: '3–5 years' },
+  { value: 'advanced', label: 'Advanced', sub: '6+ years' },
 ]
 
-// Equipment presets map onto the exercise DB's five `equipment` values
-// (free weight / machine / cable / bodyweight / resistance band). `includes` is
+// Equipment presets map onto the exercise DB's `equipment` values. `includes` is
 // what the future generator filters the exercise pool against; tune freely here.
+// Only the two ends of the range are offered — "Home gym" and "Dumbbells only"
+// were dropped (2026-07-17) as middle grounds nobody picked cleanly.
 export const EQUIPMENT_PRESETS = [
-  { value: 'gym', label: 'Full gym', includes: ['free weight', 'machine', 'cable', 'bodyweight', 'resistance band'] },
-  { value: 'home', label: 'Home gym', includes: ['free weight', 'bodyweight', 'resistance band'] },
-  { value: 'dumbbells', label: 'Dumbbells only', includes: ['free weight', 'bodyweight'] },
-  { value: 'bodyweight', label: 'Bodyweight', includes: ['bodyweight', 'resistance band'] },
+  { value: 'gym', label: 'Full gym', includes: ALL_EQUIPMENT },
+  { value: 'bodyweight', label: 'Bodyweight', includes: AT_HOME_EQUIPMENT },
 ]
 
 // Value allow-lists (for validation / matching a stored value back to an option).

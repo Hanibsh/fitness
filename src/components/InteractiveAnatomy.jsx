@@ -30,7 +30,25 @@ const DEBUG = import.meta.env.DEV &&
 // past the art's native width, which would just blur it.
 const MIN_FIGURE_PX = 360
 
-function Figure({ src, view, zones, interactive, values, onActivate, onDebugClick }) {
+// The two figures are the same size in the art, but their boxes are not: the
+// labels sit further from the front figure than the back one, so the front box
+// is wider (female 577 vs 522). Sizing both to the same column width therefore
+// renders them at different SCALES — the back figure came out ~10% bigger.
+//
+// So every width is a fraction of the widest box on show, which lands both on one
+// scale in either layout: side by side the narrower figure takes ~90% of its equal
+// column, stacked it takes ~90% of the single one. `min` has to be scaled the same
+// way or the narrower figure hits its floor first and the scales split apart again.
+function sizing(box, ref) {
+  const share = box.w / ref
+  return {
+    width: `${share * 100}%`,
+    maxWidth: `${box.w}px`,
+    minWidth: `${MIN_FIGURE_PX * share}px`,
+  }
+}
+
+function Figure({ src, view, zones, refWidth, interactive, values, onActivate, onDebugClick }) {
   const box = src[view]
   const style = {
     width: `${(src.w / box.w) * 100}%`,
@@ -43,8 +61,7 @@ function Figure({ src, view, zones, interactive, values, onActivate, onDebugClic
       className="relative overflow-hidden rounded-lg mx-auto"
       style={{
         aspectRatio: `${box.w} / ${box.h}`,
-        minWidth: `${MIN_FIGURE_PX}px`,
-        maxWidth: `${box.w}px`,
+        ...sizing(box, refWidth),
       }}
     >
       <img
@@ -132,6 +149,9 @@ export default function InteractiveAnatomy({
   const [failed, setFailed] = useState(false)
   const interactive = !values
   const src = ANATOMY_SOURCES[sex]
+  // Widest box on show — every figure is sized as a fraction of it, so they all
+  // render at one scale (see `sizing`).
+  const refWidth = Math.max(...views.map((v) => src[v].w))
 
   // The profile arrives after first paint, so the saved sex can't be a useState
   // initializer. An explicit toggle choice always wins over it.
@@ -215,6 +235,7 @@ export default function InteractiveAnatomy({
                 src={src}
                 view={view}
                 zones={zonesFor(sex, view)}
+                refWidth={refWidth}
                 interactive={interactive}
                 values={values}
                 onActivate={onActivate}

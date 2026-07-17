@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronUp, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Pencil, Timer, StickyNote, Repeat, Users } from 'lucide-react'
+import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronUp, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Pencil, Timer, StickyNote, Repeat, Split, Merge } from 'lucide-react'
 import {
   getDraft,
   saveDraft,
@@ -1556,7 +1556,7 @@ export default function WorkoutTracker() {
                                 title="Combine into one bilateral set"
                                 className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer"
                               >
-                                <Users className="w-3.5 h-3.5" />
+                                <Merge className="w-3.5 h-3.5" />
                               </button>
                             )}
                             <button
@@ -1656,7 +1656,7 @@ export default function WorkoutTracker() {
                             title="Split into left / right"
                             className="flex justify-center text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer"
                           >
-                            <Users className="w-3.5 h-3.5" />
+                            <Split className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>

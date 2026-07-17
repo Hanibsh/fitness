@@ -116,9 +116,12 @@ export function subcategoryTiles(catSlug) {
   }))
 }
 
-// Filter option lists, derived from the data so they never drift from the DB.
-// Stored lowercase in the JSON ("free weight", "compound") — display-cased in the UI.
-export const EQUIPMENT = [...new Set(ALL.map((e) => e.equipment))].filter(Boolean).sort()
+// Filter option list, derived from the data so it never drifts from the DB.
+// Stored lowercase in the JSON ("compound") — display-cased in the UI.
+//
+// Equipment has no equivalent here on purpose: the bank groups those values into
+// At home / Full gym and needs a fixed order, which a derived+sorted list can't
+// give. See data/equipmentGroups.js.
 export const TYPES = [...new Set(ALL.map((e) => e.type))].filter(Boolean).sort()
 
 // The primary (highest-weight) muscle name(s) — used for card tags.

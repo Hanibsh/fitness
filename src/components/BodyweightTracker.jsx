@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Scale, TrendingUp, TrendingDown, Minus, Plus, X, ChevronRight, Lock } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Plus, X, ChevronRight, Lock } from 'lucide-react'
 import {
   getBodyweightLog, makeBodyweightEntry, saveBodyweightEntry, deleteBodyweightEntry,
 } from '../lib/workoutStore'
@@ -8,6 +8,33 @@ import { BODYWEIGHT_RANGES, bodyweightSeries, convertWeight } from '../lib/worko
 import ProgressChart from './ProgressChart'
 import Modal from './Modal'
 import AuthModal from './AuthModal'
+
+// A bathroom scale — the kind you step on. Hand-rolled because lucide has no
+// such icon: its `Scale` is a justice/balance scale and `Weight` is a kettlebell,
+// neither of which is what a weigh-in means. Drawn on lucide's own 24x24,
+// stroke-2 grid so it sits evenly beside the icons around it.
+//
+// A square platform with a dial. The dial is deliberately large and its needle
+// diagonal: these render at 14-16px, where a smaller arc with an upright needle
+// turned to mush and read as an omega rather than a gauge.
+function ScaleIcon({ className = '' }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <path d="M6.5 16a5.5 5.5 0 0 1 11 0" />
+      <path d="M12 16l3.5-4" />
+    </svg>
+  )
+}
 
 function fmt(value, unit) {
   return `${Math.round(value * 10) / 10} ${unit}`
@@ -131,7 +158,7 @@ export default function BodyweightTracker({ user, unit = 'kg' }) {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Scale className="w-4 h-4 text-text-primary" />
+            <ScaleIcon className="w-4 h-4 text-text-primary" />
             <h2 className="font-heading text-lg font-medium text-text-primary">Bodyweight</h2>
           </div>
           {locked ? <Lock className="w-3.5 h-3.5 text-text-light" /> : <ChevronRight className="w-4 h-4 text-text-light" />}
@@ -163,7 +190,7 @@ export default function BodyweightTracker({ user, unit = 'kg' }) {
         <Modal onClose={() => setExpanded(false)} maxWidth="max-w-lg">
           <div className="p-6 sm:p-7">
             <div className="flex items-center gap-2 mb-5">
-              <Scale className="w-4 h-4 text-text-primary" />
+              <ScaleIcon className="w-4 h-4 text-text-primary" />
               <h2 className="font-heading text-xl font-medium text-text-primary">Bodyweight</h2>
             </div>
 

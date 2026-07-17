@@ -91,7 +91,10 @@ const add = (sev, exercise, msg) => findings[sev].push({ exercise, msg })
 
 const MACHINE_HINTS = /\b(machine|lever|smith|pec deck|leg press|leg curl|leg extension|lat pulldown|hack)\b/i
 const CABLE_HINTS = /\bcable|pushdown|push-down|crossover|face pull\b/i
-const BODYWEIGHT_HINTS = /\b(pull-up|chin-up|push-up|dip|muscle-up|dragon flag|toes to bar|hanging|leg raise|russian twist|sissy)\b/i
+// Plurals matter here: `\bdip\b` never matched "Chest Dips", so a whole family of
+// mistagged rows sat unreported until 2026-07-17. Keep the `s?` on anything that
+// reads naturally in the plural.
+const BODYWEIGHT_HINTS = /\b(pull-ups?|chin-ups?|push-ups?|dips?|muscle-ups?|dragon flags?|toes to bar|hanging|leg raises?|russian twists?|sissy|crunches)\b/i
 const UNILATERAL_HINTS = /\b(one[ -]arm|single[ -]arm|one[ -]leg|single[ -]leg|1[ -]arm|unilateral)\b/i
 
 // Resolve columns by HEADER NAME, not fixed position, so editing the CSV

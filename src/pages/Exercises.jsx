@@ -1,21 +1,24 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Search, X, Home } from 'lucide-react'
+import { Search, X, Home, Dumbbell } from 'lucide-react'
 import { searchExercises } from '../lib/exerciseLibrary'
 import {
   allByCategory,
   bankCategories,
   getFullExercise,
-  EQUIPMENT,
   TYPES,
   titleCase,
   EXERCISE_COUNT,
 } from '../lib/exerciseBank'
+import { AT_HOME_EQUIPMENT, GYM_EQUIPMENT, ALL_EQUIPMENT } from '../data/equipmentGroups'
 import ExerciseCard from '../components/ExerciseCard'
 import InteractiveAnatomy from '../components/InteractiveAnatomy'
 
-const AT_HOME = ['bodyweight', 'resistance band']
+// "At home" and "Full gym" are macros over the same equipment Set the gear chips
+// write to, so one predicate still filters everything. Full gym selects all five
+// values rather than clearing the Set: an empty Set means "no filter", which
+// renders the anatomy hero instead of a result list.
 
 function Chip({ active, onClick, children }) {
   return (
@@ -66,8 +69,11 @@ export default function Exercises() {
   const toggleEquip = toggle(setEquip)
   const toggleType = toggle(setTypes)
 
-  const atHomeOn = AT_HOME.every((x) => equip.has(x)) && equip.size === AT_HOME.length
-  const setAtHome = () => setEquip(atHomeOn ? new Set() : new Set(AT_HOME))
+  const isExactly = (list) => equip.size === list.length && list.every((x) => equip.has(x))
+  const atHomeOn = isExactly(AT_HOME_EQUIPMENT)
+  const fullGymOn = isExactly(ALL_EQUIPMENT)
+  const setAtHome = () => setEquip(atHomeOn ? new Set() : new Set(AT_HOME_EQUIPMENT))
+  const setFullGym = () => setEquip(fullGymOn ? new Set() : new Set(ALL_EQUIPMENT))
 
   const matches = (e) =>
     (equip.size === 0 || equip.has(e.equipment)) && (types.size === 0 || types.has(e.type))
@@ -141,7 +147,12 @@ export default function Exercises() {
               <Home className="w-3 h-3" /> At home
             </span>
           </Chip>
-          {EQUIPMENT.map((eq) => (
+          <Chip active={fullGymOn} onClick={setFullGym}>
+            <span className="inline-flex items-center gap-1">
+              <Dumbbell className="w-3 h-3" /> Full gym
+            </span>
+          </Chip>
+          {GYM_EQUIPMENT.map((eq) => (
             <Chip key={eq} active={equip.has(eq)} onClick={() => toggleEquip(eq)}>
               {titleCase(eq)}
             </Chip>
