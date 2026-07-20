@@ -28,7 +28,7 @@ export const CATEGORIES = [
   { slug: 'back', name: 'Back', source: 'Back', subs: ['lats', 'mid-back', 'spinal-erectors'] },
   { slug: 'shoulders', name: 'Shoulders', source: 'Shoulders', subs: ['front-delts', 'side-delts', 'rear-delts'] },
   { slug: 'arms', name: 'Arms', source: 'Arms', subs: ['biceps', 'triceps', 'forearms'] },
-  { slug: 'legs', name: 'Legs', source: 'Legs', subs: ['glutes', 'quads', 'hamstrings', 'calves', 'adductors', 'abductors'] },
+  { slug: 'legs', name: 'Legs', source: 'Legs', subs: ['glutes', 'quads', 'hamstrings', 'calves', 'adductors', 'abductors', 'tibialis'] },
   { slug: 'traps', name: 'Neck and Traps', source: 'Neck and Traps' },
   { slug: 'core', name: 'Core', source: 'Core' },
 ]
@@ -58,6 +58,7 @@ export const SUBCATEGORIES = {
   calves: { name: 'Calves', parent: 'legs', value: 'Calves' },
   adductors: { name: 'Adductors', parent: 'legs', value: 'Adductors' },
   abductors: { name: 'Abductors', parent: 'legs', value: 'Abductors' },
+  tibialis: { name: 'Tibialis', parent: 'legs', value: 'Tibialis' },
 }
 
 // Educational copy, keyed by category OR subcategory slug.
@@ -566,6 +567,24 @@ export const MUSCLE_INFO = {
       'Higher reps (12–20) with a deliberate pause beat heavy stack-slamming.',
     ],
   },
+  tibialis: {
+    blurb:
+      'The tibialis anterior runs down the front of the shin and pulls the foot up toward you — the exact opposite of what the calves do. Toe raises train it directly; nothing else in a normal program does.',
+    size: 'The visible front-of-shin muscle — small, but it fills out the lower leg from the front.',
+    anatomy: [
+      'Sits on the outer front of the shin bone, running from just below the knee to the inside of the foot.',
+      'It is the calves’ antagonist: calves point the foot down, the tibialis pulls it up.',
+    ],
+    functions: [
+      'Lift the foot and toes (dorsiflexion) — it controls every step you take downhill.',
+      'Absorbs impact when the foot lands, which is why it matters for shin splints and knee-friendly running.',
+    ],
+    training: [
+      'Toe raises are the whole menu: tib bar, dumbbell on the foot, cable over the forefoot, or heels-forward wall raises.',
+      'It recovers fast and takes high reps (15–25) well — train it like the calves, just in the other direction.',
+      'Control the lowering; letting the toes drop fast skips the half of the work it is best at.',
+    ],
+  },
 }
 
 // ---- Dashboard deep-links --------------------------------------------------
@@ -592,6 +611,7 @@ export const ENGINE_MUSCLE_TO_SLUG = {
   Adductors: 'adductors',
   Abductors: 'abductors',
   Calves: 'calves',
+  Tibialis: 'tibialis',
 }
 
 // Path to a slug's hub, resolving subcategory slugs through their parent.

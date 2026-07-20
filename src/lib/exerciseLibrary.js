@@ -40,6 +40,7 @@ const MUSCLE_ALIASES = {
   Adductors: 'adductors inner thigh',
   Gastrocnemius: 'calves calf',
   Soleus: 'calves calf soleus',
+  'Tibialis Anterior': 'tibialis tib shin shins',
   'Front Delts': 'front delts shoulders',
   'Side Delts': 'side delts shoulders lateral',
   'Rear Delts': 'rear delts shoulders',

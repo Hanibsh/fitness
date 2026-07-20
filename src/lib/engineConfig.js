@@ -144,7 +144,7 @@ export const ENGINE_MUSCLES = [
   'Front Delts', 'Side Delts', 'Rear Delts',
   'Biceps', 'Triceps', 'Forearms',
   'Abs', 'Obliques',
-  'Quads', 'Hamstrings', 'Glutes', 'Adductors', 'Abductors', 'Calves',
+  'Quads', 'Hamstrings', 'Glutes', 'Adductors', 'Abductors', 'Calves', 'Tibialis',
 ]
 
 // Exercise-DB muscle atom → engine muscle. Judgement calls worth knowing about:
@@ -176,6 +176,7 @@ export const ATOM_TO_GROUP = {
   Adductors: 'Adductors',
   Abductors: 'Abductors',
   Gastrocnemius: 'Calves', Soleus: 'Calves',
+  'Tibialis Anterior': 'Tibialis',
 }
 
 // Custom / typed exercises have no DB entry, so there are no atoms to roll up —
@@ -195,6 +196,7 @@ export const FALLBACK_MUSCLE_PATTERNS = [
   ['Glutes', ['hip thrust', 'glute', 'bridge', 'pull-through', 'pull through']],
   ['Abductors', ['abduction', 'abductor']],
   ['Adductors', ['adduction', 'adductor', 'copenhagen']],
+  ['Tibialis', ['tibialis', 'tib bar', 'tib raise', 'toe raise']],
   ['Calves', ['calf', 'soleus']],
   ['Quads', ['squat', 'lunge', 'leg extension', 'leg press', 'step up', 'step-up', 'hack', 'sissy']],
   ['Triceps', ['pushdown', 'pressdown', 'tricep', 'skull', 'overhead extension', 'close-grip', 'close grip']],
@@ -265,6 +267,7 @@ export const VOLUME_SCALE = {
   'Lower Back': 0.5,
   Adductors: 0.5,
   Abductors: 0.5,
+  Tibialis: 0.5,
   'Neck & Traps': 0.75,
   'Rear Delts': 0.75,
 }

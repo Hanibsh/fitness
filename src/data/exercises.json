@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-17",
-  "count": 268,
+  "generatedAt": "2026-07-20",
+  "count": 275,
   "exercises": [
     {
       "id": "assisted-chest-dip",
@@ -9231,6 +9231,234 @@
       "axialLoading": false,
       "skill": "low",
       "notes": null,
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "seated-toe-raise",
+      "name": "Seated Toe Raise",
+      "category": "Legs",
+      "subCategory": "Tibialis",
+      "type": "isolation",
+      "laterality": "both",
+      "muscles": {
+        "Tibialis Anterior": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        120
+      ],
+      "progressiveOverload": "low",
+      "stability": "very stable",
+      "hypertrophyPotential": "moderate",
+      "sfr": "good",
+      "stretchMediated": "none",
+      "resistanceProfile": "shortened",
+      "equipment": "bodyweight",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Heels planted, lift the toes as high as possible; rest a plate on the foot to add load",
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "standing-tibialis-raise",
+      "name": "Standing Tibialis Raise",
+      "category": "Legs",
+      "subCategory": "Tibialis",
+      "type": "isolation",
+      "laterality": "bilateral",
+      "muscles": {
+        "Tibialis Anterior": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        120
+      ],
+      "progressiveOverload": "low",
+      "stability": "stable",
+      "hypertrophyPotential": "moderate",
+      "sfr": "good",
+      "stretchMediated": "partial",
+      "resistanceProfile": "balanced",
+      "equipment": "bodyweight",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Back against a wall, heels a step forward; walk the feet further out to progress",
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "dumbbell-toe-raise",
+      "name": "Dumbbell Toe Raise",
+      "category": "Legs",
+      "subCategory": "Tibialis",
+      "type": "isolation",
+      "laterality": "both",
+      "muscles": {
+        "Tibialis Anterior": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        120
+      ],
+      "progressiveOverload": "moderate",
+      "stability": "stable",
+      "hypertrophyPotential": "high",
+      "sfr": "good",
+      "stretchMediated": "partial",
+      "resistanceProfile": "shortened",
+      "equipment": "free weight",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Seated with the dumbbell held upright on the foot",
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "resistance-band-seated-toe-raise",
+      "name": "Resistance Band Seated Toe Raise",
+      "category": "Legs",
+      "subCategory": "Tibialis",
+      "type": "isolation",
+      "laterality": "both",
+      "muscles": {
+        "Tibialis Anterior": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        120
+      ],
+      "progressiveOverload": "moderate",
+      "stability": "very stable",
+      "hypertrophyPotential": "moderate",
+      "sfr": "good",
+      "stretchMediated": "none",
+      "resistanceProfile": "shortened",
+      "equipment": "resistance band",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Band anchored ahead of the feet, loop over the forefoot",
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "tib-bar-toe-raise",
+      "name": "Tib Bar Toe Raise",
+      "category": "Legs",
+      "subCategory": "Tibialis",
+      "type": "isolation",
+      "laterality": "both",
+      "muscles": {
+        "Tibialis Anterior": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        120
+      ],
+      "progressiveOverload": "high",
+      "stability": "stable",
+      "hypertrophyPotential": "excellent",
+      "sfr": "excellent",
+      "stretchMediated": "yes",
+      "resistanceProfile": "shortened",
+      "equipment": "free weight",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Plate-loaded and progressive - the most loadable tibialis option",
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "cable-toe-raise",
+      "name": "Cable Toe Raise",
+      "category": "Legs",
+      "subCategory": "Tibialis",
+      "type": "isolation",
+      "laterality": "both",
+      "muscles": {
+        "Tibialis Anterior": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        120
+      ],
+      "progressiveOverload": "high",
+      "stability": "stable",
+      "hypertrophyPotential": "high",
+      "sfr": "excellent",
+      "stretchMediated": "yes",
+      "resistanceProfile": "balanced",
+      "equipment": "cable",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Low pulley with a D-handle strapped over the forefoot; constant tension through the whole arc",
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "plank",
+      "name": "Plank",
+      "category": "Core",
+      "subCategory": null,
+      "type": "isometric",
+      "laterality": "bilateral",
+      "muscles": {
+        "Rectus Abdominis": 1,
+        "Transverse Abdominis": 1,
+        "Obliques": 0.5,
+        "Front Delts": 0.25,
+        "Hip Flexors": 0.25
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        120
+      ],
+      "progressiveOverload": "low",
+      "stability": "moderate",
+      "hypertrophyPotential": "moderate",
+      "sfr": "average",
+      "stretchMediated": "none",
+      "resistanceProfile": "balanced",
+      "equipment": "bodyweight",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Time-based hold; progress with longer holds or a plate on the back",
       "video": null,
       "thumbnail": null
     }

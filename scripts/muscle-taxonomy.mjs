@@ -22,7 +22,7 @@ export const MUSCLE_GROUPS = {
   Arms: ['Biceps', 'Brachialis', 'Triceps'],
   Forearms: ['Brachioradialis', 'Wrist Flexors', 'Wrist Extensors', 'Deep Finger Flexors', 'Pronators', 'Supinator'],
   Core: ['Rectus Abdominis', 'Obliques', 'Transverse Abdominis', 'Hip Flexors'],
-  Legs: ['Quadriceps', 'Glute Max', 'Hamstrings', 'Adductors', 'Abductors', 'Gastrocnemius', 'Soleus'],
+  Legs: ['Quadriceps', 'Glute Max', 'Hamstrings', 'Adductors', 'Abductors', 'Gastrocnemius', 'Soleus', 'Tibialis Anterior'],
 }
 
 // Flat set of every canonical atom.

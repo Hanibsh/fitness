@@ -6,8 +6,8 @@
 //  - One warm "heat" hue at varying opacity over a theme-neutral body — reads
 //    correctly in both light and dark without a second palette (the brand itself
 //    is monochrome, so the accent can't carry intensity).
-//  - Stylized/diagrammatic, not medically precise. ~24 regions cover 24 of our
-//    33 atoms; deep muscles that can't render in 2D (Rotator Cuff, Transverse
+//  - Stylized/diagrammatic, not medically precise. ~25 regions cover 25 of our
+//    34 atoms; deep muscles that can't render in 2D (Rotator Cuff, Transverse
 //    Abdominis, Deep Finger Flexors) fold into their parent region.
 //  - Region ids/atom lists are exported (MUSCLE_REGIONS) so the dashboard
 //    Recovery card and the future 3D model can reuse the same mapping.
@@ -44,6 +44,7 @@ export const MUSCLE_REGIONS = {
   abductors: ['Abductors'],
   hamstrings: ['Hamstrings'],
   calves: ['Gastrocnemius', 'Soleus'],
+  tibialis: ['Tibialis Anterior'],
 }
 
 // Shapes for each region (front figure at FX, back figure at BX).
@@ -72,6 +73,7 @@ const SHAPES = {
   abductors: [e(BX - 35, 188, 8, 14), e(BX + 35, 188, 8, 14)],
   hamstrings: [e(BX - 20, 252, 15, 40), e(BX + 20, 252, 15, 40)],
   calves: [e(BX - 18, 346, 11, 28), e(BX + 18, 346, 11, 28)],
+  tibialis: [e(FX - 20, 346, 8, 26), e(FX + 20, 346, 8, 26)],
 }
 
 // A faint humanoid silhouette behind the muscles, per figure centre.
