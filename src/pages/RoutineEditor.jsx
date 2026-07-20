@@ -1,41 +1,38 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Plus, X, ChevronUp, ChevronDown, Dumbbell, Moon, Trash2, Locate, StickyNote, Repeat } from 'lucide-react'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Plus, X, ChevronUp, ChevronDown, Dumbbell, Moon, Trash2, Locate, StickyNote, Repeat, Link2 } from 'lucide-react'
 import { useProgramsState } from '../lib/useProgramsState'
 import ConfirmModal from '../components/ConfirmModal'
 import {
-  emptyProgram,
   createDay,
   createPlannedExercise,
-  programFromTemplate,
   setPointerToDay,
   scheduleMode,
   effectiveRotation,
   moveInArray,
-  STARTER_PROGRAMS,
 } from '../lib/program'
+import { supersetLabels, newSupersetId, pruneSupersets, regroupSupersets, exerciseBlocks } from '../lib/workoutStats'
 import { getDayAnnotations } from '../lib/workoutStore'
 import ExercisePicker from '../components/ExercisePicker'
 
 const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 // Full-page editor for ONE training split — reached from the split list at
-// /split/:id, or /split/new for the template/blank picker (which swaps
-// the URL to the split's real id once one is picked). Day/exercise editing
-// itself is unchanged from the single-page version; only the surrounding
-// routing changed. (Internals still say "program"/"routine" — only the
-// user-facing wording was renamed to "split".)
+// /split/:id. Splits are always built from scratch (the old starter-template
+// picker is gone — ready-made programs are the upcoming Programs feature).
+// (Internals still say "program"/"routine" — only the user-facing wording was
+// renamed to "split".)
 export default function RoutineEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const isNew = id === 'new'
-  const { programsState, loading, saveProgram, addRoutine, setActiveRoutine, deleteRoutine } = useProgramsState()
+  const { programsState, loading, saveProgram, setActiveRoutine, deleteRoutine } = useProgramsState()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [noteOpenFor, setNoteOpenFor] = useState(() => new Set())
   const [swapOpenFor, setSwapOpenFor] = useState(null)
+  const [supersetMenuFor, setSupersetMenuFor] = useState(null)
 
-  const editingProgram = !isNew ? programsState.programs.find((p) => p.id === id) || null : null
+  const editingProgram = programsState.programs.find((p) => p.id === id) || null
   const isEditingActive = !!editingProgram && editingProgram.id === programsState.activeId
 
   // Every day/exercise mutator below calls this — it's the only thing that
@@ -51,17 +48,6 @@ export default function RoutineEditor() {
     return pointer === p.pointer ? p : { ...p, pointer }
   }
 
-  function startTemplate(key) {
-    const program = programFromTemplate(key)
-    addRoutine(program)
-    navigate(`/split/${program.id}`, { replace: true })
-  }
-  function startBlank() {
-    const program = emptyProgram()
-    addRoutine(program)
-    navigate(`/split/${program.id}`, { replace: true })
-  }
-
   function handleDelete() {
     if (!editingProgram) return
     deleteRoutine(editingProgram.id)
@@ -75,8 +61,6 @@ export default function RoutineEditor() {
   const moveDay = (index, delta) => update((p) => clampPointer({ ...p, days: moveInArray(p.days, index, delta) }))
   const setDayName = (dayId, name) =>
     update((p) => ({ ...p, days: p.days.map((d) => (d.id === dayId ? { ...d, name: name.slice(0, 40) } : d)) }))
-  const setDayKind = (dayId, kind) =>
-    update((p) => ({ ...p, days: p.days.map((d) => (d.id === dayId ? { ...d, kind } : d)) }))
   const jumpToDay = (dayId) => update((p) => setPointerToDay(p, dayId))
 
   const addExercise = (dayId, name, category, exerciseId) =>
@@ -89,9 +73,45 @@ export default function RoutineEditor() {
       ),
     }))
   const removeExercise = (dayId, exId) =>
-    update((p) => ({ ...p, days: p.days.map((d) => (d.id === dayId ? { ...d, exercises: d.exercises.filter((e) => e.id !== exId) } : d)) }))
-  const moveExercise = (dayId, index, delta) =>
-    update((p) => ({ ...p, days: p.days.map((d) => (d.id === dayId ? { ...d, exercises: moveInArray(d.exercises, index, delta) } : d)) }))
+    update((p) => ({ ...p, days: p.days.map((d) => (d.id === dayId ? { ...d, exercises: pruneSupersets(d.exercises.filter((e) => e.id !== exId)) } : d)) }))
+
+  // Same superset model as the logger: partners share a supersetId, groups are
+  // pulled contiguous on pairing, lone leftovers are pruned back to standalone.
+  const pairSuperset = (dayId, exId, targetId) =>
+    update((p) => ({
+      ...p,
+      days: p.days.map((d) => {
+        if (d.id !== dayId) return d
+        const a = d.exercises.find((e) => e.id === exId)
+        const b = d.exercises.find((e) => e.id === targetId)
+        if (!a || !b || a.kind === 'cardio' || b.kind === 'cardio') return d
+        const groupId = b.supersetId || a.supersetId || newSupersetId()
+        const exercises = d.exercises.map((e) => (e.id === exId || e.id === targetId ? { ...e, supersetId: groupId } : e))
+        return { ...d, exercises: regroupSupersets(pruneSupersets(exercises)) }
+      }),
+    }))
+  const unpairSuperset = (dayId, exId) =>
+    update((p) => ({
+      ...p,
+      days: p.days.map((d) =>
+        d.id === dayId
+          ? { ...d, exercises: pruneSupersets(d.exercises.map((e) => (e.id === exId ? { ...e, supersetId: null } : e))) }
+          : d
+      ),
+    }))
+  // Reorder by BLOCK: a contiguous superset group moves as one unit, exactly
+  // like the logger — nudging any member moves the whole pair.
+  const moveExercise = (dayId, exId, delta) =>
+    update((p) => ({
+      ...p,
+      days: p.days.map((d) => {
+        if (d.id !== dayId) return d
+        const blocks = exerciseBlocks(d.exercises)
+        const from = blocks.findIndex((b) => b.some((e) => e.id === exId))
+        if (from === -1 || from + delta < 0 || from + delta >= blocks.length) return d
+        return { ...d, exercises: moveInArray(blocks, from, delta).flat() }
+      }),
+    }))
   const setExerciseSets = (dayId, exId, value) => {
     const sets = value === '' ? '' : Math.max(1, Math.min(20, parseInt(value, 10) || 1))
     update((p) => ({ ...p, days: p.days.map((d) => (d.id === dayId ? { ...d, exercises: d.exercises.map((e) => (e.id === exId ? { ...e, sets } : e)) } : d)) }))
@@ -150,46 +170,16 @@ export default function RoutineEditor() {
     </Link>
   )
 
+  // The /split/new template picker is gone — legacy links land on the list,
+  // where "New split" creates a blank split directly.
+  if (id === 'new') return <Navigate to="/log/split" replace />
+
   if (loading) {
     return (
       <div className="pt-28 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {backLink}
           <p className="text-[13px] text-text-muted">Loading…</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (isNew) {
-    return (
-      <div className="pt-28 pb-24 px-6">
-        <div className="max-w-2xl mx-auto">
-          {backLink}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="bg-white border border-border p-7">
-              <h2 className="font-heading text-xl font-medium text-text-primary mb-1">New split</h2>
-              <p className="text-[13px] text-text-muted mb-6">Pick a template to tweak, or start from scratch.</p>
-              <div className="space-y-3">
-                {STARTER_PROGRAMS.map((t) => (
-                  <button
-                    key={t.key}
-                    onClick={() => startTemplate(t.key)}
-                    className="w-full text-left bg-cream border border-border hover:border-border-hover p-4 cursor-pointer transition-colors"
-                  >
-                    <p className="text-[14px] font-medium text-text-primary">{t.name}</p>
-                    <p className="text-[12px] text-text-muted mt-0.5">{t.description}</p>
-                  </button>
-                ))}
-                <button
-                  onClick={startBlank}
-                  className="w-full inline-flex items-center gap-2 text-[13px] font-medium text-text-muted hover:text-text-primary bg-white border border-border hover:border-border-hover p-4 cursor-pointer transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> Blank split
-                </button>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </div>
     )
@@ -247,7 +237,16 @@ export default function RoutineEditor() {
 
           {/* Days */}
           <AnimatePresence initial={false}>
-            {editingProgram.days.map((day, dayIndex) => (
+            {editingProgram.days.map((day, dayIndex) => {
+              // Per-day superset context: A1/A2 labels, and the block index of
+              // each exercise (a contiguous group is one block) for the
+              // move-up/down disabled states.
+              const groups = supersetLabels(day.exercises)
+              const blocks = exerciseBlocks(day.exercises)
+              const blockIdxOf = new Map()
+              blocks.forEach((b, i) => b.forEach((e) => blockIdxOf.set(e.id, i)))
+              const strengthCount = day.exercises.filter((e) => e.kind !== 'cardio').length
+              return (
               <motion.div
                 key={day.id}
                 initial={{ opacity: 0, y: 8 }}
@@ -298,19 +297,6 @@ export default function RoutineEditor() {
                 </div>
 
                 <div className="px-4 py-3">
-                  {/* train / rest toggle */}
-                  <div className="flex border border-border w-max mb-3">
-                    {[['train', 'Training'], ['rest', 'Rest']].map(([k, label]) => (
-                      <button
-                        key={k}
-                        onClick={() => setDayKind(day.id, k)}
-                        className={`px-3 py-1 text-[12px] font-medium cursor-pointer transition-colors ${day.kind === k ? 'bg-text-primary text-cream' : 'bg-white text-text-muted hover:text-text-primary'}`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-
                   {day.kind === 'rest' ? (
                     <p className="text-[12px] text-text-light">{isWeekly ? 'A rest day — no exercises.' : 'A rest slot in the rotation — no exercises.'}</p>
                   ) : (
@@ -324,20 +310,23 @@ export default function RoutineEditor() {
                             <span className="text-center">Reps</span>
                             <span />
                           </div>
-                          {day.exercises.map((ex, exIndex) => {
+                          {day.exercises.map((ex) => {
                             const noteOpen = noteOpenFor.has(ex.id) || !!ex.note
                             return (
                               <div key={ex.id}>
                                 <div className="grid grid-cols-[1fr_44px_92px_28px] gap-2 items-center">
                                   <div className="min-w-0 flex items-center gap-1">
                                     <div className="flex flex-col shrink-0">
-                                      <button onClick={() => moveExercise(day.id, exIndex, -1)} disabled={exIndex === 0} aria-label="Move exercise up" className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer p-0 leading-none disabled:opacity-30 disabled:cursor-not-allowed">
+                                      <button onClick={() => moveExercise(day.id, ex.id, -1)} disabled={blockIdxOf.get(ex.id) === 0} aria-label="Move exercise up" className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer p-0 leading-none disabled:opacity-30 disabled:cursor-not-allowed">
                                         <ChevronUp className="w-3 h-3" />
                                       </button>
-                                      <button onClick={() => moveExercise(day.id, exIndex, 1)} disabled={exIndex === day.exercises.length - 1} aria-label="Move exercise down" className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer p-0 leading-none disabled:opacity-30 disabled:cursor-not-allowed">
+                                      <button onClick={() => moveExercise(day.id, ex.id, 1)} disabled={blockIdxOf.get(ex.id) === blocks.length - 1} aria-label="Move exercise down" className="text-text-light hover:text-text-primary bg-transparent border-none cursor-pointer p-0 leading-none disabled:opacity-30 disabled:cursor-not-allowed">
                                         <ChevronDown className="w-3 h-3" />
                                       </button>
                                     </div>
+                                    {groups.get(ex.id) && (
+                                      <span className="shrink-0 text-[9px] font-semibold text-cream bg-text-primary px-1 py-0.5">{groups.get(ex.id).label}</span>
+                                    )}
                                     <span className="text-[13px] text-text-primary truncate">{ex.name}</span>
                                     <button
                                       onClick={() => toggleNote(ex.id)}
@@ -356,6 +345,17 @@ export default function RoutineEditor() {
                                     >
                                       <Repeat className="w-3 h-3" />
                                     </button>
+                                    {ex.kind !== 'cardio' && strengthCount > 1 && (
+                                      <button
+                                        onClick={() => setSupersetMenuFor(supersetMenuFor === ex.id ? null : ex.id)}
+                                        aria-label={`Superset options for ${ex.name}`}
+                                        aria-expanded={supersetMenuFor === ex.id}
+                                        title={groups.get(ex.id) ? `In superset ${groups.get(ex.id).letter}` : 'Superset with another exercise'}
+                                        className={`shrink-0 bg-transparent border-none cursor-pointer p-0.5 leading-none ${groups.get(ex.id) ? 'text-text-primary' : 'text-text-light hover:text-text-primary'}`}
+                                      >
+                                        <Link2 className="w-3 h-3" />
+                                      </button>
+                                    )}
                                   </div>
                                   <input
                                     type="number" inputMode="numeric" min="1" max="20"
@@ -405,6 +405,35 @@ export default function RoutineEditor() {
                                     />
                                   </div>
                                 )}
+                                {supersetMenuFor === ex.id && (
+                                  <div className="mt-1.5 border border-border bg-white">
+                                    <p className="px-3 py-2 text-[10px] uppercase tracking-wider text-text-light border-b border-border">Superset with</p>
+                                    {day.exercises.filter((o) => o.id !== ex.id && o.kind !== 'cardio').map((o) => {
+                                      const og = groups.get(o.id)
+                                      const together = !!ex.supersetId && o.supersetId === ex.supersetId
+                                      return (
+                                        <button
+                                          key={o.id}
+                                          onClick={() => { pairSuperset(day.id, ex.id, o.id); setSupersetMenuFor(null) }}
+                                          className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left bg-transparent border-none cursor-pointer hover:bg-cream transition-colors"
+                                        >
+                                          <span className="text-[12px] text-text-primary truncate">{o.name}</span>
+                                          {(og || together) && (
+                                            <span className="shrink-0 text-[9px] font-semibold text-cream bg-text-primary px-1 py-0.5">{together ? 'paired' : og.label}</span>
+                                          )}
+                                        </button>
+                                      )
+                                    })}
+                                    {!!ex.supersetId && (
+                                      <button
+                                        onClick={() => { unpairSuperset(day.id, ex.id); setSupersetMenuFor(null) }}
+                                        className="w-full text-left px-3 py-2 text-[12px] text-red-600 bg-transparent border-t border-border cursor-pointer hover:bg-cream transition-colors"
+                                      >
+                                        Remove from superset
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             )
                           })}
@@ -418,7 +447,8 @@ export default function RoutineEditor() {
                   )}
                 </div>
               </motion.div>
-            ))}
+              )
+            })}
           </AnimatePresence>
 
           {/* Add day / delete routine */}
@@ -427,7 +457,7 @@ export default function RoutineEditor() {
               <Plus className="w-4 h-4" /> Training day
             </button>
             <button onClick={() => addDay('rest')} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-text-muted hover:text-text-primary bg-white border border-border hover:border-border-hover px-4 py-2.5 cursor-pointer transition-colors">
-              <Moon className="w-4 h-4" /> Rest day
+              <Plus className="w-4 h-4" /> Rest day
             </button>
           </div>
 

@@ -75,6 +75,53 @@ export function supersetLabels(exercises = []) {
   return map
 }
 
+export function newSupersetId() {
+  return `ss-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+// Any supersetId shared by fewer than two exercises is meaningless — clear it
+// so a leftover partner falls back to standalone.
+export function pruneSupersets(exercises) {
+  const counts = {}
+  for (const e of exercises) if (e.supersetId) counts[e.supersetId] = (counts[e.supersetId] || 0) + 1
+  return exercises.map((e) => (e.supersetId && counts[e.supersetId] < 2 ? { ...e, supersetId: null } : e))
+}
+
+// Enforce "once paired, supersets stay adjacent": pull every member of each
+// group together at the position of that group's first-encountered member,
+// preserving relative order otherwise. Idempotent — safe to call any time a
+// supersetId changes.
+export function regroupSupersets(exercises) {
+  const emitted = new Set()
+  const out = []
+  for (const e of exercises) {
+    if (!e.supersetId) {
+      out.push(e)
+    } else if (!emitted.has(e.supersetId)) {
+      emitted.add(e.supersetId)
+      out.push(...exercises.filter((x) => x.supersetId === e.supersetId))
+    }
+  }
+  return out
+}
+
+// Group a list into contiguous runs: a run of same-`supersetId` exercises is
+// one block (moved/reordered as a unit), everything else is its own 1-item
+// block. Assumes the contiguous-group invariant already holds (see
+// regroupSupersets) — this just describes the blocks, it doesn't enforce it.
+export function exerciseBlocks(exercises) {
+  const blocks = []
+  let i = 0
+  while (i < exercises.length) {
+    const id = exercises[i].supersetId
+    let j = i + 1
+    if (id) while (j < exercises.length && exercises[j].supersetId === id) j++
+    blocks.push(exercises.slice(i, j))
+    i = j
+  }
+  return blocks
+}
+
 // ---- Rest tracking ---------------------------------------------------------
 // Sets are timestamped (`completedAt`) as they're logged; rest between two sets
 // is the gap between stamps. Only plausible gaps count — logging everything at

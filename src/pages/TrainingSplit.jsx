@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Plus, ChevronUp, ChevronDown, Trash2, CalendarRange, Copy } from 'lucide-react'
 import { useProgramsState } from '../lib/useProgramsState'
+import { emptyProgram } from '../lib/program'
 import ConfirmModal from '../components/ConfirmModal'
 import LogTabs from '../components/LogTabs'
 
@@ -12,10 +13,18 @@ import LogTabs from '../components/LogTabs'
 // stays a clean, scannable list. Lives as the second tab of the log.
 export default function TrainingSplit() {
   const navigate = useNavigate()
-  const { user, programsState, loading, duplicateRoutine, setActiveRoutine, moveRoutine, deleteRoutine } = useProgramsState()
+  const { user, programsState, loading, addRoutine, duplicateRoutine, setActiveRoutine, moveRoutine, deleteRoutine } = useProgramsState()
   const [confirmDelete, setConfirmDelete] = useState(null) // { id, name } | null
 
   function openEditor(program) {
+    navigate(`/split/${program.id}`)
+  }
+
+  // No starter templates — ready-made programs are the upcoming Programs
+  // feature's job. "New split" goes straight to a blank editor.
+  function createSplit() {
+    const program = emptyProgram()
+    addRoutine(program)
     navigate(`/split/${program.id}`)
   }
 
@@ -49,9 +58,9 @@ export default function TrainingSplit() {
           ) : programsState.programs.length === 0 ? (
             <div className="bg-white border border-border p-7 text-center">
               <h2 className="font-heading text-xl font-medium text-text-primary mb-1">Start a split</h2>
-              <p className="text-[13px] text-text-muted mb-6">Pick a template to tweak, or start from scratch.</p>
+              <p className="text-[13px] text-text-muted mb-6">Name it, add your days and exercises — the log will follow it.</p>
               <button
-                onClick={() => navigate('/split/new')}
+                onClick={createSplit}
                 className="inline-flex items-center gap-2 bg-text-primary text-cream font-medium px-6 py-3 border-none cursor-pointer text-[14px] hover:bg-accent-hover transition-colors"
               >
                 <Plus className="w-4 h-4" /> Start your first split
@@ -128,7 +137,7 @@ export default function TrainingSplit() {
                   })}
                 </div>
                 <button
-                  onClick={() => navigate('/split/new')}
+                  onClick={createSplit}
                   className="inline-flex items-center gap-1.5 text-[12px] font-medium text-text-muted hover:text-text-primary bg-transparent border-none cursor-pointer mt-3 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" /> New split

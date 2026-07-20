@@ -34,7 +34,7 @@ import {
 } from '../lib/workoutStore'
 import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts, fetchRemoteProgram, upsertRemoteProgram, fetchRemoteDayAnnotations } from '../lib/workoutRemote'
 import { todayPlan, advanceProgram, draftFromDay, scheduleMode, nextTrainingDate } from '../lib/program'
-import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels, sessionAvgRest, formatRest, lastLoggedExercise } from '../lib/workoutStats'
+import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels, sessionAvgRest, formatRest, lastLoggedExercise, newSupersetId, pruneSupersets, regroupSupersets, exerciseBlocks } from '../lib/workoutStats'
 import { reasonLabel } from '../lib/dayLog'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
@@ -156,10 +156,6 @@ function migrateExercise(ex) {
   }
   return next
 }
-function newSupersetId() {
-  return `ss-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
-}
-
 // Convert legacy adjacency-based supersets (`linkedToPrev`) to the group-id
 // model (`supersetId`), so grouping no longer depends on list order. No-op once
 // data is already on the new model. Also normalizes to the contiguous-group
@@ -176,41 +172,6 @@ function migrateSupersets(exercises) {
     delete out[i].linkedToPrev
   }
   return regroupSupersets(out)
-}
-
-// Group a list into contiguous runs: a run of same-`supersetId` exercises is
-// one block (moved/reordered as a unit), everything else is its own 1-item
-// block. Assumes the contiguous-group invariant already holds (see
-// regroupSupersets) — this just describes the blocks, it doesn't enforce it.
-function exerciseBlocks(exercises) {
-  const blocks = []
-  let i = 0
-  while (i < exercises.length) {
-    const id = exercises[i].supersetId
-    let j = i + 1
-    if (id) while (j < exercises.length && exercises[j].supersetId === id) j++
-    blocks.push(exercises.slice(i, j))
-    i = j
-  }
-  return blocks
-}
-
-// Enforce "once paired, supersets stay adjacent": pull every member of each
-// group together at the position of that group's first-encountered member,
-// preserving relative order otherwise. Idempotent — safe to call any time a
-// supersetId changes.
-function regroupSupersets(exercises) {
-  const emitted = new Set()
-  const out = []
-  for (const e of exercises) {
-    if (!e.supersetId) {
-      out.push(e)
-    } else if (!emitted.has(e.supersetId)) {
-      emitted.add(e.supersetId)
-      out.push(...exercises.filter((x) => x.supersetId === e.supersetId))
-    }
-  }
-  return out
 }
 
 function migrateDraft(draft) {
@@ -572,14 +533,6 @@ export default function WorkoutTracker() {
         return { ...e, sets: e.sets.map((s) => (s.id === setId ? convertSet(s, !s.left) : s)) }
       }),
     }))
-  }
-
-  // Any supersetId shared by fewer than two exercises is meaningless — clear it
-  // so a leftover partner falls back to standalone.
-  function pruneSupersets(exercises) {
-    const counts = {}
-    for (const e of exercises) if (e.supersetId) counts[e.supersetId] = (counts[e.supersetId] || 0) + 1
-    return exercises.map((e) => (e.supersetId && counts[e.supersetId] < 2 ? { ...e, supersetId: null } : e))
   }
 
   // Group two resistance exercises into a superset. If either is already in a

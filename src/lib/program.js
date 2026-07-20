@@ -267,54 +267,13 @@ export function draftFromDay(day, opts = {}) {
     // Traces this session exercise back to its slot in the routine, so a
     // mid-session substitution can optionally update the plan too.
     ex.plannedExerciseId = pe.id
+    // Planned supersets carry into the session: partners share the same group
+    // id in the plan, so the log renders the same A1/A2 pairing.
+    ex.supersetId = pe.supersetId || null
     return ex
   })
 }
 
-// ---- Starter templates -----------------------------------------------------
-// Ready-made programs so a user isn't staring at a blank builder. Exercise ids
-// reference src/data/exercises.json so prefills carry full DB metadata.
-
-const x = (name, exerciseId, sets, low, high) => ({ name, exerciseId, sets, repRange: { low, high } })
-
-const TEMPLATES = [
-  {
-    key: 'ppl',
-    name: 'Push / Pull / Legs',
-    description: 'Three training days on rotation, then a rest slot.',
-    days: [
-      { kind: 'train', name: 'Push', exercises: [x('Bench Press', 'bench-press', 4, 6, 10), x('Dumbbell Shoulder Press', 'dumbbell-shoulder-press', 3, 8, 12), x('Cable Lateral Raise', 'cable-lateral-raise', 3, 12, 20), x('Push-down', 'push-down', 3, 10, 15)] },
-      { kind: 'train', name: 'Pull', exercises: [x('Barbell Bent Over Row', 'barbell-bent-over-row', 4, 6, 10), x('Lat Pulldown', 'lat-pulldown', 3, 8, 12), x('Face Pull', 'face-pull', 3, 12, 20), x('Barbell Curl', 'barbell-curl', 3, 8, 12)] },
-      { kind: 'train', name: 'Legs', exercises: [x('Barbell Squat', 'barbell-squat', 4, 5, 8), x('Romanian Deadlift', 'romanian-deadlift', 3, 8, 12), x('Leg Extension', 'leg-extension', 3, 12, 15), x('Lying Leg Curl', 'lying-leg-curl', 3, 10, 15)] },
-      { kind: 'rest', name: 'Rest', exercises: [] },
-    ],
-  },
-  {
-    key: 'upper-lower',
-    name: 'Upper / Lower (A/B)',
-    description: 'Four training days (Upper A, Lower A, Upper B, Lower B) then rest.',
-    days: [
-      { kind: 'train', name: 'Upper A', exercises: [x('Bench Press', 'bench-press', 4, 6, 10), x('Barbell Bent Over Row', 'barbell-bent-over-row', 4, 6, 10), x('Dumbbell Shoulder Press', 'dumbbell-shoulder-press', 3, 8, 12), x('Barbell Curl', 'barbell-curl', 3, 8, 12)] },
-      { kind: 'train', name: 'Lower A', exercises: [x('Barbell Squat', 'barbell-squat', 4, 5, 8), x('Romanian Deadlift', 'romanian-deadlift', 3, 8, 12), x('Leg Extension', 'leg-extension', 3, 12, 15)] },
-      { kind: 'train', name: 'Upper B', exercises: [x('Incline Barbell Bench Press', 'incline-barbell-bench-press', 4, 6, 10), x('Lat Pulldown', 'lat-pulldown', 4, 8, 12), x('Cable Lateral Raise', 'cable-lateral-raise', 3, 12, 20), x('Push-down', 'push-down', 3, 10, 15)] },
-      { kind: 'train', name: 'Lower B', exercises: [x('Leg Press', 'leg-press', 4, 8, 12), x('Lying Leg Curl', 'lying-leg-curl', 4, 10, 15), x('Leg Extension', 'leg-extension', 3, 12, 15)] },
-      { kind: 'rest', name: 'Rest', exercises: [] },
-    ],
-  },
-]
-
-// Public list for the builder's "start from a template" picker.
-export const STARTER_PROGRAMS = TEMPLATES.map((t) => ({ key: t.key, name: t.name, description: t.description }))
-
-// Instantiate a fresh program (new ids, pointer 0) from a template key, or an
-// empty program when key is falsy / 'blank'.
-export function programFromTemplate(key) {
-  const t = TEMPLATES.find((tpl) => tpl.key === key)
-  if (!t) return emptyProgram()
-  const program = emptyProgram(t.name)
-  program.days = t.days.map((d) => ({
-    ...createDay(d.kind, d.name),
-    exercises: d.exercises.map((e) => createPlannedExercise(e.name, { exerciseId: e.exerciseId, sets: e.sets, repRange: e.repRange })),
-  }))
-  return program
-}
+// Starter templates (PPL / Upper-Lower) used to live here — removed 2026-07-20:
+// ready-made programs are the upcoming "Programs" feature's job, so the builder
+// starts every split from scratch. Git history has them if ever needed.
