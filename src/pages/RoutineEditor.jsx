@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Plus, X, ChevronUp, ChevronDown, Dumbbell, Moon, Trash2, Locate, StickyNote, Repeat, Link2 } from 'lucide-react'
 import { useProgramsState } from '../lib/useProgramsState'
 import ConfirmModal from '../components/ConfirmModal'
 import {
+  emptyProgram,
   createDay,
   createPlannedExercise,
   setPointerToDay,
@@ -26,11 +27,28 @@ const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', '
 export default function RoutineEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { programsState, loading, saveProgram, setActiveRoutine, deleteRoutine } = useProgramsState()
+  const { programsState, loading, saveProgram, addRoutine, setActiveRoutine, deleteRoutine } = useProgramsState()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [noteOpenFor, setNoteOpenFor] = useState(() => new Set())
   const [swapOpenFor, setSwapOpenFor] = useState(null)
   const [supersetMenuFor, setSupersetMenuFor] = useState(null)
+  const isNew = id === 'new'
+  const creatingRef = useRef(false)
+
+  // Landing on /split/new creates a blank split, then swaps the URL to its id.
+  // Creation happens HERE (not on the list page) on purpose: /split/new and
+  // /split/:id are the same route element, so the component stays mounted across
+  // the swap and the just-created split is already in this hook's in-memory
+  // state — no reload, no race. Doing it on the list page navigated to a fresh
+  // editor that reloaded storage before the write landed and 404'd.
+  useEffect(() => {
+    if (isNew && !loading && !creatingRef.current) {
+      creatingRef.current = true
+      const program = emptyProgram()
+      addRoutine(program)
+      navigate(`/split/${program.id}`, { replace: true })
+    }
+  }, [isNew, loading, addRoutine, navigate])
 
   const editingProgram = programsState.programs.find((p) => p.id === id) || null
   const isEditingActive = !!editingProgram && editingProgram.id === programsState.activeId
@@ -170,11 +188,9 @@ export default function RoutineEditor() {
     </Link>
   )
 
-  // The /split/new template picker is gone — legacy links land on the list,
-  // where "New split" creates a blank split directly.
-  if (id === 'new') return <Navigate to="/log/split" replace />
-
-  if (loading) {
+  // Still loading, or on /split/new mid-create (the effect above is swapping the
+  // URL to the real split) — show a spinner rather than a false "not found".
+  if (loading || isNew) {
     return (
       <div className="pt-28 pb-24 px-6">
         <div className="max-w-2xl mx-auto">

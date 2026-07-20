@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Plus, ChevronUp, ChevronDown, Trash2, CalendarRange, Copy } from 'lucide-react'
 import { useProgramsState } from '../lib/useProgramsState'
-import { emptyProgram } from '../lib/program'
 import ConfirmModal from '../components/ConfirmModal'
 import LogTabs from '../components/LogTabs'
 
@@ -13,7 +12,7 @@ import LogTabs from '../components/LogTabs'
 // stays a clean, scannable list. Lives as the second tab of the log.
 export default function TrainingSplit() {
   const navigate = useNavigate()
-  const { user, programsState, loading, addRoutine, duplicateRoutine, setActiveRoutine, moveRoutine, deleteRoutine } = useProgramsState()
+  const { user, programsState, loading, duplicateRoutine, setActiveRoutine, moveRoutine, deleteRoutine } = useProgramsState()
   const [confirmDelete, setConfirmDelete] = useState(null) // { id, name } | null
 
   function openEditor(program) {
@@ -21,11 +20,11 @@ export default function TrainingSplit() {
   }
 
   // No starter templates — ready-made programs are the upcoming Programs
-  // feature's job. "New split" goes straight to a blank editor.
+  // feature's job. "New split" opens the editor at /split/new, which creates a
+  // blank split there (so the just-created split is in the editor's own state —
+  // creating here and navigating raced a fresh editor against unsaved storage).
   function createSplit() {
-    const program = emptyProgram()
-    addRoutine(program)
-    navigate(`/split/${program.id}`)
+    navigate('/split/new')
   }
 
   function handleDuplicate(program) {
