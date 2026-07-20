@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Check, Dumbbell, Activity, Trash2, ChevronUp, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Pencil, Timer, StickyNote, Repeat, Split, Merge } from 'lucide-react'
+import { Plus, X, Check, Dumbbell, Activity, Trash2, ChevronUp, ChevronDown, HelpCircle, LineChart, Calendar, CalendarDays, ArrowLeftRight, Link2, Pencil, Timer, StickyNote, Repeat, Split, Merge } from 'lucide-react'
 import {
   getDraft,
   saveDraft,
@@ -48,6 +48,7 @@ import { lateralityFor, usesBodyweight } from '../lib/movements'
 import { getExercise, exerciseIdForName } from '../lib/exerciseLibrary'
 import { muscleRecovery, musclesForExercises } from '../lib/engine'
 import UnitHelp from '../components/UnitHelp'
+import LogTabs from '../components/LogTabs'
 
 const SET_GRID = 'grid grid-cols-[18px_1fr_1fr_50px_18px] gap-2 items-center'
 // Same as SET_GRID plus a trailing column for the per-set laterality toggle —
@@ -1296,7 +1297,7 @@ export default function WorkoutTracker() {
                       onClick={() => confirmSubstitute(true)}
                       className="text-[11px] font-medium text-cream bg-text-primary px-2.5 py-1.5 border-none cursor-pointer hover:bg-accent-hover transition-colors"
                     >
-                      Save to routine
+                      Save to split
                     </button>
                     <button
                       onClick={() => setPendingSub(null)}
@@ -1680,9 +1681,7 @@ export default function WorkoutTracker() {
   return (
     <div className="pt-28 pb-24 px-6">
       <div className="max-w-2xl mx-auto">
-        <Link to="/tools" className="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary no-underline text-[13px] mb-10 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to tools
-        </Link>
+        <LogTabs active="/log" />
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="font-heading text-4xl font-medium text-text-primary mb-3">Workout log</h1>
@@ -1700,7 +1699,7 @@ export default function WorkoutTracker() {
                   <CalendarDays className="w-4 h-4 text-cream/70 shrink-0" />
                   <p className="text-[11px] uppercase tracking-wider text-cream/60">Today’s session</p>
                 </div>
-                <Link to={`/routine/${program.id}`} className="text-[11px] text-cream/70 underline hover:text-cream no-underline shrink-0">Edit program</Link>
+                <Link to={`/split/${program.id}`} className="text-[11px] text-cream/70 underline hover:text-cream no-underline shrink-0">Edit split</Link>
               </div>
 
               {/* `done` must win over the rest branch: for a rotating program

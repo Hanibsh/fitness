@@ -20,11 +20,12 @@ import ExercisePicker from '../components/ExercisePicker'
 
 const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-// Full-page editor for ONE routine — reached from the routines list at
-// /routine/:id, or /routine/new for the template/blank picker (which swaps
-// the URL to the routine's real id once one is picked). Day/exercise editing
+// Full-page editor for ONE training split — reached from the split list at
+// /split/:id, or /split/new for the template/blank picker (which swaps
+// the URL to the split's real id once one is picked). Day/exercise editing
 // itself is unchanged from the single-page version; only the surrounding
-// routing changed.
+// routing changed. (Internals still say "program"/"routine" — only the
+// user-facing wording was renamed to "split".)
 export default function RoutineEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -53,18 +54,18 @@ export default function RoutineEditor() {
   function startTemplate(key) {
     const program = programFromTemplate(key)
     addRoutine(program)
-    navigate(`/routine/${program.id}`, { replace: true })
+    navigate(`/split/${program.id}`, { replace: true })
   }
   function startBlank() {
     const program = emptyProgram()
     addRoutine(program)
-    navigate(`/routine/${program.id}`, { replace: true })
+    navigate(`/split/${program.id}`, { replace: true })
   }
 
   function handleDelete() {
     if (!editingProgram) return
     deleteRoutine(editingProgram.id)
-    navigate('/routine')
+    navigate('/log/split')
   }
 
   // ---- day + exercise mutators (unchanged from the single-page version) ----
@@ -144,8 +145,8 @@ export default function RoutineEditor() {
   const highlightIndex = isWeekly ? todayWeekdayIndex : pointerIndex
 
   const backLink = (
-    <Link to="/routine" className="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary no-underline text-[13px] mb-10 transition-colors">
-      <ArrowLeft className="w-3.5 h-3.5" /> Back to routines
+    <Link to="/log/split" className="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary no-underline text-[13px] mb-10 transition-colors">
+      <ArrowLeft className="w-3.5 h-3.5" /> Back to your splits
     </Link>
   )
 
@@ -167,7 +168,7 @@ export default function RoutineEditor() {
           {backLink}
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
             <div className="bg-white border border-border p-7">
-              <h2 className="font-heading text-xl font-medium text-text-primary mb-1">New routine</h2>
+              <h2 className="font-heading text-xl font-medium text-text-primary mb-1">New split</h2>
               <p className="text-[13px] text-text-muted mb-6">Pick a template to tweak, or start from scratch.</p>
               <div className="space-y-3">
                 {STARTER_PROGRAMS.map((t) => (
@@ -184,7 +185,7 @@ export default function RoutineEditor() {
                   onClick={startBlank}
                   className="w-full inline-flex items-center gap-2 text-[13px] font-medium text-text-muted hover:text-text-primary bg-white border border-border hover:border-border-hover p-4 cursor-pointer transition-colors"
                 >
-                  <Plus className="w-4 h-4" /> Blank program
+                  <Plus className="w-4 h-4" /> Blank split
                 </button>
               </div>
             </div>
@@ -199,7 +200,7 @@ export default function RoutineEditor() {
       <div className="pt-28 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {backLink}
-          <p className="text-[13px] text-text-muted">That routine couldn’t be found — it may have been deleted.</p>
+          <p className="text-[13px] text-text-muted">That split couldn’t be found — it may have been deleted.</p>
         </div>
       </div>
     )
@@ -214,9 +215,9 @@ export default function RoutineEditor() {
           {/* Program header */}
           <div className="bg-white border border-border p-5 sm:p-6 mb-6">
             <div className="flex items-center justify-between gap-3 mb-2">
-              <label className="text-[11px] uppercase tracking-wider text-text-light">Routine name</label>
+              <label className="text-[11px] uppercase tracking-wider text-text-light">Split name</label>
               {isEditingActive ? (
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-cream bg-text-primary px-1.5 py-0.5">Active routine</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-cream bg-text-primary px-1.5 py-0.5">Active split</span>
               ) : (
                 <button
                   onClick={() => setActiveRoutine(editingProgram.id)}
@@ -431,7 +432,7 @@ export default function RoutineEditor() {
           </div>
 
           <button onClick={() => setConfirmDelete(true)} className="inline-flex items-center gap-1.5 text-[12px] text-text-light hover:text-red-600 bg-transparent border-none cursor-pointer mt-8 transition-colors">
-            <Trash2 className="w-3.5 h-3.5" /> Delete this routine
+            <Trash2 className="w-3.5 h-3.5" /> Delete this split
           </button>
         </motion.div>
       </div>

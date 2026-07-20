@@ -55,7 +55,7 @@ export function createDay(kind = 'train', name = '') {
   }
 }
 
-export function emptyProgram(name = 'My program') {
+export function emptyProgram(name = 'My split') {
   const now = Date.now()
   return { id: newId(), name, days: [], pointer: 0, createdAt: now, updatedAt: now }
 }

@@ -548,10 +548,10 @@ export default function Dashboard() {
                   <CalendarDays className="w-3.5 h-3.5" /> Full calendar
                 </Link>
                 <Link
-                  to={program ? `/routine/${program.id}` : '/routine'}
+                  to={program ? `/split/${program.id}` : '/log/split'}
                   className="inline-flex items-center gap-1 text-[12px] text-text-muted hover:text-text-primary no-underline transition-colors"
                 >
-                  <CalendarRange className="w-3.5 h-3.5" /> Edit routine
+                  <CalendarRange className="w-3.5 h-3.5" /> Edit split
                 </Link>
                 <div className="flex border border-border">
                   <button

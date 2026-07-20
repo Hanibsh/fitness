@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import InstallPrompt from './components/InstallPrompt'
@@ -19,8 +19,15 @@ const CalorieDeficit = lazy(() => import('./pages/tools/CalorieDeficit'))
 const FFMICalculator = lazy(() => import('./pages/tools/FFMICalculator'))
 const MuscleGainPotential = lazy(() => import('./pages/tools/MuscleGainPotential'))
 const WorkoutTracker = lazy(() => import('./pages/WorkoutTracker'))
-const Routine = lazy(() => import('./pages/Routine'))
+const TrainingSplit = lazy(() => import('./pages/TrainingSplit'))
 const RoutineEditor = lazy(() => import('./pages/RoutineEditor'))
+
+// The routine builder became the "Training split" tab of the log (2026-07).
+// Old /routine URLs (bookmarks, synced devices mid-deploy) land on the new ones.
+function LegacyRoutineRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/split/${id}`} replace />
+}
 const Account = lazy(() => import('./pages/Account'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -47,9 +54,11 @@ function App() {
         <Route path="/exercises/group/:cat/:sub" element={<ExerciseCategory />} />
         <Route path="/exercises/:id" element={<ExerciseDetail />} />
         <Route path="/log" element={<WorkoutTracker />} />
+        <Route path="/log/split" element={<TrainingSplit />} />
         <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/routine" element={<Routine />} />
-        <Route path="/routine/:id" element={<RoutineEditor />} />
+        <Route path="/split/:id" element={<RoutineEditor />} />
+        <Route path="/routine" element={<Navigate to="/log/split" replace />} />
+        <Route path="/routine/:id" element={<LegacyRoutineRedirect />} />
         <Route path="/account" element={<Account />} />
         <Route path="/profile" element={<Account />} />
         <Route path="/privacy" element={<Privacy />} />

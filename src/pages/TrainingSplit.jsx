@@ -1,58 +1,66 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, CalendarRange, Copy } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, ChevronUp, ChevronDown, Trash2, CalendarRange, Copy } from 'lucide-react'
 import { useProgramsState } from '../lib/useProgramsState'
 import ConfirmModal from '../components/ConfirmModal'
+import LogTabs from '../components/LogTabs'
 
-// The routines list: every saved routine, reorderable, with Set active /
+// The training-split list: every saved split, reorderable, with Set active /
 // Duplicate / Delete, and a tap-through to the full-page editor. Creating or
-// editing a routine is a separate page (/routine/new or /routine/:id) so this
-// page stays a clean, scannable list.
-export default function Routine() {
+// editing a split is a separate page (/split/new or /split/:id) so this page
+// stays a clean, scannable list. Lives as the second tab of the log.
+export default function TrainingSplit() {
   const navigate = useNavigate()
   const { user, programsState, loading, duplicateRoutine, setActiveRoutine, moveRoutine, deleteRoutine } = useProgramsState()
   const [confirmDelete, setConfirmDelete] = useState(null) // { id, name } | null
 
   function openEditor(program) {
-    navigate(`/routine/${program.id}`)
+    navigate(`/split/${program.id}`)
   }
 
   function handleDuplicate(program) {
     const copy = duplicateRoutine(program)
-    navigate(`/routine/${copy.id}`)
+    navigate(`/split/${copy.id}`)
+  }
+
+  // "Fixed week · 4 training days" / "5-day rotation · 3 training days" — the
+  // same 7-days-means-weekly rule as scheduleMode in lib/program.js.
+  function shapeLabel(p) {
+    if (!p.days.length) return 'Empty — add days'
+    const train = p.days.filter((d) => d.kind !== 'rest').length
+    const days = `${train} training day${train !== 1 ? 's' : ''}`
+    return p.days.length === 7 ? `Fixed week · ${days}` : `${p.days.length}-day rotation · ${days}`
   }
 
   return (
     <div className="pt-28 pb-24 px-6">
       <div className="max-w-2xl mx-auto">
-        <Link to="/tools" className="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary no-underline text-[13px] mb-10 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to tools
-        </Link>
+        <LogTabs active="/log/split" />
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="font-heading text-4xl font-medium text-text-primary mb-3">Routine builder</h1>
+          <h1 className="font-heading text-4xl font-medium text-text-primary mb-3">Training split</h1>
           <p className="text-text-muted text-[15px] mb-10">
-            Build a program that schedules your split. The log surfaces today’s session and pre-fills your planned exercises.
+            The split your log follows — days, exercises and rep targets, as a fixed week or a rotating cycle. The log surfaces today’s session and pre-fills what you planned.
           </p>
 
           {loading ? (
             <p className="text-[13px] text-text-muted">Loading…</p>
           ) : programsState.programs.length === 0 ? (
             <div className="bg-white border border-border p-7 text-center">
-              <h2 className="font-heading text-xl font-medium text-text-primary mb-1">Start a program</h2>
+              <h2 className="font-heading text-xl font-medium text-text-primary mb-1">Start a split</h2>
               <p className="text-[13px] text-text-muted mb-6">Pick a template to tweak, or start from scratch.</p>
               <button
-                onClick={() => navigate('/routine/new')}
+                onClick={() => navigate('/split/new')}
                 className="inline-flex items-center gap-2 bg-text-primary text-cream font-medium px-6 py-3 border-none cursor-pointer text-[14px] hover:bg-accent-hover transition-colors"
               >
-                <Plus className="w-4 h-4" /> Start your first routine
+                <Plus className="w-4 h-4" /> Start your first split
               </button>
             </div>
           ) : (
             <>
               <div className="bg-white border border-border p-5 sm:p-6 mb-6">
-                <p className="text-[11px] uppercase tracking-wider text-text-light mb-3">Your routines</p>
+                <p className="text-[11px] uppercase tracking-wider text-text-light mb-3">Your splits</p>
                 <div className="space-y-2">
                   {programsState.programs.map((p, index) => {
                     const isActive = p.id === programsState.activeId
@@ -62,11 +70,14 @@ export default function Routine() {
                         className="flex items-center justify-between gap-2 px-3 py-2.5 border border-border hover:border-border-hover cursor-pointer transition-colors"
                         onClick={() => openEditor(p)}
                       >
-                        <div className="min-w-0 flex items-center gap-2">
-                          <span className="text-[13px] font-medium text-text-primary truncate">{p.name}</span>
-                          {isActive && (
-                            <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-cream bg-text-primary px-1.5 py-0.5">Active</span>
-                          )}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-medium text-text-primary truncate">{p.name}</span>
+                            {isActive && (
+                              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-cream bg-text-primary px-1.5 py-0.5">Active</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-text-light mt-0.5 truncate">{shapeLabel(p)}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <div className="flex flex-col mr-1">
@@ -117,16 +128,16 @@ export default function Routine() {
                   })}
                 </div>
                 <button
-                  onClick={() => navigate('/routine/new')}
+                  onClick={() => navigate('/split/new')}
                   className="inline-flex items-center gap-1.5 text-[12px] font-medium text-text-muted hover:text-text-primary bg-transparent border-none cursor-pointer mt-3 transition-colors"
                 >
-                  <Plus className="w-3.5 h-3.5" /> New routine
+                  <Plus className="w-3.5 h-3.5" /> New split
                 </button>
               </div>
 
               <div className="mt-10 flex items-center gap-2 text-[12px] text-text-light">
                 <CalendarRange className="w-4 h-4" />
-                <span>Your routines are saved automatically{user ? ' to your account' : ' on this device'}.</span>
+                <span>Your splits are saved automatically{user ? ' to your account' : ' on this device'}.</span>
               </div>
             </>
           )}

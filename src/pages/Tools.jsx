@@ -10,10 +10,10 @@ const tools = [
     desc: 'Track every session set by set — reps, weight, and your training history.',
   },
   {
-    to: '/routine',
+    to: '/log/split',
     icon: CalendarRange,
-    title: 'Routine builder',
-    desc: 'Build a training program that rotates through your split and surfaces today\'s session.',
+    title: 'Training split',
+    desc: 'Plan the split your log follows — days, exercises and rep targets, fixed week or rotating.',
   },
   {
     to: '/tools/tdee',
