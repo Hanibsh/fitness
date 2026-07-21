@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-20",
-  "count": 275,
+  "generatedAt": "2026-07-21",
+  "count": 277,
   "exercises": [
     {
       "id": "assisted-chest-dip",
@@ -5637,6 +5637,38 @@
       "thumbnail": null
     },
     {
+      "id": "rope-push-down",
+      "name": "Rope Push-down",
+      "category": "Arms",
+      "subCategory": "Triceps",
+      "type": "isolation",
+      "laterality": "both",
+      "muscles": {
+        "Triceps": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        180
+      ],
+      "progressiveOverload": "moderate",
+      "stability": "stable",
+      "hypertrophyPotential": "high",
+      "sfr": "excellent",
+      "stretchMediated": "none",
+      "resistanceProfile": "balanced",
+      "equipment": "cable",
+      "axialLoading": false,
+      "skill": "moderate",
+      "notes": null,
+      "video": null,
+      "thumbnail": null
+    },
+    {
       "id": "cable-rope-overhead-triceps-extension",
       "name": "Cable Rope Overhead Triceps Extension",
       "category": "Arms",
@@ -5857,6 +5889,38 @@
       "axialLoading": false,
       "skill": "low",
       "notes": null,
+      "video": null,
+      "thumbnail": null
+    },
+    {
+      "id": "cuffed-triceps-extension",
+      "name": "Cuffed Triceps Extension",
+      "category": "Arms",
+      "subCategory": "Triceps",
+      "type": "isolation",
+      "laterality": "both",
+      "muscles": {
+        "Triceps": 1
+      },
+      "fatigueScore": 1,
+      "recoveryWindowHours": [
+        24,
+        48
+      ],
+      "restSeconds": [
+        120,
+        180
+      ],
+      "progressiveOverload": "moderate",
+      "stability": "stable",
+      "hypertrophyPotential": "high",
+      "sfr": "excellent",
+      "stretchMediated": "none",
+      "resistanceProfile": "balanced",
+      "equipment": "cable",
+      "axialLoading": false,
+      "skill": "low",
+      "notes": "Wrist cuff attachment instead of a handle, so grip is not the limiter. Upper arm stays at the side; the overhead version is Cable One-Arm Overhead Triceps Extension.",
       "video": null,
       "thumbnail": null
     },
