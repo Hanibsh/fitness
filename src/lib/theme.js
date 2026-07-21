@@ -27,9 +27,20 @@ export function effectiveTheme() {
 export function applyTheme(theme) {
   if (typeof document === 'undefined') return
   document.documentElement.dataset.theme = theme
-  // Keep the mobile browser chrome in step with the page.
-  const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', theme === 'dark' ? DARK_BG : LIGHT_BG)
+  // Keep the mobile browser chrome in step with the page. Two subtleties here,
+  // both of which showed up as a stubbornly white status bar on iOS:
+  //   1. *Every* theme-color tag has to go, not just the first. vite-plugin-pwa
+  //      injects its own from the manifest's theme_color at the end of <head>,
+  //      and a browser honours the first tag it finds — so leaving a stale one
+  //      behind means the toggle appears to do nothing.
+  //   2. The tag is replaced rather than edited in place, because older iOS
+  //      Safari reads theme-color on insert and won't repaint for a mutated
+  //      `content` attribute.
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.remove())
+  const next = document.createElement('meta')
+  next.setAttribute('name', 'theme-color')
+  next.setAttribute('content', theme === 'dark' ? DARK_BG : LIGHT_BG)
+  document.head.appendChild(next)
 }
 
 export function setTheme(theme) {

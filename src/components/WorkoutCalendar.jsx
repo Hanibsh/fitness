@@ -133,7 +133,7 @@ export default function WorkoutCalendar({ sessions, onSelectDay, selectedDate, p
                 isSelected
                   ? 'border-text-primary bg-cream-dark'
                   : isToday
-                    ? 'border-text-primary/40 bg-white'
+                    ? 'border-accent-soft bg-white'
                     : 'border-transparent hover:border-border'
               } ${hasWorkout ? 'text-text-primary font-medium' : 'text-text-muted'}`}
             >

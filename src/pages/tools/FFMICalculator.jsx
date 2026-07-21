@@ -206,7 +206,7 @@ export default function FFMICalculator() {
                   <p className="text-2xl font-medium text-text-primary">{result.ffmi}</p>
                 </div>
                 <div className="bg-text-primary p-5 text-center">
-                  <p className="text-[11px] text-cream/70 uppercase tracking-wider mb-1.5">Adjusted FFMI</p>
+                  <p className="text-[11px] text-cream-70 uppercase tracking-wider mb-1.5">Adjusted FFMI</p>
                   <p className="text-2xl font-medium text-cream">{result.adjustedFfmi}</p>
                 </div>
               </div>

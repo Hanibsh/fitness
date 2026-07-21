@@ -35,6 +35,25 @@
   --color-text-light: #8c8c8c;
   --color-accent: #1a1a1a;
   --color-accent-hover: #333333;
+  /* Pre-composited translucent variants of the tokens above. Use these instead
+     of Tailwind's `/opacity` modifier on any themed color: an opacity modifier
+     compiles to color-mix(), which Safari only got in 16.2, and the fallback
+     Tailwind bakes in for older engines is a *literal light-mode hex*. On an
+     iPhone stuck below iOS 16 that fallback wins in both themes, so dark mode
+     silently breaks (the navbar stayed cream, the inverted chips below turned
+     invisible). These are plain tokens, so the dark block re-points them and
+     every browser follows. Suffixes are alpha, not lightness. */
+  --color-surface-nav: rgba(243, 241, 236, 0.9);
+  --color-cream-90: rgba(250, 249, 246, 0.9);
+  --color-cream-80: rgba(250, 249, 246, 0.8);
+  --color-cream-70: rgba(250, 249, 246, 0.7);
+  --color-cream-60: rgba(250, 249, 246, 0.6);
+  --color-cream-50: rgba(250, 249, 246, 0.5);
+  --color-cream-30: rgba(250, 249, 246, 0.3);
+  --color-cream-20: rgba(250, 249, 246, 0.2);
+  --color-cream-10: rgba(250, 249, 246, 0.1);
+  --color-border-soft: rgba(232, 230, 225, 0.6);
+  --color-accent-soft: rgba(26, 26, 26, 0.4);
   --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
 }
@@ -64,6 +83,17 @@
   --color-text-light: #83837d;
   --color-accent: #f0efeb;
   --color-accent-hover: #ffffff;
+  --color-surface-nav: rgba(30, 32, 39, 0.9);
+  --color-cream-90: rgba(21, 22, 26, 0.9);
+  --color-cream-80: rgba(21, 22, 26, 0.8);
+  --color-cream-70: rgba(21, 22, 26, 0.7);
+  --color-cream-60: rgba(21, 22, 26, 0.6);
+  --color-cream-50: rgba(21, 22, 26, 0.5);
+  --color-cream-30: rgba(21, 22, 26, 0.3);
+  --color-cream-20: rgba(21, 22, 26, 0.2);
+  --color-cream-10: rgba(21, 22, 26, 0.1);
+  --color-border-soft: rgba(46, 48, 56, 0.6);
+  --color-accent-soft: rgba(240, 239, 235, 0.4);
 }
 
 :root[data-theme='dark'] ::selection {

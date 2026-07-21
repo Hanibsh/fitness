@@ -178,9 +178,9 @@ export default function StrengthStandards() {
                   <p className="text-[11px] text-text-light">{unit === 'metric' ? 'kg' : 'lbs'}</p>
                 </div>
                 <div className="bg-text-primary p-5 text-center">
-                  <p className="text-[11px] text-cream/70 uppercase tracking-wider mb-1.5">Your level</p>
+                  <p className="text-[11px] text-cream-70 uppercase tracking-wider mb-1.5">Your level</p>
                   <p className="text-2xl font-medium text-cream">{result.tier}</p>
-                  <p className="text-[11px] text-cream/50">{result.ratio}x bodyweight</p>
+                  <p className="text-[11px] text-cream-50">{result.ratio}x bodyweight</p>
                 </div>
               </div>
 

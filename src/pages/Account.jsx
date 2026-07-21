@@ -123,7 +123,7 @@ export default function Account() {
       }`}
     >
       {label}
-      {sub && <span className={`block text-[10px] font-normal mt-0.5 ${active ? 'text-cream/60' : 'text-text-light'}`}>{sub}</span>}
+      {sub && <span className={`block text-[10px] font-normal mt-0.5 ${active ? 'text-cream-60' : 'text-text-light'}`}>{sub}</span>}
     </button>
   )
 

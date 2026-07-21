@@ -1547,7 +1547,7 @@ export default function WorkoutTracker() {
                       and unilateral sets in the same list. */}
                   {ex.sets.map((set, i) =>
                     set.left ? (
-                      <div key={set.id} className="mb-2.5 pb-2.5 border-b border-border/60 last:border-0 last:pb-0 last:mb-1">
+                      <div key={set.id} className="mb-2.5 pb-2.5 border-b border-border-soft last:border-0 last:pb-0 last:mb-1">
                         <div className="flex items-center justify-between mb-1">
                           <button
                             type="button"
@@ -1705,10 +1705,10 @@ export default function WorkoutTracker() {
             <div className="bg-text-primary text-cream p-6 md:p-7 mb-6">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2 min-w-0">
-                  <CalendarDays className="w-4 h-4 text-cream/70 shrink-0" />
-                  <p className="text-[11px] uppercase tracking-wider text-cream/60">Today’s session</p>
+                  <CalendarDays className="w-4 h-4 text-cream-70 shrink-0" />
+                  <p className="text-[11px] uppercase tracking-wider text-cream-60">Today’s session</p>
                 </div>
-                <Link to={`/split/${program.id}`} className="text-[11px] text-cream/70 underline hover:text-cream no-underline shrink-0">Edit split</Link>
+                <Link to={`/split/${program.id}`} className="text-[11px] text-cream-70 underline hover:text-cream no-underline shrink-0">Edit split</Link>
               </div>
 
               {/* `done` must win over the rest branch: for a rotating program
@@ -1719,7 +1719,7 @@ export default function WorkoutTracker() {
                   <p className="font-heading text-xl font-medium flex items-center gap-2">
                     <Check className="w-5 h-5" /> {isWeeklyProgram ? `${todayDay.name} — logged` : 'Done for today'}
                   </p>
-                  <p className="text-[12px] text-cream/60 mt-0.5">
+                  <p className="text-[12px] text-cream-60 mt-0.5">
                     {isWeeklyProgram ? 'Done for today.' : 'Nice work.'}{nextUp ? ` Next up: ${nextUp.day.name} ${nextDayLabel(nextUp.date)}.` : ''}
                   </p>
                 </div>
@@ -1727,7 +1727,7 @@ export default function WorkoutTracker() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <p className="font-heading text-xl font-medium">Rest day</p>
-                    <p className="text-[12px] text-cream/60 mt-0.5">
+                    <p className="text-[12px] text-cream-60 mt-0.5">
                       {isWeeklyProgram
                         ? `Enjoy your day off — relax and recover.${nextUp ? ` Back at it ${nextDayLabel(nextUp.date)} with ${nextUp.day.name}.` : ''}`
                         : 'Recovery in your rotation — it passes on its own tomorrow. Log freely below, or mark it done to move on now.'}
@@ -1745,7 +1745,7 @@ export default function WorkoutTracker() {
               ) : skipTodayCard ? (
                 <div>
                   <p className="font-heading text-xl font-medium">{todayDay.name} — marked off</p>
-                  <p className="text-[12px] text-cream/60 mt-0.5">
+                  <p className="text-[12px] text-cream-60 mt-0.5">
                     You marked today as {reasonLabel(todayAnnotation.reason).toLowerCase()}
                     {todayAnnotation.note ? ` — "${todayAnnotation.note}"` : ''}. No pressure — log it anyway if you're up for it, or skip ahead.
                   </p>
@@ -1759,7 +1759,7 @@ export default function WorkoutTracker() {
                     {!isWeeklyProgram && (
                       <button
                         onClick={() => markRestDone(todayDay)}
-                        className="shrink-0 inline-flex items-center justify-center gap-2 bg-transparent text-cream border border-cream/30 font-medium px-5 py-2.5 cursor-pointer text-[13px] hover:border-cream/60 transition-colors"
+                        className="shrink-0 inline-flex items-center justify-center gap-2 bg-transparent text-cream border border-cream-30 font-medium px-5 py-2.5 cursor-pointer text-[13px] hover:border-cream-60 transition-colors"
                       >
                         Skip — move to next
                       </button>
@@ -1772,13 +1772,13 @@ export default function WorkoutTracker() {
                   {todayDay.exercises.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5 mt-3 mb-5">
                       {todayDay.exercises.map((ex) => (
-                        <span key={ex.id} className="text-[12px] text-cream/90 bg-cream/10 border border-cream/20 px-2.5 py-1">
-                          {ex.name} <span className="text-cream/50">· {ex.sets}×</span>
+                        <span key={ex.id} className="text-[12px] text-cream-90 bg-cream-10 border border-cream-20 px-2.5 py-1">
+                          {ex.name} <span className="text-cream-50">· {ex.sets}×</span>
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[12px] text-cream/60 mt-1 mb-5">No exercises planned yet — add some in the routine builder.</p>
+                    <p className="text-[12px] text-cream-60 mt-1 mb-5">No exercises planned yet — add some in the routine builder.</p>
                   )}
                   {recoveringToday.length > 0 && (
                     /* This card inverts with the theme (near-black in light,
@@ -1795,7 +1795,7 @@ export default function WorkoutTracker() {
                       <Check className="w-4 h-4" /> Start session
                     </button>
                     {draft.exercises.length > 0 && (
-                      <span className="text-[11px] text-cream/60">Your current entries will be set aside and restored after.</span>
+                      <span className="text-[11px] text-cream-60">Your current entries will be set aside and restored after.</span>
                     )}
                   </div>
                 </>

@@ -177,9 +177,9 @@ function CoachingBanner() {
 function CoachingCTA() {
   return (
     <div className="bg-text-primary text-cream p-6 sm:p-8 text-center">
-      <MessageCircle className="w-5 h-5 text-cream/80 mx-auto mb-4" />
+      <MessageCircle className="w-5 h-5 text-cream-80 mx-auto mb-4" />
       <h2 className="font-heading text-2xl sm:text-3xl font-medium mb-3">Ready to take it further?</h2>
-      <p className="text-[14px] text-cream/70 max-w-md mx-auto mb-6 leading-relaxed">
+      <p className="text-[14px] text-cream-70 max-w-md mx-auto mb-6 leading-relaxed">
         A dashboard tracks your progress — a coach in your corner accelerates it. I build the plan,
         fix your form, and adjust it around your life so you actually stick to it.
       </p>
@@ -445,47 +445,47 @@ export default function Dashboard() {
         {/* SECTION 1 — HERO */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
           <div className="bg-text-primary text-cream p-6 sm:p-8">
-            <p className="text-[12px] text-cream/60 uppercase tracking-wider">{greeting()}</p>
+            <p className="text-[12px] text-cream-60 uppercase tracking-wider">{greeting()}</p>
             <div className="flex items-center gap-2 mb-1">
               <h1 className={`font-heading text-2xl sm:text-3xl font-medium ${nameClass}`}>{displayName}</h1>
               {user && (
                 <button
                   onClick={() => setEditingNick(true)}
                   aria-label="Edit nickname"
-                  className="text-cream/50 hover:text-cream bg-transparent border-none cursor-pointer p-1"
+                  className="text-cream-50 hover:text-cream bg-transparent border-none cursor-pointer p-1"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
               )}
             </div>
-            <p className="text-[12px] text-cream/50 mb-6">{fullDate(now)}</p>
+            <p className="text-[12px] text-cream-50 mb-6">{fullDate(now)}</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               <div className="col-span-2 sm:col-span-1">
-                <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-1">Weekly streak</p>
+                <p className="text-[10px] uppercase tracking-wider text-cream-50 mb-1">Weekly streak</p>
                 <p className="font-heading text-2xl font-medium flex items-center gap-1.5">
                   <Flame className="w-5 h-5 text-orange-400" /> {hero.streak}
                 </p>
-                <p className="text-[11px] text-cream/50">{hero.streak === 1 ? 'week' : 'weeks'} in a row</p>
+                <p className="text-[11px] text-cream-50">{hero.streak === 1 ? 'week' : 'weeks'} in a row</p>
               </div>
               {hero.last && (
                 <>
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-1">Last workout</p>
+                    <p className="text-[10px] uppercase tracking-wider text-cream-50 mb-1">Last workout</p>
                     <p className="font-heading text-[15px] font-medium break-words">{hero.last.name}</p>
-                    <p className="text-[11px] text-cream/50">{relativeDay(hero.last.date)}</p>
+                    <p className="text-[11px] text-cream-50">{relativeDay(hero.last.date)}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-1">Volume</p>
+                    <p className="text-[10px] uppercase tracking-wider text-cream-50 mb-1">Volume</p>
                     <p className="font-heading text-[15px] font-medium">{fmtNum(hero.last.volume)} {unit}</p>
-                    <p className="text-[11px] text-cream/50">
+                    <p className="text-[11px] text-cream-50">
                       {hero.last.sets} sets{hero.last.durationMs ? ` · ${formatDuration(hero.last.durationMs)}` : ''}
                     </p>
                   </div>
                 </>
               )}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-1">{program ? 'Today' : 'Up next'}</p>
+                <p className="text-[10px] uppercase tracking-wider text-cream-50 mb-1">{program ? 'Today' : 'Up next'}</p>
                 <button
                   type="button"
                   onClick={() => goToDay(new Date(), todaySessions)}
@@ -493,18 +493,18 @@ export default function Dashboard() {
                   className="block w-full text-left cursor-pointer group bg-transparent border-none p-0"
                 >
                   <p className="font-heading text-[15px] font-medium break-words group-hover:underline">{upToday.label}</p>
-                  {upToday.sub && <p className="text-[11px] text-cream/50">{upToday.sub}</p>}
+                  {upToday.sub && <p className="text-[11px] text-cream-50">{upToday.sub}</p>}
                   {upToday.done ? (
-                    <p className="text-[11px] text-cream/70">Done for today ✓</p>
+                    <p className="text-[11px] text-cream-70">Done for today ✓</p>
                   ) : upToday.rest ? (
-                    <p className="text-[11px] text-cream/70">Enjoy your day off — relax and recover.</p>
+                    <p className="text-[11px] text-cream-70">Enjoy your day off — relax and recover.</p>
                   ) : null}
                 </button>
                 {!upToday.done && !upToday.rest && !upToday.off && (
                   <Link
                     to="/log"
                     onClick={(e) => e.stopPropagation()}
-                    className="text-[11px] text-cream/70 underline hover:text-cream no-underline"
+                    className="text-[11px] text-cream-70 underline hover:text-cream no-underline"
                   >
                     {program ? 'Start today’s session →' : 'Start logging →'}
                   </Link>
@@ -516,10 +516,10 @@ export default function Dashboard() {
                     aria-label={`See tomorrow's exercises: ${upTomorrow.label}`}
                     className="block w-full text-left cursor-pointer group bg-transparent border-none p-0 mt-3"
                   >
-                    <p className="text-[10px] uppercase tracking-wider text-cream/50 mb-0.5">Tomorrow</p>
+                    <p className="text-[10px] uppercase tracking-wider text-cream-50 mb-0.5">Tomorrow</p>
                     <p className="text-[13px] font-medium break-words group-hover:underline">
                       {upTomorrow.label}
-                      {upTomorrow.sub && <span className="text-[11px] font-normal text-cream/50"> · {upTomorrow.sub}</span>}
+                      {upTomorrow.sub && <span className="text-[11px] font-normal text-cream-50"> · {upTomorrow.sub}</span>}
                     </p>
                   </button>
                 )}

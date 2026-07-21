@@ -13,13 +13,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <!-- Set the theme before first paint so there's no flash of the wrong mode. -->
+    <!-- Set the theme before first paint so there's no flash of the wrong mode.
+         This also has to seed theme-color: the meta above is a static light
+         value, and lib/theme.js only rewrites it when you hit the toggle, so
+         without this a dark-mode *reload* left mobile Safari tinting its status
+         bar cream. Keep the two colors in step with DARK_BG/LIGHT_BG there. -->
     <script>
       (function () {
         try {
           var stored = localStorage.getItem('leon_theme')
           var dark = stored ? stored === 'dark' : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
           document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+          var metas = document.querySelectorAll('meta[name="theme-color"]')
+          for (var i = 0; i < metas.length; i++) {
+            metas[i].setAttribute('content', dark ? '#15161a' : '#FAF9F6')
+          }
         } catch (e) { document.documentElement.dataset.theme = 'light' }
       })()
     </script>

@@ -177,9 +177,9 @@ export default function MuscleGainPotential() {
               <h2 className="font-heading text-xl font-medium text-text-primary mb-6">Your estimated natural ceiling</h2>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-text-primary p-5 text-center">
-                  <p className="text-[11px] text-cream/70 uppercase tracking-wider mb-1.5">Max bodyweight at {targetBf}% BF</p>
+                  <p className="text-[11px] text-cream-70 uppercase tracking-wider mb-1.5">Max bodyweight at {targetBf}% BF</p>
                   <p className="text-2xl font-medium text-cream">{result.maxBodyweight}</p>
-                  <p className="text-[11px] text-cream/50">{unit === 'metric' ? 'kg' : 'lbs'}</p>
+                  <p className="text-[11px] text-cream-50">{unit === 'metric' ? 'kg' : 'lbs'}</p>
                 </div>
                 <div className="bg-cream border border-border p-5 text-center">
                   <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1.5">Implied lean mass</p>

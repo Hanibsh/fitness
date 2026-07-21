@@ -175,7 +175,7 @@ export default function CalorieDeficit() {
               <div className="flex gap-3">
                 {speeds.map((s, i) => (
                   <button key={s.label} onClick={() => setSpeed(i)} className={`flex-1 py-3 text-[13px] font-medium border cursor-pointer transition-colors ${speed === i ? 'bg-text-primary text-cream border-text-primary' : 'bg-white text-text-muted border-border hover:border-border-hover'}`}>
-                    {s.label}<br /><span className={`text-[11px] ${speed === i ? 'text-cream/60' : 'text-text-light'}`}>{s.desc}</span>
+                    {s.label}<br /><span className={`text-[11px] ${speed === i ? 'text-cream-60' : 'text-text-light'}`}>{s.desc}</span>
                   </button>
                 ))}
               </div>
@@ -193,9 +193,9 @@ export default function CalorieDeficit() {
               <h2 className="font-heading text-xl font-medium text-text-primary mb-6">Your timeline</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-text-primary p-5 text-center">
-                  <p className="text-[11px] text-cream/70 uppercase tracking-wider mb-1.5">Duration</p>
+                  <p className="text-[11px] text-cream-70 uppercase tracking-wider mb-1.5">Duration</p>
                   <p className="text-2xl font-medium text-cream">{result.weeks} weeks</p>
-                  <p className="text-[11px] text-cream/50">({result.days} days)</p>
+                  <p className="text-[11px] text-cream-50">({result.days} days)</p>
                 </div>
                 <div className="bg-cream border border-border p-5 text-center">
                   <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1.5">Daily calories</p>

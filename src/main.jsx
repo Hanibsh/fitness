@@ -5,6 +5,14 @@ import { MotionConfig } from 'framer-motion'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './lib/auth.jsx'
+import { applyTheme, effectiveTheme } from './lib/theme'
+
+// index.html seeds the theme before first paint, but it can only see the
+// theme-color tag declared above it — vite-plugin-pwa injects a second one from
+// the manifest at the end of <head>, parsed later. Re-applying once here
+// collapses them to a single correct tag, so a stale duplicate can never win
+// and leave the mobile status bar out of step with the page.
+applyTheme(effectiveTheme())
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

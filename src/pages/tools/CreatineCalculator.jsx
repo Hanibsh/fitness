@@ -118,9 +118,9 @@ export default function CreatineCalculator() {
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mt-10 bg-white border border-border p-9">
               <h2 className="font-heading text-xl font-medium text-text-primary mb-6">Your daily dose</h2>
               <div className="bg-text-primary p-6 text-center">
-                <p className="text-[11px] uppercase tracking-wider mb-1.5 text-cream/70">Take daily, every day — including rest days</p>
+                <p className="text-[11px] uppercase tracking-wider mb-1.5 text-cream-70">Take daily, every day — including rest days</p>
                 <p className="text-3xl font-medium text-cream">{result.dose}g</p>
-                <p className="text-[11px] text-cream/50">per day, no loading phase</p>
+                <p className="text-[11px] text-cream-50">per day, no loading phase</p>
               </div>
               <p className="text-[13px] text-text-muted mt-6 leading-relaxed">Based on 0.07g per kg of lean body mass ({result.lbm}kg) — a research-backed maintenance dose that lands close to the classic "3-5g/day" advice for most people, while scaling sensibly if you're notably larger or smaller than average. Take it with food or a drink, any time of day that's easy to remember.</p>
             </motion.div>

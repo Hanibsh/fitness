@@ -228,9 +228,9 @@ export default function TDEECalculator() {
                 <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   {[['LBM', result.lbm], ['BMR', result.bmr], ['TDEE', result.tdee]].map(([label, val], i) => (
                     <div key={label} className={`px-2 py-4 sm:p-5 text-center ${i === 2 ? 'bg-text-primary' : 'bg-cream border border-border'}`}>
-                      <p className={`text-[11px] uppercase tracking-wider mb-1.5 ${i === 2 ? 'text-cream/70' : 'text-text-muted'}`}>{label}</p>
+                      <p className={`text-[11px] uppercase tracking-wider mb-1.5 ${i === 2 ? 'text-cream-70' : 'text-text-muted'}`}>{label}</p>
                       <p className={`text-2xl sm:text-3xl font-medium ${i === 2 ? 'text-cream' : 'text-text-primary'}`}>{val}</p>
-                      <p className={`text-[11px] ${i === 2 ? 'text-cream/50' : 'text-text-light'}`}>{label === 'LBM' ? 'kg' : 'cal/day'}</p>
+                      <p className={`text-[11px] ${i === 2 ? 'text-cream-50' : 'text-text-light'}`}>{label === 'LBM' ? 'kg' : 'cal/day'}</p>
                     </div>
                   ))}
                 </div>

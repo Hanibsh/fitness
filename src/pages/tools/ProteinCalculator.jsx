@@ -212,9 +212,9 @@ export default function ProteinCalculator() {
               <div className="grid grid-cols-3 gap-4">
                 {[['Minimum', result.min, false], ['Optimal', result.optimal, true], ['Maximum', result.max, false]].map(([label, val, highlight]) => (
                   <div key={label} className={`p-4 text-center ${highlight ? 'bg-text-primary' : 'bg-cream border border-border'}`}>
-                    <p className={`text-[11px] uppercase tracking-wider mb-1.5 ${highlight ? 'text-cream/70' : 'text-text-muted'}`}>{label}</p>
+                    <p className={`text-[11px] uppercase tracking-wider mb-1.5 ${highlight ? 'text-cream-70' : 'text-text-muted'}`}>{label}</p>
                     <p className={`text-2xl font-medium ${highlight ? 'text-cream' : 'text-text-primary'}`}>{val}</p>
-                    <p className={`text-[11px] ${highlight ? 'text-cream/50' : 'text-text-light'}`}>grams/day</p>
+                    <p className={`text-[11px] ${highlight ? 'text-cream-50' : 'text-text-light'}`}>grams/day</p>
                   </div>
                 ))}
               </div>

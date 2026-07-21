@@ -112,9 +112,9 @@ export default function OneRepMax() {
               <div className="space-y-2">
                 {result.table.map(row => (
                   <div key={row.pct} className={`flex items-center justify-between px-4 py-3 text-[13px] ${row.pct === 100 ? 'bg-text-primary text-cream' : 'bg-cream border border-border'}`}>
-                    <span className={row.pct === 100 ? 'text-cream/70 font-medium' : 'text-text-muted'}>{row.pct}%</span>
+                    <span className={row.pct === 100 ? 'text-cream-70 font-medium' : 'text-text-muted'}>{row.pct}%</span>
                     <span className={row.pct === 100 ? 'text-cream font-medium' : 'text-text-primary font-medium'}>{row.weight} {unit === 'metric' ? 'kg' : 'lbs'}</span>
-                    <span className={row.pct === 100 ? 'text-cream/50' : 'text-text-muted'}>~{row.reps} reps</span>
+                    <span className={row.pct === 100 ? 'text-cream-50' : 'text-text-muted'}>~{row.reps} reps</span>
                   </div>
                 ))}
               </div>
