@@ -150,9 +150,15 @@ function migrateExercise(ex) {
     next = { ...ex, laterality, unilateral, sets: (ex.sets || []).map((s) => convertSet(s, unilateral)) }
   }
   // Backfill the exercise-DB id from the name where it matches, so exercises
-  // logged before IDs existed still link to the library.
-  if (next.exerciseId === undefined) {
-    next = { ...next, exerciseId: exerciseIdForName(next.name) }
+  // logged before IDs existed still link to the library. Retry on null, not
+  // just undefined: a name that didn't resolve on an earlier pass would
+  // otherwise be stamped null forever, orphaned from the library even once
+  // resolution improves (as it did when stale names started walking forward
+  // through the id aliases). Only rewrite on a hit, so a genuinely custom
+  // exercise doesn't allocate a new object on every normalize pass.
+  if (next.exerciseId == null) {
+    const resolved = exerciseIdForName(next.name)
+    if (resolved) next = { ...next, exerciseId: resolved }
   }
   return next
 }

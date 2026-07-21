@@ -156,10 +156,26 @@ export function getExercise(id) {
   return id ? BY_ID.get(id) || null : null
 }
 
+// Slug of a display name. MUST mirror slugify() in scripts/lint-exercises.mjs,
+// which is what mints the ids in the first place — every id in the DB is the
+// slug of its own name, and the fallback below leans on that. If the two ever
+// drift, that fallback goes quiet rather than erroring, so keep them in step.
+function slugify(name) {
+  return name.toLowerCase().replace(/[()]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
 // Reconcile a bare exercise name back to a DB id when it matches one exactly
 // (case-insensitive) — used to backfill ids on older logged exercises.
+//
+// A log written before a rename stores the OLD name, which matches nothing in
+// BY_NAME. But ids are slugs of names, so the old name slugs to the old id —
+// and BY_ID already carries every old id as an alias key (see withAliases). So
+// slugging a stale name walks it forward to the current row for free, with no
+// separate name→id map to maintain. Verified safe: no current exercise name
+// slugs onto an alias key, so this can only fire on names that no longer exist.
 export function exerciseIdForName(name) {
-  const entry = BY_NAME.get((name || '').trim().toLowerCase())
+  const key = (name || '').trim().toLowerCase()
+  const entry = BY_NAME.get(key) || BY_ID.get(slugify(key))
   return entry?.id || null
 }
 
