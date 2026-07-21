@@ -203,12 +203,16 @@ export function exercisePool(recentNames = []) {
 // leads a generic query ("squat" → Barbell Squat, not Belt Squat; "curl" →
 // Barbell/Dumbbell Curl, not a lever variant). A specific query still wins on
 // its own name match, so this only decides otherwise-weak/tied results.
+// NOTE: these are live exercise ids, not the pre-v4 ones — an id that no longer
+// resolves is a silently dead boost, not an error. Six entries had gone stale in
+// the v4 rename (bench-press, romanian-deadlift, the two shoulder presses,
+// lat-pulldown, pull-up); re-point rather than delete when a row gets renamed.
 const PRIORITY = new Set([
-  'bench-press', 'incline-barbell-bench-press', 'dumbbell-bench-press',
-  'barbell-squat', 'deadlift', 'romanian-deadlift', 'sumo-deadlift', 'leg-press', 'leg-extension', 'lying-leg-curl',
-  'seated-barbell-shoulder-press', 'dumbbell-shoulder-press',
-  'barbell-bent-over-row', 'seated-cable-row', 'lat-pulldown', 'pull-up', 'chin-up',
-  'barbell-curl', 'dumbbell-curl', 'hammer-curl', 'push-down', 'barbell-hip-thrusts',
+  'flat-bench-press', 'incline-barbell-bench-press', 'dumbbell-bench-press',
+  'barbell-squat', 'deadlift', 'romanian-deadlift-rdl', 'sumo-deadlift', 'leg-press', 'leg-extension', 'lying-leg-curl',
+  'overhead-press-seated-barbell', 'overhead-press-seated-dumbbell',
+  'barbell-bent-over-row', 'seated-cable-row', 'lat-pulldown-overhand-grip', 'pull-up-overhand-grip', 'chin-up',
+  'barbell-curl', 'dumbbell-curl', 'hammer-curl', 'push-down-straight-bar', 'barbell-hip-thrusts',
 ])
 
 // Whole-word queries that read as "show me this group" — boost members of that

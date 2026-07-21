@@ -5605,8 +5605,8 @@
       "thumbnail": null
     },
     {
-      "id": "push-down",
-      "name": "Push-down",
+      "id": "push-down-straight-bar",
+      "name": "Push-down - Straight Bar",
       "category": "Arms",
       "subCategory": "Triceps",
       "type": "isolation",
@@ -5637,8 +5637,8 @@
       "thumbnail": null
     },
     {
-      "id": "rope-push-down",
-      "name": "Rope Push-down",
+      "id": "push-down-rope",
+      "name": "Push-down - Rope",
       "category": "Arms",
       "subCategory": "Triceps",
       "type": "isolation",

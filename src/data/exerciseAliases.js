@@ -64,6 +64,12 @@ export const EXERCISE_ID_ALIASES = {
   'prone-tricep-kick-back-single-arm': 'dumbbell-tricep-kick-back-incline-prone',
   'seated-ez-bar-overhead-tricep-extensions': 'seated-ez-bar-overhead-triceps-extension',
   'wrist-curl': 'dumbbell-wrist-curl',
+  // The generic "Push-down" became "Push-down - Straight Bar" when the rope
+  // variant was added, same move as the generic lat pulldown above. The rope
+  // row shipped briefly under its own name before the family was renamed to
+  // match the "Base - Variant" convention, so it needs an alias of its own.
+  'push-down': 'push-down-straight-bar',
+  'rope-push-down': 'push-down-rope',
   // legs (weighted → base merges; deadlift abbreviation renames)
   'standing-calf-raise-weighted': 'standing-calf-raise',
   'copenhagen-adduction-weighted': 'copenhagen-adduction',
