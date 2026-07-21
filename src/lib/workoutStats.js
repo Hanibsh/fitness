@@ -129,13 +129,19 @@ export function exerciseBlocks(exercises) {
 const REST_MIN_SEC = 5
 const REST_MAX_SEC = 20 * 60
 
-// A set counts toward rest only if it was actually logged (stamped + real work,
-// warm-ups excluded).
-function isLoggedSet(set, kind) {
-  if (!set.completedAt || set.type === 'warmup') return false
+// Does this set have actual work recorded — reps on either limb, or, for
+// cardio, a duration? Says nothing about WHEN it was logged or what type it
+// is; callers layer those on (see isLoggedSet below, splitSync's set counting).
+export function setHasWork(set, kind) {
   if (kind === 'cardio') return Number(set.duration) > 0
   if (set.left) return Number(set.left?.reps) > 0 || Number(set.right?.reps) > 0
   return Number(set.reps) > 0
+}
+
+// A set counts toward rest only if it was actually logged (stamped + real work,
+// warm-ups excluded).
+function isLoggedSet(set, kind) {
+  return !!set.completedAt && set.type !== 'warmup' && setHasWork(set, kind)
 }
 
 // Rests (seconds) between consecutive logged working sets of one exercise.

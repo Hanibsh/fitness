@@ -34,7 +34,8 @@ import {
 } from '../lib/workoutStore'
 import { fetchRemoteHistory, insertRemoteSession, insertRemoteSessions, deleteRemoteSession, updateRemoteSessionDate, updateRemoteSession, insertSharedLifts, submitGuestLifts, fetchRemoteProgram, upsertRemoteProgram, fetchRemoteDayAnnotations } from '../lib/workoutRemote'
 import { todayPlan, advanceProgram, draftFromDay, scheduleMode, nextTrainingDate, dayForPlannedExercise } from '../lib/program'
-import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels, sessionAvgRest, formatRest, lastLoggedExercise, newSupersetId, pruneSupersets, regroupSupersets, exerciseBlocks } from '../lib/workoutStats'
+import { buildSharedLifts, distanceUnit, repRangeStatus, convertWeight, supersetLabels, sessionAvgRest, formatRest, lastLoggedExercise, newSupersetId, pruneSupersets, regroupSupersets, exerciseBlocks, setHasWork } from '../lib/workoutStats'
+import { diffSessionAgainstDay, applySplitChanges } from '../lib/splitSync'
 import { reasonLabel } from '../lib/dayLog'
 import { fetchProfile } from '../lib/profile'
 import { getTurnstileToken, turnstileConfigured } from '../lib/turnstile'
@@ -49,6 +50,7 @@ import { getExercise, exerciseIdForName } from '../lib/exerciseLibrary'
 import { muscleRecovery, musclesForExercises } from '../lib/engine'
 import UnitHelp from '../components/UnitHelp'
 import LogTabs from '../components/LogTabs'
+import SplitSyncModal from '../components/SplitSyncModal'
 
 const SET_GRID = 'grid grid-cols-[18px_1fr_1fr_50px_18px] gap-2 items-center'
 // Same as SET_GRID plus a trailing column for the per-set laterality toggle —
@@ -116,14 +118,6 @@ function setSummary(set, unit, kind, distUnit) {
   const hasRir = set.rir !== '' && set.rir != null
   const base = set.weight ? `${set.weight}${unit} × ${set.reps}` : `${set.reps} reps`
   return tag + (hasRir ? `${base} · ${set.rir} RIR` : base)
-}
-
-// A unilateral set is "worked" if either limb has reps; a bilateral set if it
-// has reps; a cardio entry if it has duration.
-function isWorkingSet(set, kind) {
-  if (kind === 'cardio') return Number(set.duration) > 0
-  if (set.left) return Number(set.left?.reps) > 0 || Number(set.right?.reps) > 0
-  return Number(set.reps) > 0
 }
 
 // Passively timestamp a set the moment it's first logged (positive reps or, for
@@ -201,7 +195,8 @@ export default function WorkoutTracker() {
   const [supersetMenuFor, setSupersetMenuFor] = useState(null)
   const [noteOpenFor, setNoteOpenFor] = useState(() => new Set())
   const [substituteFor, setSubstituteFor] = useState(null)
-  const [pendingSub, setPendingSub] = useState(null) // { exId, name, kind, exerciseId, plannedExerciseId }
+  const [pendingSub, setPendingSub] = useState(null) // { exId, name, kind, exerciseId, plannedExerciseId, dayId }
+  const [splitSyncOpen, setSplitSyncOpen] = useState(false)
   const [selectedCalDay, setSelectedCalDay] = useState(null)
   const [editingSessionDate, setEditingSessionDate] = useState(null)
   const [showRirHelp, setShowRirHelp] = useState(false)
@@ -577,33 +572,25 @@ export default function WorkoutTracker() {
     return null
   })()
 
-  // Copy THIS session's superset grouping onto the split day it came from, for
-  // the exercises the two have in common (matched by plannedExerciseId). Draft
-  // group ids are session-scoped, so they're re-minted into the plan's id space;
-  // planned exercises not in today's session are left untouched. Explicit, not
-  // automatic — the button that calls this only shows when the two differ.
-  function saveSupersetsToRoutine() {
-    if (!program || !planDayForDraft) return
-    const draftGroupOf = new Map() // plannedExerciseId -> draft supersetId | null
-    for (const e of draft.exercises) if (e.plannedExerciseId) draftGroupOf.set(e.plannedExerciseId, e.supersetId || null)
-    const planGroupId = new Map() // draft group id -> fresh plan group id
-    const updated = {
-      ...program,
-      days: program.days.map((d) => {
-        if (d.id !== planDayForDraft.id) return d
-        const exercises = d.exercises.map((pe) => {
-          if (!draftGroupOf.has(pe.id)) return pe // not in this session — leave as-is
-          const g = draftGroupOf.get(pe.id)
-          if (!g) return { ...pe, supersetId: null }
-          if (!planGroupId.has(g)) planGroupId.set(g, newSupersetId())
-          return { ...pe, supersetId: planGroupId.get(g) }
-        })
-        return { ...d, exercises: regroupSupersets(pruneSupersets(exercises)) }
-      }),
-      updatedAt: Date.now(),
-    }
+  // How this session has drifted from its split day — drives the "Update split"
+  // row and the review modal. Empty when they already agree, when the session
+  // isn't linked to a split, or when there's no split at all.
+  const splitChanges = diffSessionAgainstDay(draft.exercises, planDayForDraft, { complete: isEditing })
+
+  // Write the accepted changes into the split. Exercises added to the plan are
+  // stamped back onto the session so they stay linked from here on — a later
+  // swap on one will offer to update the split too.
+  function applyChangesToSplit(accepted) {
+    if (!program || !planDayForDraft || !accepted.length) return
+    const { program: updated, links } = applySplitChanges(program, planDayForDraft.id, accepted, draft.exercises)
     setProgram(updated)
     persistProgram(updated)
+    if (links.size) {
+      setDraft((d) => ({
+        ...d,
+        exercises: d.exercises.map((e) => (links.has(e.id) ? { ...e, plannedExerciseId: links.get(e.id) } : e)),
+      }))
+    }
   }
 
   // Move an exercise up/down, keeping resistance and cardio reordered
@@ -759,7 +746,7 @@ export default function WorkoutTracker() {
         // (if logged but not yet stamped) so rest is captured even when you keep
         // the same reps and never touch the inputs.
         const sets = e.sets.map((s, i) =>
-          i === e.sets.length - 1 && !s.completedAt && isWorkingSet(s, e.kind) ? { ...s, completedAt: now } : s
+          i === e.sets.length - 1 && !s.completedAt && setHasWork(s, e.kind) ? { ...s, completedAt: now } : s
         )
         const prev = sets[sets.length - 1]
         // A new set inherits the PREVIOUS set's own shape (not an exercise-wide
@@ -1111,36 +1098,13 @@ export default function WorkoutTracker() {
   }
 
   const distUnit = distanceUnit(unit)
-  const hasLoggedSets = draft.exercises.some((e) => e.sets.some((s) => isWorkingSet(s, e.kind)))
+  const hasLoggedSets = draft.exercises.some((e) => e.sets.some((s) => setHasWork(s, e.kind)))
   const liveStats = sessionStats(draft)
   const resistanceExercises = draft.exercises.filter((e) => e.kind !== 'cardio')
   const cardioExercises = draft.exercises.filter((e) => e.kind === 'cardio')
   // Superset grouping is a resistance-only concept, derived from each exercise's
   // `linkedToPrev` flag over the section in order.
   const resistanceGroups = supersetLabels(resistanceExercises)
-
-  // Does this session's superset grouping differ from the split day it came
-  // from? Compares the two partitions restricted to the exercises they share
-  // (matched by plannedExerciseId); drives the "Save supersets to split" button.
-  const supersetsDifferFromPlan = (() => {
-    if (!planDayForDraft) return false
-    // partition signature over a set of {key, group} — canonical + comparable
-    const sig = (items) => {
-      const groups = new Map()
-      const singles = []
-      for (const { key, group } of items) {
-        if (group) { if (!groups.has(group)) groups.set(group, []); groups.get(group).push(key) }
-        else singles.push([key])
-      }
-      return [...groups.values(), ...singles].map((g) => g.slice().sort().join('+')).sort().join('|')
-    }
-    const linked = resistanceExercises.filter((e) => e.plannedExerciseId)
-    if (linked.length < 2) return false
-    const common = new Set(linked.map((e) => e.plannedExerciseId))
-    const draftSig = sig(linked.map((e) => ({ key: e.plannedExerciseId, group: e.supersetId })))
-    const planSig = sig(planDayForDraft.exercises.filter((pe) => common.has(pe.id)).map((pe) => ({ key: pe.id, group: pe.supersetId })))
-    return draftSig !== planSig
-  })()
 
   const CHIP_TONE = {
     go: 'text-green-700 bg-green-50 border-green-300',
@@ -1878,6 +1842,26 @@ export default function WorkoutTracker() {
               </div>
             </div>
 
+            {/* This session has drifted from the split day it came from. Quiet
+                until there's something to say, and never automatic — tapping
+                opens a review where each difference is accepted or skipped. */}
+            {splitChanges.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSplitSyncOpen(true)}
+                className="w-full flex items-center gap-2 bg-cream border border-border py-2 px-3 mb-6 cursor-pointer hover:border-border-hover transition-colors text-left"
+              >
+                <Link2 className="w-3.5 h-3.5 text-text-light shrink-0" />
+                <span className="text-[12px] text-text-secondary min-w-0">
+                  {splitChanges.length} {splitChanges.length === 1 ? 'change' : 'changes'} not in{' '}
+                  <span className="text-text-primary">{planDayForDraft.name}</span>
+                </span>
+                <span className="ml-auto text-[11px] font-medium uppercase tracking-wider text-text-primary shrink-0">
+                  Update split
+                </span>
+              </button>
+            )}
+
             {showRest && (
               <button
                 type="button"
@@ -1903,15 +1887,6 @@ export default function WorkoutTracker() {
               <div className="flex items-center gap-2 mb-3">
                 <Dumbbell className="w-4 h-4 text-text-primary" />
                 <h3 className="text-[12px] font-medium uppercase tracking-wider text-text-secondary">Resistance training</h3>
-                {supersetsDifferFromPlan && (
-                  <button
-                    onClick={saveSupersetsToRoutine}
-                    title="Update the split with how you supersetted today"
-                    className="ml-auto inline-flex items-center gap-1 text-[11px] font-medium text-text-muted hover:text-text-primary bg-white border border-border hover:border-border-hover px-2 py-1 cursor-pointer transition-colors"
-                  >
-                    <Link2 className="w-3 h-3" /> Save supersets to split
-                  </button>
-                )}
               </div>
               <AnimatePresence initial={false}>
                 {resistanceExercises.map(renderExercise)}
@@ -2126,7 +2101,7 @@ export default function WorkoutTracker() {
                             <div className="px-6 pb-5 border-t border-border pt-4">
                               {session.exercises.map((ex) => {
                                 const du = distanceUnit(session.unit || 'kg')
-                                const shown = ex.sets.filter((s) => isWorkingSet(s, ex.kind))
+                                const shown = ex.sets.filter((s) => setHasWork(s, ex.kind))
                                 const g = sessionGroups.get(ex.id)
                                 const badge = g && g.size > 1 ? g.label : null
                                 return (
@@ -2308,6 +2283,16 @@ export default function WorkoutTracker() {
         <Modal onClose={() => setProgressExercise(null)} maxWidth="max-w-xl">
           <ExerciseProgress exerciseName={progressExercise.name} kind={progressExercise.kind} sessions={progressSessions} unit={unit} />
         </Modal>
+      )}
+
+      {/* Review what this session changed, and push the accepted bits to the split */}
+      {splitSyncOpen && splitChanges.length > 0 && (
+        <SplitSyncModal
+          dayName={planDayForDraft.name}
+          changes={splitChanges}
+          onApply={applyChangesToSplit}
+          onClose={() => setSplitSyncOpen(false)}
+        />
       )}
     </div>
   )
